@@ -1,0 +1,277 @@
+Q:
+--
+Where do we configure static hostname resolution ?
+
+
+A:
+--
+1)  /etc/hosts
+
+
+===============================================================================================================================
+
+Q:
+--
+How do we see what processes on our system are listening for incoming network connections, on the TCP and UDP protocols ?
+
+
+A:
+--
+#  We can see what processes on our system are listening for incoming network connections, on the TCP and UDP protocols.
+1)  $   sudo ss -tunlp
+
+
+===============================================================================================================================
+
+Q:
+--
+Identify the IP address of the eth0 interface on our current system.
+
+Create a file called /home/bob/ip and save the ip address value (without subnet) in it.
+
+
+A:
+--
+
+1)  $   ip a
+
+12578: eth0@if12579: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default 
+    link/ether 02:42:c0:23:74:09 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet 192.35.116.9/24 brd 192.35.116.255 scope global eth0
+       valid_lft forever preferred_lft forever
+
+2)  $   vi /home/bob/ip
+192.35.116.9
+
+
+===============================================================================================================================
+
+Q:
+--
+Identify the default gateway on this system and store the output (only the IP address) in /home/bob/gateway.txt file.
+
+
+A:
+--
+1)  $   ip r
+
+# Look for the line that contains default via string and copy the IP address you see after default via in this line:
+default via 172.25.0.1 dev eth1 
+172.25.0.0/24 dev eth1 proto kernel scope link src 172.25.0.56 
+192.35.116.0/24 dev eth0 proto kernel scope link src 192.35.116.9 
+192.168.122.0/24 dev virbr0 proto kernel scope link src 192.168.122.1 linkdown 
+
+2)  $   vi /home/bob/gateway.txt
+172.25.0.1
+
+
+===============================================================================================================================
+
+Q:
+--
+Find out what process is listening for incoming connections on port 22, and identify its PID.
+
+Create a file called /home/bob/pid and save the PID value in it.
+
+
+A:
+--
+1)  $   sudo ss -tlnp | grep :22
+
+LISTEN 0      128          0.0.0.0:22         0.0.0.0:*    users:(("sshd",pid=942,fd=3))                           
+LISTEN 0      128             [::]:22            [::]:*    users:(("sshd",pid=942,fd=4))
+
+2)  $   vi /home/bob/pid
+942
+
+
+===============================================================================================================================
+
+Q:
+--
+Now, find out what process is listening for incoming connections on port 67, and identify its PID.
+
+Create a file called /home/bob/process_pid and save the PID value in it.
+
+
+A:
+--
+# Since its a UDP port so you need to use u option as well with ss command:
+1)  sudo ss -tlnpu | grep :67
+
+udp   UNCONN 0      0      0.0.0.0%virbr0:67         0.0.0.0:*    users:(("dnsmasq",pid=1232,fd=3))
+
+2)  $   vi /home/bob/process_pid
+1232
+
+
+===============================================================================================================================
+
+Q:
+--
+So now let's try to identify the process name based on the port it's listening on, find out the process name that is listening for incoming connections on port 8080.
+
+Create a file called /home/bob/process and save the name of the process in it, for example sshd.
+
+
+A:
+--
+1a)  $   sudo ss -tlnp | grep :8080
+
+LISTEN 0      128          0.0.0.0:8080       0.0.0.0:*    users:(("ttyd",pid=821,fd=11))                          
+
+
+1b)  $   sudo netstat -natp | grep :8080
+
+tcp        0      0 0.0.0.0:8080            0.0.0.0:*               LISTEN      821/ttyd            
+tcp        0      0 192.35.116.9:8080       192.35.116.7:59956      ESTABLISHED 821/ttyd
+
+
+1c)  $  sudo ss -natp | grep :8080
+LISTEN 0      128          0.0.0.0:8080       0.0.0.0:*     users:(("ttyd",pid=821,fd=11))                          
+ESTAB  0      0       192.35.116.9:8080  192.35.116.7:59956 users:(("ttyd",pid=821,fd=12)) 
+
+
+2)   $  vi /home/bob/process
+ttyd
+
+
+===============================================================================================================================
+
+Q:
+--
+Configure static resolution so that example.com hostname resolves to IP address 8.8.8.8.
+
+
+A:
+--
+1)  $   sudo vi /etc/hosts
+
+127.0.0.1       localhost
+::1     localhost ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+192.35.116.9    centos-host
+8.8.8.8         example.com
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+Our system uses dynamic network configuration. Leave it as it is, dynamically configured, but add an extra IP to eth1 interface on this system: 10.0.0.50/24.
+
+If needed, use the proper command to reapply network settings after you make your modifications.
+
+
+A:
+--
+# You can use below given command to set the new IP address
+1)  $   sudo ip a add 10.0.0.50/24 dev eth1
+
+
+# Re-apply network settings with below given command if needed:
+2)  $   sudo nmcli device reapply eth1
+Connection successfully reapplied to device 'eth1'.
+
+
+===============================================================================================================================
+
+Q:
+--
+Check the network route of this system and store the output in /home/bob/route.txt file.
+
+
+A:
+--
+1)  $   sudo ip r > /home/bob/route.txt
+
+
+===============================================================================================================================
+
+Q:
+--
+Get the list of all incoming open ports on this system and store the output in /home/bob/incoming.txt file.
+
+
+A:
+--
+1)  sudo ss -tulpn | grep LISTEN > /home/bob/incoming.txt
+
+
+===============================================================================================================================
+
+Q:
+--
+Add a new DNS resolver 8.8.8.8 on this system.
+
+
+A:
+--
+1)  $   sudo vi /etc/resolv.conf
+
+search us-central1-a.c.kk-lab-prod.internal c.kk-lab-prod.internal google.internal
+nameserver 172.25.0.1
+options ndots:0
+nameserver 8.8.8.8
+
+
+===============================================================================================================================
+
+Q:
+--
+Identify the transient hostname of this system and save the value in /home/bob/t-hostname file.
+
+
+A:
+--
+# Execute below given command and look for Transient hostname:
+1)  $   hostnamectl
+
+   Static hostname: centos-host
+Transient hostname: dev-host01
+         Icon name: computer-container
+           Chassis: container
+        Machine ID: 2e407637679b477eb3e2a25b8ad9611d
+           Boot ID: bbe138110e2e43a89496fab82b4def50
+    Virtualization: container-other
+  Operating System: CentOS Stream 8
+       CPE OS Name: cpe:/o:centos:centos:8
+            Kernel: Linux 5.4.0-1106-gcp
+      Architecture: x86-64
+
+
+2)  $   vi /home/bob/t-hostname
+dev-host01
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+Now, update the static hostname to match the transient hostname on this system.
+
+
+A:
+--
+# If you see Could not set property: Failed to set static hostname: Device or resource busy error then run the below given command in a new terminal.
+$   sudo hostnamectl set-hostname dev-host01
+Could not set property: Failed to set static hostname: Device or resource busy
+
+
+$   sudo hostnamectl set-hostname dev-host01
+
+#   Now execute below given command and look for Static hostname:
+$   hostnamectl
+   Static hostname: dev-host01
+         Icon name: computer-container
+           Chassis: container
+        Machine ID: 2e407637679b477eb3e2a25b8ad9611d
+           Boot ID: bbe138110e2e43a89496fab82b4def50
+    Virtualization: container-other
+  Operating System: CentOS Stream 8
+       CPE OS Name: cpe:/o:centos:centos:8
+            Kernel: Linux 5.4.0-1106-gcp
+      Architecture: x86-64

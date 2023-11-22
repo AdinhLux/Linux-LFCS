@@ -1,0 +1,244 @@
+Q:
+--
+How do we see all processes running on the system, along with their nice values ?
+
+
+A:
+--
+
+1)	ps lax
+
+
+===============================================================================================================================
+
+Q:
+-- 
+Which of the following commands you will use to sleep for 10 seconds ?
+
+
+A:
+--
+
+1)	sleep 10
+
+
+===============================================================================================================================
+
+Q:
+-- 
+By default which directory contains the logs of most of the services running on a Linux system ?
+
+
+A:
+--
+
+1)	/var/log/
+		   
+
+===============================================================================================================================
+
+Q:
+-- 
+Assign a nice value of 9 to the sshd process.
+
+
+A:
+--
+1)	$ renice --help
+Usage:
+ renice [-n] <priority> [-p|--pid] <pid>...
+ 
+2)	$ ps lax | grep "sshd"
+F   UID     PID    PPID PRI  NI    VSZ   RSS WCHAN  STAT TTY        TIME COMMAND
+4     0    1109       1  20   0  76644  7680 -      Ss   ?          0:00 /usr/sbin/sshd -D -oCi...
+
+3)	$ sudo renice 9 1109
+1109 (process ID) old priority 0, new priority 9
+		   
+
+===============================================================================================================================
+
+Q:
+--
+List all files that are opened by process with PID 1, this process is owned by the root user.
+
+Save the output in /home/bob/files.txt file.
+
+
+A:
+--
+1)	$ lsof -p 1 > /home/bob/files.txt
+
+		   
+===============================================================================================================================
+
+Q:
+--
+Search the logs for entries related to the SSH daemon i.e sshd. Find out what IP address last connected to this daemon successfully.
+
+Save that IP in /home/bob/ip.txt file.
+
+
+A:
+--
+1)	$ where ssh
+-bash: where: command not found
+
+2)	$ systemctl status ssh
+Unit ssh.service could not be found.
+
+3)	$ systemctl status sshd
+● sshd.service - OpenSSH server daemon
+   Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; vendor preset: enabled)
+   
+4)	$ journalctl -u sshd.service
+	$ sudo journalctl --unit=sshd.service -n 20 --no-pager
+	
+Aug 19 07:40:11 centos-host sshd[1109]: Server listening on 0.0.0.0 port 22.
+Aug 19 07:40:11 centos-host sshd[1109]: Server listening on :: port 22.
+Aug 19 08:41:19 centos-host sshd[1469]: Connection closed by authenticating user root 192.10.105.10 port 3681>
+Aug 19 08:41:20 centos-host sshd[1489]: Accepted password for root from 192.10.105.10 port 36832 ssh2
+Aug 19 08:41:20 centos-host sshd[1526]: Accepted publickey for root from 192.10.105.10 port 36840 ssh2: RSA S>
+   
+5)	$ echo 192.10.105.10 > /home/bob/ip.txt
+
+
+===============================================================================================================================
+
+Q:
+--
+Identify the PID of the process named rpcbind and save its value in /home/bob/pid.txt file.
+
+
+A:
+--
+1)	$ pgrep -a rpcbind
+535 /usr/bin/rpcbind -w -f
+
+2)	$ echo 535 > /home/bob/pid.txt
+
+		   
+===============================================================================================================================
+
+Q:
+--
+With the systemctl command, find out the PID of the process currently managed by the sshd.service. 
+Send the SIGHUP signal to this process.
+
+
+A:
+--
+1)	$ systemctl status sshd
+● sshd.service - OpenSSH server daemon
+   Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; vendor preset: enabled)
+   Active: active (running) since Sat 2023-08-19 07:40:11 UTC; 1h 27min ago
+     Docs: man:sshd(8)
+           man:sshd_config(5)
+ Main PID: 1109 (sshd)
+ 
+2)	$ sudo kill -SIGHUP 1109
+
+		   
+===============================================================================================================================
+
+Q:
+--
+Assign nice value 15 to bash process ran by user bob.
+
+
+A:
+--
+1)	$ nice -n 15 bash
+
+		   
+===============================================================================================================================
+
+Q:
+--
+Under /var/log directory, search for all files containing the reboot string and save the search result in /home/bob/reboot.log file.
+
+
+A:
+--
+1)	$ sudo grep -r 'reboot' /var/log/ > reboot.log
+
+		   
+===============================================================================================================================
+
+Q:
+--
+Analyze the error logs through journalctl with the priority flag and copy the output to /home/bob/.priority/priority.log.
+
+
+A:
+--
+1)	$ sudo journalctl -p err > /home/bob/.priority/priority.log
+
+		   
+===============================================================================================================================
+
+Q(!!!!!):
+---------
+Analyse the info priority logs through journalctl that begin with letter c and store the output in /home/bob/.priority/boot.log file.
+
+
+A:
+--
+1)	$ sudo journalctl -p info | grep -r '^c'
+	$ sudo journalctl -p info -g '^c'
+-- Logs begin at Sat 2023-08-19 07:40:10 UTC, end at Sat 2023-08-19 09:14:36 UTC. --
+Aug 19 07:40:11 centos-host bash[879]: Cloning into '/opt/.init/scripts'...
+Aug 19 07:40:12 centos-host dnsmasq[1247]: compile time options: IPv6 GNU-getopt DBus no-i18n IDN2 DHCP DHCPv>
+Aug 19 08:25:53 centos-host dnf[1411]: CentOS Stream 8 - AppStream                     1.5 MB/s |  31 MB     >
+Aug 19 08:26:02 centos-host dnf[1411]: CentOS Stream 8 - BaseOS                         18 MB/s |  41 MB     >
+Aug 19 08:26:10 centos-host dnf[1411]: CentOS Stream 8 - Extras                         31 kB/s |  18 kB     >
+Aug 19 08:26:10 centos-host dnf[1411]: CentOS Stream 8 - Extras common packages         17 kB/s | 6.8 kB     >
+Aug 19 08:41:19 centos-host sshd[1469]: Connection closed by authenticating user root 192.10.105.10 port 3681>
+Aug 19 08:58:56 centos-host sshd[2602]: Connection closed by 127.0.0.1 port 58692 [preauth]
+
+
+2)	$ sudo journalctl -p info -g '^c' > /home/bob/.priority/boot.log
+
+		   
+===============================================================================================================================
+
+Q:
+--
+Using ps command, identify the CPU and Memory usage by only the process having PID 1 and save the entire command output in /home/bob/resources.txt file.
+
+
+A:
+--
+1)	ps --help list
+
+Usage:
+ ps [options]
+
+Selection by list:
+ -p, p, --pid <PID>   process id
+        --ppid <PID>  parent process id
+
+  The selection options take as their argument either:
+    a comma-separated list e.g. '-u root,nobody' or
+    a blank-separated list e.g. '-p 123 4567'
+	
+2)	$ ps -u -p 1
+	$ ps u 1
+	
+3)	$ ps u 1 > /home/bob/resources.txt
+
+		   
+===============================================================================================================================
+
+Q:
+--
+Run a command to sleep for 3000 seconds and make sure its running in the background.
+
+
+A:
+--
+1)	$ sleep 3000 &
+[1] 3490
+
+2)	$ jobs
+[1]+  Running                 sleep 3000 &

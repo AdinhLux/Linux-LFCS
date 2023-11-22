@@ -1,0 +1,1596 @@
+Q:
+--
+In your home directory you will find a file named file1.
+
+A. Create a hard link to this file in the /opt/ directory. 
+   At the end of this exercise /opt/file1 should be hard-linked with /home/bob/file1.
+
+B. Create a soft link to file1. 
+   Specifically, you should create a soft link at /opt/softlink that points to your file at /home/bob/file1. 
+   The soft link should point to this absolute path, /home/bob/file1 and not a relative path.
+
+
+A:
+--
+# Commands will be found in sections 1 and 8
+1)	$   apropos -s 1,8 hard link
+
+ln (1)               - make links between files
+
+
+2)  $   man ln
+
+SYNOPSIS
+       ln [OPTION]... TARGET... DIRECTORY
+
+
+3)  $   ln --help
+
+Usage: ln [OPTION]... [-T] TARGET LINK_NAME
+  or:  ln [OPTION]... TARGET
+  or:  ln [OPTION]... TARGET... DIRECTORY
+  or:  ln [OPTION]... -t DIRECTORY TARGET...
+  
+Create hard links by default, symbolic links with --symbolic.
+
+
+4)  $   sudo ln /home/bob/file1 /opt/file1
+5)  $   sudo ln -s /home/bob/file1 /opt/softlink
+
+
+
+===============================================================================================================================
+
+Q:
+--
+In your home directory you will find a file named file2. Perform the following actions on it:
+
+
+A. Change the owners of this file. It should be owned by the user called bob and the group called bob.
+
+B. Change permissions so that the user called bob can read, write, and execute this file. 
+   The group should be able to only read and write to this file (no execute permission). 
+   Other users should only be able to read this file, all other permissions denied. 
+   
+   Otherwise said, after all permissions are changed, the ls -l command should show these permissions bits: -rwxrw-r--
+
+C. Enable the SUID (set user id) special permission flag on file2. 
+   The ls -l command should now show you these permission bits: rwsrw-r--
+
+
+A:
+--
+1)  $   sudo chown bob:bob /home/bob/file2
+
+2)  $   chmod --help
+
+Usage: chmod [OPTION]... MODE[,MODE]... FILE...
+Each MODE is of the form '[ugoa]*([-+=]([rwxXst]*|[ugo]))+|[-+=][0-7]+'.
+
+# [ugoa]    : Match any character in the set.
+# *         : Matches 0 or more of the preceding token.
+#
+# (         : Capturing Group #1 
+# [-+=]     : Match any character in the set.
+#
+# (         : Capturing Group #2 
+# [rwxXst]  : Match any character in the set.
+# *         : Matches 0 or more of the preceding token.
+# |         : Acts like a boolean OR. Matches the expression before or after the |
+# [ugo]     : Match any character in the set.
+# )         : Capturing Group #2 END
+#
+# )         : Capturing Group #1 END
+#
+# +         : Matches 1 or more of the preceding token.
+# |         : Acts like a boolean OR. Matches the expression before or after the |
+# [-+=]     : Match any character in the set.
+# [0-7]     : Match any character in the set.
+# +         : Matches 1 or more of the preceding token.
+
+# [] should be followed by * or +
+
+
+3)  $   sudo chmod u=rwx,g=rw,o=r /home/bob/file2
+4)  $   ls -l /home/bob/
+total 0
+-rw-r--r--. 2 bob bob 0 Sep 26 10:20 file1
+-rwxrw-r--. 1 bob bob 0 Sep 26 10:30 file2
+
+5)  $   man chmod
+
+DESCRIPTION
+
+       ...
+
+       A numeric mode is from one to four octal digits (0-7), derived by adding up the bits with values 4,
+       2, and 1.  Omitted digits are assumed to be leading zeros.  The first digit selects the set user ID
+       (4) and set group ID (2) and restricted deletion  or  sticky  (1)  attributes.   The  second  digit
+       selects permissions for the user who owns the file: read (4), write (2), and execute (1); the third
+       selects permissions for other users in the file's group, with the same values; and the  fourth  for
+       other users not in the file's group, with the same values.
+
+
+6)  $   chmod 4764 /home/bob/file2
+
+7)  $   ls -l /home/bob/
+total 0
+-rw-r--r--. 2 bob bob 0 Sep 26 13:45 file1
+-rwsrw-r--. 1 bob bob 0 Sep 26 13:45 file2
+
+
+
+===============================================================================================================================
+
+Q:
+--
+In your home directory you will find three files, file3, file4, and file5. Perform the following actions:
+
+
+A. Create this directory: /opt/newdir/
+B. Move file3 to the /opt/newdir directory.
+C. Copy file4 to the /opt/newdir directory.
+D. Remove file5.
+
+
+A:
+--
+
+1)  $  sudo mkdir /opt/newdir
+2)  $  sudo mv ./file3 /opt/newdir
+3)  $  sudo cp ./file4 /opt/newdir
+4)  $  sudo rm ./file5
+
+
+
+===============================================================================================================================
+
+Q:
+--
+Enable the sticky bit special permission on the following directory: /opt/sticky/
+
+
+A:
+--
+
+1)  $   man chmod
+
+DESCRIPTION
+
+       ...
+
+       A numeric mode is from one to four octal digits (0-7), derived by adding up the bits with values 4,
+       2, and 1.  Omitted digits are assumed to be leading zeros.  The first digit selects the set user ID
+       (4) and set group ID (2) and restricted deletion  or  sticky  (1)  attributes.   The  second  digit
+       selects permissions for the user who owns the file: read (4), write (2), and execute (1); the third
+       selects permissions for other users in the file's group, with the same values; and the  fourth  for
+       other users not in the file's group, with the same values.
+
+
+2)  $   sudo stat /opt/sticky/   
+
+  File: /opt/sticky/
+  Size: 6               Blocks: 0          IO Block: 4096   directory
+Device: fd01h/64769d    Inode: 8811783     Links: 2
+Access: (0755/drwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)
+Context: unconfined_u:object_r:usr_t:s0
+Access: 2023-09-27 14:42:21.668837873 +0000
+Modify: 2023-09-27 14:42:21.668837873 +0000
+Change: 2023-09-27 14:42:21.668837873 +0000
+ Birth: -     
+
+
+ 3)  $   sudo chmod 1755 /opt/sticky/
+
+
+ 4)  $   sudo ls -l /opt/
+ drwxr-xr-t. 2 root root  6 Sep 27 14:42 sticky
+ 
+
+
+===============================================================================================================================
+
+Q:
+--
+In the /opt/findme/ directory, you will find 1000 files. You need to filter out specific files.
+
+
+A. First, find all files that have the executable permission bit enabled for the user that owns them.
+Hint: the command you will use to search for files will need two parameters:
+
+- one that will make it look for objects that have at least the u=x permission enabled.
+- another that will filter results to only show file type objects, ignoring directories and others.
+
+Redirect the output of the find command to the /opt/foundthem.txt file. Just as an example, the content in this file should look similar to this:
+
+/opt/findme/file002
+/opt/findme/file019
+/opt/findme/file123
+
+
+B. Find all files that have the SETUID permission enabled and delete them.
+
+C. Find any file that is larger than 1KB and copy it to the /opt/ directory.
+
+
+A:
+--
+1)  $   man find
+
+EXAMPLES
+
+       find . -perm 664
+
+       Search for files which have read and write permission for their owner, and group,  but  which  other
+       users  can  read  but not write to.  Files which meet these criteria but have other permissions bits
+       set (for example if someone can execute the file) will not be matched.
+
+       find . -perm -664
+
+       Search for files which have read and write permission for their owner and  group,  and  which  other
+       users  can  read,  without regard to the presence of any extra permission bits (for example the exe‐
+       cutable bit).  This will match a file which has mode 0777, for example.
+
+       find . -perm /222
+
+       Search for files which are writable by somebody (their owner, or their group, or anybody else).
+
+
+# Finding ONLY files (not directories) with at least the execute permission for users. For redirection you need to be root
+2)  $   sudo -i
+3)  $   sudo find /opt/findme/ -perm -u=x -type f > /opt/foundthem.txt
+/opt/findme/file009
+/opt/findme/file253
+/opt/findme/file688
+
+4)  $   exit
+
+
+
+5)  $   man find
+
+   ACTIONS
+       -exec command ;
+              Execute  command; true if 0 status is returned.  All following arguments to find are taken to
+              be arguments to the command until an argument consisting of `;' is encountered.   The  string
+              `{}'  is  replaced by the current file name being processed everywhere it occurs in the argu‐
+              ments to the command, not just in arguments where it is alone, as in some versions  of  find.
+              Both  of  these constructions might need to be escaped (with a `\') or quoted to protect them
+              from expansion by the shell.  See the EXAMPLES section for examples of the use of  the  -exec
+              option.  The specified command is run once for each matched file.  The command is executed in
+              the starting directory.   There are unavoidable security  problems  surrounding  use  of  the
+              -exec action; you should use the -execdir option instead.
+
+              
+# -exec rm {} \;    ----->    Delete all files matched by file pattern. 
+# \; says that for each found result, the [command] is executed. 
+6)  $   sudo find /opt/findme/ -perm -4000 -exec rm {} \;
+/opt/findme/file883
+/opt/findme/file885
+/opt/findme/file887
+
+
+# Finding ONLY files larger than 1 KB
+7)  $   sudo find /opt/findme/ -size +1k -type f -exec cp "{}" /opt/  \;
+/opt/findme/file669
+
+
+# file669 is present
+8)  $   ls /opt/
+containerd  file1  file669  findme  foundthem.txt  newdir  softlink  sticky
+
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+In the /opt/findme/ directory there is a special file. It has some text content inside.
+Look for the word special through all the files in the /opt/findme/ directory and copy the file to the /opt/foundme/ directory which contains the special string.
+
+
+A:
+--
+1)  $   grep --help
+
+Pattern selection and interpretation:
+  -e, --regexp=PATTERN      use PATTERN for matching
+  -w, --word-regexp         force PATTERN to match only whole words
+
+Output control:
+  -n, --line-number         print line number with output lines
+      --line-buffered       flush output on every line
+  -r, --recursive           like --directories=recurse
+  -R, --dereference-recursive
+                            likewise, but follow all symlinks
+      --include=FILE_PATTERN
+                            search only files that match FILE_PATTERN
+      --exclude=FILE_PATTERN
+                            skip files and directories matching FILE_PATTERN
+      --exclude-from=FILE   skip files matching any file pattern from FILE
+      --exclude-dir=PATTERN directories that match PATTERN will be skipped.
+
+
+2)  $   grep -Rnw '/opt/findme/' -e 'special'
+/opt/findme/file559:1:You found me! I'm the special file.
+
+3)  $   man find
+
+   ACTIONS
+       -exec command ;
+              Execute  command; true if 0 status is returned.  All following arguments to find are taken to
+              be arguments to the command until an argument consisting of `;' is encountered.   The  string
+              `{}'  is  replaced by the current file name being processed everywhere it occurs in the argu‐
+              ments to the command, not just in arguments where it is alone, as in some versions  of  find.
+              Both  of  these constructions might need to be escaped (with a `\') or quoted to protect them
+              from expansion by the shell.  See the EXAMPLES section for examples of the use of  the  -exec
+              option.  The specified command is run once for each matched file.  The command is executed in
+              the starting directory.   There are unavoidable security  problems  surrounding  use  of  the
+              -exec action; you should use the -execdir option instead.
+
+       -exec command {} +
+              This  variant  of  the -exec action runs the specified command on the selected files, but the
+              command line is built by appending each selected file name at the end; the  total  number  of
+              invocations  of  the command will be much less than the number of matched files.  The command
+              line is built in much the same way that xargs builds its command lines.  Only one instance of
+              `{}'  is  allowed within the command.  The command is executed in the starting directory.  If
+              any invocation returns a non-zero value as exit status, then find  returns  a  non-zero  exit
+              status.   If  find  encounters  an error, this can sometimes cause an immediate exit, so some
+              pending commands may not be run at all.  This variant of -exec always returns true.
+
+
+   OPERATORS
+       Listed in order of decreasing precedence:
+
+       expr1 expr2
+              Two expressions in a row are taken to be joined with an implied "and"; expr2 is not evaluated
+              if expr1 is false.
+
+
+
+4)  $   sudo find /opt/findme/ -type f -exec grep -lr "special" {} \;
+/opt/findme/file559
+
+
+5)  $   sudo find /opt/findme/ -type f -exec grep -lr "special" {} \; -exec cp "{}" /opt/foundme/  \;
+/opt/findme/file559
+
+
+6)  $   ls -l /opt/foundme/
+total 4
+-rw-r--r--. 1 root root 36 Sep 27 16:57 file559
+
+
+
+===============================================================================================================================
+
+Q:
+--
+In this exercise, you'll need to make some changes to the /etc/settings.cfg file.
+
+A. Add a new line at the end of this file. The line should have this content: system51=reserved . Save the file and exit the editor.
+
+
+B. Use the correct command to display only the systems that are disabled in this file. The command should output something like:
+
+system1=disabled
+system4=disabled
+
+and so on. Now redirect this filtered output to this file: /opt/disabledsystems.txt
+
+
+C. Use the correct tool to automate a search and replace action on the /etc/settings.cfg file. All of the words enabled should be changed to the word disabled.
+
+
+Line added in the file ?
+Verify the content in "/opt/disabledsystems.txt" file.
+Verify "/etc/settings.cfg" file for the required changes.
+
+
+A:
+--
+1)  $   sudo vi /etc/settings.cfg
+system51=reserved
+
+
+2)  $   sudo -i
+3)  $   grep /etc/settings.cfg -e 'disabled' > /opt/disabledsystems.txt
+4)  $   man sed
+
+DESCRIPTION
+       Sed  is  a stream editor.  A stream editor is used to perform basic text transformations on an input
+       stream (a file or input from a pipeline).  While in some ways similar to  an  editor  which  permits
+       scripted  edits  (such  as  ed),  sed works by making only one pass over the input(s), and is conse‐
+       quently more efficient.  But it is sed's ability to filter text in  a  pipeline  which  particularly
+       distinguishes it from other types of editors.
+
+       -i[SUFFIX], --in-place[=SUFFIX]
+
+              edit files in place (makes backup if SUFFIX supplied)
+
+
+COMMAND SYNOPSIS
+       This is just a brief synopsis of sed commands to serve as a reminder to those who already know  sed;
+       other documentation (such as the texinfo document) must be consulted for fuller descriptions.
+
+
+   Commands which accept address ranges
+
+       g G    Copy/append hold space to pattern space.
+
+       s/regexp/replacement/
+              Attempt to match regexp against the pattern  space.   If  successful,  replace  that  portion
+              matched  with  replacement.   The replacement may contain the special character & to refer to
+              that portion of the pattern space which matched, and the special escapes  \1  through  \9  to
+              refer to the corresponding matching sub-expressions in the regexp.
+
+
+# Replacing enabled by disabled
+5)  $   sudo sed -i 's/enabled/disabled/g' /etc/settings.cfg
+
+
+
+===============================================================================================================================
+
+Q:
+--
+In this exercise, we'll create different types of archives containing the /opt/manyfiles/ directory:
+
+
+A. First, create a simple TAR archive (uncompressed) that contains all files in the /opt/manyfiles/ directory. Store this archive at /opt/manyfiles.tar
+B. Compress the entire /opt/manyfiles/ directory into a GZipped TAR archive. Store this archive at /opt/manyfiles.tar.gz
+C. Compress the entire /opt/manyfiles/ directory into a BZipped TAR archive. Store this archive at /opt/manyfiles.tar.bz2
+D. Finally, create a non-TAR archive. This time, create a simple compressed ZIP archive of /opt/manyfiles/ and store this archive at /opt/manyfiles.zip
+
+
+A:
+--
+1)  $   man tar
+
+SYNOPSIS
+   Traditional usage
+       tar {A|c|d|r|t|u|x}[GnSkUWOmpsMBiajJzZhPlRvwo] [ARG...]
+
+   UNIX-style usage
+       tar -c [-f ARCHIVE] [OPTIONS] [FILE...]
+       tar -t [-f ARCHIVE] [OPTIONS] [MEMBER...]
+
+   GNU-style usage
+       tar --create [--file ARCHIVE] [OPTIONS] [FILE...]
+
+DESCRIPTION
+
+   Operation mode
+       The  options listed in the table below tell GNU tar what operation it is to perform.  Exactly one of
+       them must be given.  Meaning of non-optional arguments depends on the operation mode requested.
+
+       -c, --create
+              Create  a  new archive.  Arguments supply the names of the files to be archived.  Directories
+              are archived recursively, unless the --no-recursion option is given.
+
+       -t, --list
+              List the contents of an archive.  Arguments are optional.  When given, they specify the names
+              of the members to list.
+
+
+2)  $   sudo tar -c -f /opt/manyfiles.tar /opt/manyfiles/
+tar: Removing leading `/' from member names
+
+
+3)  $   sudo tar -tf /opt/manyfiles.tar
+4)  $   apropos -s 1,8 Gzip
+gzip (1)             - compress or expand files
+
+
+5)  $   man gzip
+
+SYNOPSIS
+       gzip [ -acdfhklLnNrtvV19 ] [-S suffix] [ name ...  ]
+
+OPTIONS
+       -k --keep
+              Keep (don't delete) input files during compression or decompression.
+
+
+5)  $   sudo gzip -k /opt/manyfiles.tar
+6)  $   sudo bzip2 -k /opt/manyfiles.tar
+
+
+7)  $   man zip
+
+SYNOPSIS
+       zip  [-aABcdDeEfFghjklLmoqrRSTuvVwXyz!@$] [--longoption ...]  [-b path] [-n suffixes] [-t date] [-tt
+       date] [zipfile [file ...]]  [-xi list]
+
+USE
+       Command format.  The basic command format is
+
+              zip options archive inpath inpath ...
+
+       where  archive  is  a  new or existing zip archive and inpath is a directory or file path optionally
+       including wildcards.  When given the name of an existing zip archive, zip will  replace  identically
+       named  entries  in  the  zip  archive  (matching the relative names as stored in the archive) or add
+       entries for new names.  For example, if foo.zip exists and contains foo/file1 and foo/file2, and the
+       directory foo contains the files foo/file1 and foo/file3, then:
+
+              zip -r foo.zip foo
+ 
+OPTIONS             
+
+       -r
+       --recurse-paths
+              Travel the directory structure recursively; for example:
+
+                     zip -r foo.zip foo
+
+              or more concisely
+
+                     zip -r foo foo
+
+
+8)  $   sudo zip -r /opt/manyfiles.zip /opt/manyfiles/
+  adding: opt/manyfiles/ (stored 0%)
+  adding: opt/manyfiles/file000 (stored 0%)
+
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+In your home directory you will find two files: backup.tar.gz and backup.zip.
+
+A. Extract the contents of backup.tar.gz into the /opt/restoredgz/ directory.
+B. Extract the contents of backup.zip into the /opt/restoredzip/ directory.
+
+
+A:
+--
+1)  $   man tar
+
+SYNOPSIS
+
+   UNIX-style usage
+       tar -x [-f ARCHIVE] [OPTIONS] [MEMBER...]
+
+   GNU-style usage
+       tar {--extract|--get} [-f ARCHIVE] [OPTIONS] [MEMBER...]
+
+
+DESCRIPTION
+   Operation mode/
+       -x, --extract, --get
+              Extract files from an archive.  Arguments are optional.  When given, they  specify  names  of
+              the archive members to be extracted.
+
+
+OPTIONS    
+   Device selection and switching
+       -f, --file=ARCHIVE
+              Use  archive file or device ARCHIVE.  If this option is not given, tar will first examine the
+              environment variable `TAPE'.  If it is set, its value will be used as the archive name.  Oth‐
+              erwise,  tar  will assume the compiled-in default.  The default value can be inspected either
+              using the --show-defaults option, or at the end of the tar --help output.
+
+   Local file selection
+       -C, --directory=DIR
+              Change to DIR before performing any operations.  This  option  is  order-sensitive,  i.e.  it
+              affects all options that follow.
+              
+   Informative output
+       -v, --verbose
+              Verbosely list files processed.
+
+# gunzip -c /home/bob/backup.tar.gz > /opt/restoredgz
+# -bash: /opt/restoredgz: Is a directory             
+
+
+2)  $   sudo tar -xvf /home/bob/backup.tar.gz -C /opt/restoredgz/
+file1
+file2
+file9
+
+
+3)  $   sudo tar -xvf /home/bob/backup.zip -C /opt/restoredzip/
+tar: This does not look like a tar archive
+tar: Exiting with failure status due to previous errors
+
+
+4)  $   man unzip
+
+SYNOPSIS
+       unzip [-Z] [-cflptTuvz[abjnoqsCDKLMUVWX$/:^]] file[.zip] [file(s) ...]  [-x xfile(s) ...] [-d exdir]
+
+ARGUMENTS
+       [-d exdir]
+              An optional directory to which to extract files.  By default, all  files  and  subdirectories
+              are  recreated  in  the  current  directory;  the -d option allows extraction in an arbitrary
+              directory (always assuming one has permission to write to the directory).  This  option  need
+              not  appear at the end of the command line; it is also accepted before the zipfile specifica‐
+              tion (with the normal options), immediately after the zipfile specification, or  between  the
+              file(s)  and  the  -x option.  The option and directory may be concatenated without any white
+              space between them, but note that this may cause normal shell behavior to be suppressed.   In
+              particular,  ``-d ~''  (tilde)  is expanded by Unix C shells into the name of the user's home
+              directory, but ``-d~'' is treated as a literal subdirectory ``~'' of the current directory.
+
+
+5)  $   sudo unzip /home/bob/backup.zip -d /opt/restoredzip/
+Archive:  /home/bob/backup.zip
+ extracting: /opt/restoredzip/file1  
+ extracting: /opt/restoredzip/file2  
+ extracting: /opt/restoredzip/file9  
+ 
+
+
+===============================================================================================================================
+
+Q:
+--
+Perform the following tasks:
+
+A. Install the software package called memcached.
+B. Enable the memcached service so that this application automatically starts up at boot time.
+C. Start the memcached service.
+
+
+A:
+--
+1)  $   sudo dnf install memcached -y
+2)  $   sudo systemctl enable memcached.service
+Created symlink /etc/systemd/system/multi-user.target.wants/memcached.service → /usr/lib/systemd/system/memcached.service.
+
+3)  $   sudo systemctl start memcached.service
+
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+A new sysadmin has joined your team, so you need to make sure he gets proper access to this system.
+
+
+A. First, create a new user called smith.
+B. He said he prefers zsh instead of the default bash shell, so change his login shell to /bin/zsh
+C. With no password set yet, he can't log in, so assign a password for smith. The password should be exampassed.
+D. To be able to perform administrative tasks, he needs to be able to run sudo commands. 
+   All users in the wheel group can run such commands. Add smith to the wheel group. 
+   His primary group should remain the same (he's already part of a group called smith) so wheel should be a secondary group for him.
+   
+
+A:
+--
+1)  $   apropos -s 1,8 new user
+useradd (8)          - create a new user or update default new user information
+
+
+2)  $   man useradd
+SYNOPSIS
+       useradd [options] LOGIN
+
+OPTIONS
+       -s, --shell SHELL
+           The name of the user's login shell. The default is to leave this field blank, which causes the
+           system to select the default login shell specified by the SHELL variable in
+           /etc/default/useradd, or an empty string by default.
+
+
+3)  $   sudo useradd smith
+4)  $   useradd --defaults
+GROUP=100
+HOME=/home
+INACTIVE=-1
+EXPIRE=
+SHELL=/bin/bash
+SKEL=/etc/skel
+CREATE_MAIL_SPOOL=yes
+
+
+5)  $   ls /bin/
+6)  $   apropos -s 1,8 "modify a user"
+usermod (8)          - modify a user account
+
+
+7)  $   man usermod
+SYNOPSIS
+       usermod [options] LOGIN
+
+OPTIONS
+       -s, --shell SHELL
+           The name of the user's new login shell. Setting this field to blank causes the system to select
+           the default login shell.
+
+       -g, --gid GROUP
+           The group name or number of the user's new initial login group. The group must exist.
+
+           Any file from the user's home directory owned by the previous primary group of the user will be
+           owned by this new group.
+
+           The group ownership of files outside of the user's home directory must be fixed manually.
+
+           The change of the group ownership of files inside of the user's home directory is also not done
+           if the home dir owner uid is different from the current or new user id. This is safety measure
+           for special home directories such as /.
+
+       -G, --groups GROUP1[,GROUP2,...[,GROUPN]]]
+           A list of supplementary groups which the user is also a member of. Each group is separated from
+           the next by a comma, with no intervening whitespace. The groups are subject to the same
+           restrictions as the group given with the -g option.
+
+           If the user is currently a member of a group which is not listed, the user will be removed from
+           the group. This behaviour can be changed via the -a option, which appends the user to the
+           current supplementary group list.
+
+  
+8)  $   sudo usermod --shell /bin/zsh smith  
+    $   vi /etc/passwd
+smith:x:1004:1004::/home/smith:/bin/zsh
+
+
+# -g change the primary group
+# -G change the secondary group
+9)  $   sudo usermod -G wheel smith
+
+10) $   groups smith
+groups smith
+smith : smith wheel
+
+
+11) $   apropos -s 1,8 "update user's authentication"
+passwd (1)           - update user's authentication tokens
+
+
+12) $   man passwd
+SYNOPSIS
+       passwd  [-k] [-l] [-u [-f]] [-d] [-e] [-n mindays] [-x maxdays] [-w warndays] [-i inactivedays] [-S]
+       [--stdin] [-?] [--usage] [username]
+
+
+13) $   sudo passwd smith
+Changing password for user smith.
+New password: exampassed
+Retype new password: exampassed
+passwd: all authentication tokens updated successfully.
+
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+The company has two employees. 
+
+One logs in with the username employee1, the other with the user employee2 : 
+- The first one was on vacation, so someone locked his password temporarily, 
+  to make sure an unauthorized person cannot log in if the laptop gets stolen. 
+
+  But now he's returned, so you have to re-enable his password logins. 
+
+- The second employee is about to leave on vacation so you need to lock him out temporarily. 
+
+Basically, you have two tasks:
+
+A. Lock the password for the user employee2 so he can't log in to this system while on vacation.
+B. Unlock the password for the user employee1 so he can log in to this system.
+
+
+A:
+--
+1)  $   man usermod
+SYNOPSIS
+       usermod [options] LOGIN
+
+OPTIONS
+       -L, --lock
+           Lock a user's password. This puts a '!' in front of the encrypted password, effectively
+           disabling the password. You can't use this option with -p or -U.
+
+           Note: if you wish to lock the account (not only access with a password), you should also set the
+           EXPIRE_DATE to 1.
+
+       -U, --unlock
+           Unlock a user's password. This removes the '!' in front of the encrypted password. You can't use
+           this option with -p or -L.
+
+           Note: if you wish to unlock the account (not only access with a password), you should also set
+           the EXPIRE_DATE (for example to 99999, or to the EXPIRE value from /etc/default/useradd).
+
+
+# Use 'passwd' instead. A message of confirmation should be displayed.
+2)  $   #    sudo usermod --lock employee2
+        sudo passwd -l employee2
+Locking password for user employee2.
+passwd: Success
+
+
+3)  $   sudo usermod --unlock employee1
+        sudo passwd -u employee1
+Unlocking password for user employee1.
+passwd: Success
+
+
+# Checking Lock status
+# ====================
+4)  $   sudo passwd -S employee1
+employee1 PS 2023-09-29 0 99999 7 -1 (Password set, SHA512 crypt.)
+
+5)  $   sudo passwd -S employee2
+employee2 LK 2023-09-29 0 99999 7 -1 (Password locked.)
+
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+Define a resource limit for the user called jane. 
+Set a limit for this user so that she can open no more than 30 processes. 
+This should be a hard limit.
+
+
+A:
+--
+1)  $   apropos pam_limits
+limits.conf (5)      - configuration file for the pam_limits module
+pam_limits (8)       - PAM module to limit resources
+
+
+2)  $   man limits.conf
+3)  $   sudo vi /etc/security/limits.conf
+
+#        - nproc - max number of processes
+#
+#<domain>      <type>  <item>         <value>
+#
+#@student        -       maxlogins       4
+jane hard nproc 30
+
+
+
+===============================================================================================================================
+
+Q :
+---
+Edit the so-called skeleton directory so that whenever a new user is created on this system, a file called README is copied to his/her home directory.
+
+
+A:
+--
+1)  $   sudo touch /etc/skel/README
+
+
+
+===============================================================================================================================
+
+Q :
+---
+The user called jack should no longer have sudo privileges. 
+This means you have to remove him from the wheel group. 
+Make sure his primary group called jack is preserved.
+
+
+A:
+--
+1)  $   apropos gpasswd
+chgpasswd (8)        - update group passwords in batch mode
+gpasswd (1)          - administer /etc/group and /etc/gshadow
+
+
+2)  $   man gpasswd
+SYNOPSIS
+       gpasswd [option] group
+
+OPTIONS
+       -d, --delete user
+           Remove the user from the named group.
+
+
+3)  $   sudo gpasswd -d jack wheel
+Removing user jack from group wheel
+
+
+
+===============================================================================================================================
+
+Q :
+---
+Display all the lines in the /etc/services file that start out with the text core. 
+A line beginning with a word like corel_vncadmin should be a match, but a line beginning with a word likeopencore shouldn't be. 
+Redirect this filtered output to /opt/coreservices.txt
+
+
+A:
+--
+1)  $   man grep
+
+SYNOPSIS
+       grep [OPTIONS] -e PATTERN ... [FILE...]
+
+OPTIONS
+   Matching Control
+       -e PATTERN, --regexp=PATTERN
+              Use PATTERN as the pattern.  If this option is used multiple times or is combined with the -f
+              (--file) option, search for all patterns given.  This option can be used to protect a pattern
+              beginning with “-”.
+
+REGULAR EXPRESSIONS
+   Repetition
+       A regular expression may be followed by one of several repetition operators:
+       ?      The preceding item is optional and matched at most once.
+       *      The preceding item will be matched zero or more times.
+       +      The preceding item will be matched one or more times.
+       {n}    The preceding item is matched exactly n times.
+       {n,}   The preceding item is matched n or more times.
+       {,m}   The preceding item is matched at most m times.  This is a GNU extension.
+       {n,m}  The preceding item is matched at least n times, but not more than m times.
+
+
+2)  $   sudo grep -e "^core" /etc/services
+
+corerjd         284/tcp                 # corerjd
+corerjd         284/udp                 # corerjd
+corelvideo      1566/tcp                # CORELVIDEO
+corelvideo      1566/udp                # CORELVIDEO
+corel_vncadmin  2654/tcp  corel-vncadmin  # Corel VNC Admin
+corel_vncadmin  2654/udp  corel-vncadmin  # Corel VNC Admin
+corelccam       4300/tcp                # Corel CCam
+corelccam       4300/udp                # Corel CCam
+
+
+3)  $   sudo -i
+4)  $   sudo grep -e "^core" /etc/services > /opt/coreservices.txt
+
+
+
+===============================================================================================================================
+
+Q :
+---
+A.The files /opt/left.txt and /opt/right.txt are almost identical. 
+  However, there is one unique line that only exists in one file, but not in the other one. 
+  Find that line and save the content of that line in /opt/difference.txt
+
+
+B. /opt/dir1/ and /opt/dir2/ have very similar files. 
+   Find out which files only exist in /opt/dir2/ but not in /opt/dir1. 
+   Find the difference and save the output in the /opt/onlyindir2.txt file.
+
+
+With our sample output, the content in that file would be like:
+
+Only in dir2: file1
+Only in dir2: file2
+Only in dir2: file3
+
+
+A:
+--
+1)  $   apropos -s 1,8 "compare file"
+diff (1)             - compare files line by line
+
+2)  $   man diff
+SYNOPSIS
+       diff [OPTION]... FILES
+
+DESCRIPTION
+       -q, --brief
+              report only when files differ
+
+       -r, --recursive
+              recursively compare any subdirectories found
+
+       FILES are 'FILE1 FILE2' or 'DIR1 DIR2' or 'DIR FILE' or 'FILE DIR'.  If --from-file or --to-file  is
+       given, there are no restrictions on FILE(s).  If a FILE is '-', read standard input.  Exit status is
+       0 if inputs are the same, 1 if different, 2 if trouble.
+
+
+3)  $   sudo diff /opt/left.txt /opt/right.txt > /opt/difference.txt
+9d8
+< You found me! I am the special line.
+
+
+4)  $   sudo diff -qr /opt/dir1/ /opt/dir2/ > /opt/onlyindir2.txt
+Only in /opt/dir2/: jatin2004.md
+Only in /opt/dir2/: khalby787.md
+Only in /opt/dir2/: pavstar719.md
+
+
+
+===============================================================================================================================
+
+Q :
+---
+A. Create a new Docker container using nginx image and make sure its in running state.
+
+B. List what Docker container images are currently copied to this system. 
+   Remove all images except the nginx image. 
+   At the end of the exercise, the nginx image should be the only one remaining; all of the others should be removed.
+
+
+A:
+--
+
+1)  $   sudo docker run -d nginx
+2)  $   sudo docker images -a
+
+REPOSITORY   TAG       IMAGE ID       CREATED       SIZE
+nginx        latest    61395b4c586d   8 days ago    187MB
+mariadb      latest    871a9153c184   3 weeks ago   404MB
+
+
+3)  $   sudo docker rmi 871a9153c184
+Untagged: mariadb:latest
+Untagged: mariadb@sha256:5d851e999b84625ef9810589e832686cae58453452698ee69e2980041e626eb2
+Deleted: sha256:871a9153c1842e3b480cb1be691c64151bc96a5de2cc8039470d31e32ff0a177
+
+
+
+===============================================================================================================================
+
+Q (!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!):
+------------------------------------------
+In this exercise, we'll analyze some networking details of our current system.
+
+
+A. First, use the correct command to list IP addresses. From that output extract the IP address of the eth0 network interface. 
+   Write that IP to the /opt/ip.txt file. For example, if in your output you would see something like inet 10.11.12.9/28 then you would write 10.11.12.9 in that file.
+
+B. Print out the network routing table and save the entire output to /opt/routes.txt file. Also make sure to preserve any existing content of this file.
+
+C. Use the correct command to inspect all programs that are listening for incoming connections on TCP ports.
+
+Hint: You'll get the best results if you use four options for that command. The options you pass should make it list the following:
+
+- listening
+- tcp
+- processes
+- numeric
+
+
+Take a look at the process that is listening for incoming connections on port 22. 
+What is the PID of this process ? Write this number to the following file: /opt/pidof22.txt. 
+
+For example, if in your output you see something like pid=922 then you would write 922 into this file.
+
+
+A:
+--
+1)  $   ip a
+
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 52:54:00:56:20:f3 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.121.70/24 brd 192.168.121.255 scope global dynamic noprefixroute eth0
+       valid_lft 2836sec preferred_lft 2836sec
+    inet6 fe80::5054:ff:fe56:20f3/64 scope link 
+       valid_lft forever preferred_lft forever
+
+
+2)  $   sudo vi /opt/ip.txt
+192.168.121.70
+
+
+3)  $   sudo ip r 
+    
+default via 192.168.121.1 dev eth0 proto dhcp metric 100 
+default via 172.28.128.1 dev eth1 proto dhcp metric 101 
+172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 
+172.28.128.0/24 dev eth1 proto kernel scope link src 172.28.128.105 metric 101 
+192.168.121.0/24 dev eth0 proto kernel scope link src 192.168.121.70 metric 100 
+
+
+4)  $   sudo vi /opt/routes.txt
+
+default via 192.168.121.1 dev eth0 proto dhcp metric 100 
+default via 172.28.128.1 dev eth1 proto dhcp metric 101 
+172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 
+172.28.128.0/24 dev eth1 proto kernel scope link src 172.28.128.105 metric 101 
+192.168.121.0/24 dev eth0 proto kernel scope link src 192.168.121.70 metric 100 
+
+
+5)  $   apropos -s 1,8 socket
+ss (8)               - another utility to investigate sockets
+
+
+6)  $   man ss
+
+SYNOPSIS
+       ss [options] [ FILTER ]
+
+OPTIONS
+      -l, --listening
+              Display only listening sockets (these are omitted by default).
+
+       -p, --processes
+              Show process using socket.
+
+       -t, --tcp
+              Display TCP sockets.
+
+       -n, --numeric
+              Do not try to resolve service names. Show exact bandwidth values, instead of human-readable.
+
+
+# CONNECT as ROOT to get PID
+7)  $   sudo -i
+8)  $   ss -lnpt 
+
+State         Recv-Q        Send-Q               Local Address:Port                  Peer Address:Port                                                                                                                      
+LISTEN        0             128                      127.0.0.1:11211                      0.0.0.0:*            users:(("memcached",pid=29356,fd=27))                                                                        
+LISTEN        0             128                        0.0.0.0:111                        0.0.0.0:*            users:(("rpcbind",pid=595,fd=4),("systemd",pid=1,fd=92))                                                     
+LISTEN        0             128                        0.0.0.0:8080                       0.0.0.0:*            users:(("ttyd",pid=8718,fd=11))                                                                              
+LISTEN        0             128                        0.0.0.0:22                         0.0.0.0:*            users:(("sshd",pid=8827,fd=5))                                                                               
+LISTEN        0             128                          [::1]:11211                         [::]:*            users:(("memcached",pid=29356,fd=28))                                                                        
+LISTEN        0             128                           [::]:111                           [::]:*            users:(("rpcbind",pid=595,fd=6),("systemd",pid=1,fd=94))                                                     
+LISTEN        0             128                           [::]:22                            [::]:*            users:(("sshd",pid=8827,fd=7))      
+
+
+    $   ss -ntap | grep 22
+LISTEN   0        128                 0.0.0.0:22                0.0.0.0:*        users:(("sshd",pid=8827,fd=5))                                                 
+LISTEN   0        128                    [::]:22                   [::]:*        users:(("sshd",pid=8827,fd=7))
+
+
+9)  $   sudo vi /opt/pidof22.txt
+8827
+
+
+
+===============================================================================================================================
+
+Q (!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!):
+------------------------------------------
+SSH in to node01 using user bob and password caleston123
+
+
+A. Add an extra DNS resolver (nameserver) on this system: 8.8.8.8
+B. Add a static host so that the host called database resolves to this IP address: 10.0.0.12
+C. Find out the IP address of eth1 interface on node01 and add a temporary static route so that network traffic going to 192.168.5.0/24 is routed via the IP address you find.
+
+
+Don't forget to log out from node01 when you're done with this exercise.
+
+
+A:
+--
+1)  $   man ssh
+
+SYNOPSIS
+     ssh [-46AaCfGgKkMNnqsTtVvXxYy] [-B bind_interface] [-b bind_address] [-c cipher_spec] [-D [bind_address:]port]
+         [-E log_file] [-e escape_char] [-F configfile] [-I pkcs11] [-i identity_file] [-J destination] [-L address]
+         [-l login_name] [-m mac_spec] [-O ctl_cmd] [-o option] [-p port] [-Q query_option] [-R address] [-S ctl_path]
+         [-W host:port] [-w local_tun[:remote_tun]] destination [command]
+
+DESCRIPTION
+     -l login_name
+             Specifies the user to log in as on the remote machine.  This also may be specified on a per-host basis in
+             the configuration file.
+
+
+2)  $   ssh node01 -l bob
+
+The authenticity of host 'node01 (192.16.252.12)' can't be established.
+ECDSA key fingerprint is SHA256:aVwP1X8/hqusa3KyWZgqF89ipd2cHJmb0BXzY+a+pbQ.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added 'node01,192.16.252.12' (ECDSA) to the list of known hosts.
+
+bob@node01's password: caleston123
+[bob@node01 ~]$ 
+
+
+3)  $   apropos "dns resolver"
+resolvconf (1)       - Resolve domain names, IPV4 and IPv6 addresses, DNS resource records, and services; introspect and...
+resolvectl (1)       - Resolve domain names, IPV4 and IPv6 addresses, DNS resource records, and services; introspect and...
+
+
+    $   apropos "resolv.conf"
+resolv.conf (5)      - resolver configuration file
+
+
+4)  $   man resolv.conf
+
+FILES
+       /etc/resolv.conf, <resolv.h>
+
+
+5)  $   sudo vi /etc/resolv.conf
+
+# Generated by NetworkManager
+nameserver 192.168.121.1
+nameserver 172.28.128.1
+nameserver 8.8.8.8
+
+
+6)  $   apropos hosts
+hosts (5)            - static table lookup for hostnames 
+
+
+7)  $   man hosts
+
+SYNOPSIS
+       /etc/hosts
+
+EXAMPLE
+       # The following lines are desirable for IPv4 capable hosts
+       127.0.0.1       localhost
+
+       # 127.0.1.1 is often used for the FQDN of the machine
+       127.0.1.1       thishost.mydomain.org  thishost
+       192.168.1.10    foo.mydomain.org       foo
+       192.168.1.13    bar.mydomain.org       bar
+       146.82.138.7    master.debian.org      master
+       209.237.226.90  www.opensource.org
+
+8)  $   sudo vi /etc/hosts
+
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+127.0.1.1 node01 node01
+10.0.0.12 database
+
+
+9)  $   ip a
+
+3: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 52:54:00:38:cd:9a brd ff:ff:ff:ff:ff:ff
+    inet 172.28.128.64/24 brd 172.28.128.255 scope global dynamic noprefixroute eth1
+       valid_lft 3185sec preferred_lft 3185sec
+    inet6 fe80::5054:ff:fe38:cd9a/64 scope link 
+       valid_lft forever preferred_lft forever
+
+
+10)  $   sudo ip route add 192.168.5.0/24 via 172.28.128.64
+
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+Create a bash script that performs two actions:
+
+
+A. It recursively copies the /var/www/ directory into the /opt/www-backup/ directory.
+
+B. It creates an empty file called jobdone at this location: /opt/jobdone
+
+C. Make sure that your script /opt/script.sh automatically runs every day at 4AM. More specifically, create a cron job for user bob that runs that script every day at 4AM.
+
+
+Save your script at /opt/script.sh.
+
+
+A:
+--
+1)  $   sudo vi /opt/script.sh
+
+#! /bin/bash
+
+sudo cp -r /var/www/ /opt/www-backup/
+sudo touch /opt/jobdone
+
+
+2)  $   cat /etc/crontab
+
+# For details see man 4 crontabs
+
+# Example of job definition:
+# .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+# |  |  |  |  |
+# *  *  *  *  * user-name  command to be executed
+
+
+3)  $   crontab -e
+0 4 * * * bob /bin/bash /opt/script.sh
+
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+In this exercise you'll deal with advanced file permissions or attributes.
+
+
+A. First, in your home directory you will find a file called bobandjane. 
+   Currently this file can only be read by bob. Add a new ACL permission so that jane can also read this. 
+   Jane should not have write or execute permissions, but only the read permission.
+
+
+B. Next, in your home directory you will find a file named frozenfile.
+   This currently has the immutable attribute set on it. Remove the immutable attribute from this file
+
+
+A:
+--
+1)  $   apropos -s 1,8 "file access"
+
+getfacl (1)          - get file access control lists
+setfacl (1)          - set file access control lists
+
+
+2)  $   man setfacl
+
+SYNOPSIS
+       setfacl [-bkndRLPvh] [{-m|-x} acl_spec] [{-M|-X} acl_file] file ...
+
+       setfacl --restore=file
+
+DESCRIPTION
+       This utility sets Access Control Lists (ACLs) of files and directories.  On the command line, a sequence of com‐
+       mands is followed by a sequence of files (which in turn can be followed by another sequence of commands, ...).
+
+       The -m and -x options expect an ACL on the command line. Multiple ACL entries are separated by comma  characters
+       (`,').  The  -M and -X options read an ACL from a file or from standard input. The ACL entry format is described
+       in Section ACL ENTRIES.
+
+       The --set and --set-file options set the ACL of a file or a  directory.  The  previous  ACL  is  replaced.   ACL
+       entries for this operation must include permissions.
+
+       The  -m  (--modify)  and -M (--modify-file) options modify the ACL of a file or directory.  ACL entries for this
+       operation must include permissions. 
+       
+EXAMPLES
+       Granting an additional user read access
+              setfacl -m u:lisa:r file
+
+       
+3)  $   sudo setfacl --modify user:jane:r /home/bob/bobandjane
+
+4)  $   apropos "file attribute"
+chattr (1)           - change file attributes on a Linux file system
+
+
+5)  $   man chattr
+
+SYNOPSIS
+       chattr [ -RVf ] [ -v version ] [ -p project ] [ mode ] files..
+
+DESCRIPTION
+       chattr changes the file attributes on a Linux file system.
+
+       The format of a symbolic mode is +-=[aAcCdDeFijPsStTu].
+
+       The letters 'aAcCdDeFijPsStTu' select the new attributes for the files: append only (a), no atime  updates  (A),
+       compressed  (c),  no copy on write (C), no dump (d), synchronous directory updates (D), extent format (e), case-
+       insensitive directory lookups (F), immutable (i), data journalling (j), project hierarchy (P),  secure  deletion
+       (s), synchronous updates (S), no tail-merging (t), top of directory hierarchy (T), and undeletable (u).
+
+
+6)  $   sudo chattr -i /home/bob/frozenfile
+
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+Send the SIGHUP signal to the httpd process.
+
+
+A:
+--
+1)  $   apropos -s 1p "signal process"
+kill (1p)            - terminate or signal processes
+
+
+# Identify the PID of httpd
+2)  $   sudo systemctl status httpd 
+
+● httpd.service - The Apache HTTP Server
+   Loaded: loaded (/usr/lib/systemd/system/httpd.service; disabled; vendor preset: disabled)
+   Active: active (running) since Sat 2023-09-30 15:24:24 UTC; 3min 36s ago
+     Docs: man:httpd.service(8)
+ Main PID: 31084 (httpd)
+   Status: "Running, listening on: port 80"
+    Tasks: 213 (limit: 5970)
+   Memory: 25.3M
+   CGroup: /system.slice/httpd.service
+           ├─31084 /usr/sbin/httpd -DFOREGROUND
+           ├─31085 /usr/sbin/httpd -DFOREGROUND
+           ├─31086 /usr/sbin/httpd -DFOREGROUND
+           ├─31087 /usr/sbin/httpd -DFOREGROUND
+           └─31088 /usr/sbin/httpd -DFOREGROUND
+
+
+3)  $   man kill
+
+SYNOPSIS
+       kill [-signal|-s signal|-p] [-q value] [-a] [--] pid|name...
+       kill -l [number] | -L
+
+DESCRIPTION
+       The command kill sends the specified signal to the specified processes or process groups.
+
+       If  no  signal  is  specified,  the TERM signal is sent.  The default action for this signal is to terminate the
+       process.  This signal should be used in preference to the KILL signal (number 9), since a process may install  a
+       handler  for  the TERM signal in order to perform clean-up steps before terminating in an orderly fashion.  If a
+       process does not terminate after a TERM signal has been sent, then the KILL signal may be used;  be  aware  that
+       the  latter  signal  cannot  be  caught,  and so does not give the target process the opportunity to perform any
+       clean-up before terminating.
+
+OPTIONS
+       -l, --list [number]
+              Print  a list of signal names, or convert the given signal number to a name.  The signals can be found in
+              /usr/include/linux/signal.h
+
+       -L, --table
+              Similar to -l, but it will print signal names and their corresponding numbers.
+
+
+4)  $   kill -L
+ 1) SIGHUP       2) SIGINT       3) SIGQUIT      4) SIGILL       5) SIGTRAP
+ 6) SIGABRT      7) SIGBUS       8) SIGFPE       9) SIGKILL     10) SIGUSR1
+11) SIGSEGV     12) SIGUSR2     13) SIGPIPE     14) SIGALRM     15) SIGTERM
+16) SIGSTKFLT   17) SIGCHLD     18) SIGCONT     19) SIGSTOP     20) SIGTSTP
+21) SIGTTIN     22) SIGTTOU     23) SIGURG      24) SIGXCPU     25) SIGXFSZ
+26) SIGVTALRM   27) SIGPROF     28) SIGWINCH    29) SIGIO       30) SIGPWR
+31) SIGSYS      34) SIGRTMIN    35) SIGRTMIN+1  36) SIGRTMIN+2  37) SIGRTMIN+3
+38) SIGRTMIN+4  39) SIGRTMIN+5  40) SIGRTMIN+6  41) SIGRTMIN+7  42) SIGRTMIN+8
+43) SIGRTMIN+9  44) SIGRTMIN+10 45) SIGRTMIN+11 46) SIGRTMIN+12 47) SIGRTMIN+13
+48) SIGRTMIN+14 49) SIGRTMIN+15 50) SIGRTMAX-14 51) SIGRTMAX-13 52) SIGRTMAX-12
+53) SIGRTMAX-11 54) SIGRTMAX-10 55) SIGRTMAX-9  56) SIGRTMAX-8  57) SIGRTMAX-7
+58) SIGRTMAX-6  59) SIGRTMAX-5  60) SIGRTMAX-4  61) SIGRTMAX-3  62) SIGRTMAX-2
+63) SIGRTMAX-1  64) SIGRTMAX
+
+
+5)  $   sudo kill -SIGHUP 31084
+
+
+
+===============================================================================================================================
+
+Q :
+---
+In this exercise you'll prepare the disk found at /dev/vdb to be used by this system.
+
+
+A. First, you'll see that this disk has 1GB of unpartitioned space. Create two partitions. Each should be exactly 500MB in size.
+
+B. Format the first partition, /dev/vdb1 to be used as swap and enable it.
+
+C. Edit the correct file in /etc/ so that /dev/vdb1 is automatically mounted as swap space every time the system boots up.
+
+D. Format the second partition at /dev/vdb2 with the xfs filesystem.
+
+
+A:
+--
+1)  $    lsblk
+
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vda    253:0    0  11G  0 disk 
+└─vda1 253:1    0  10G  0 part /
+vdb    253:16   0   1G  0 disk 
+vdc    253:32   0   1G  0 disk 
+vdd    253:48   0   1G  0 disk 
+vde    253:64   0   1G  0 disk 
+
+
+2)  $    apropos -s 1,8 partition
+fdisk (8)            - manipulate disk partition table
+
+
+3)  $   apropos -s 1,8 swap
+mkswap (8)           - set up a Linux swap area
+swapon (8)           - enable/disable devices and files for paging and swapping
+
+
+4)  $   sudo fdisk /dev/vdb
+
+Command (m for help): n
+Partition type
+   p   primary (0 primary, 0 extended, 4 free)
+   e   extended (container for logical partitions)
+Select (default p): 
+
+Using default response p.
+Partition number (1-4, default 1): 
+First sector (2048-2097151, default 2048): 
+Last sector, +sectors or +size{K,M,G,T,P} (2048-2097151, default 2097151): +500M
+
+Created a new partition 1 of type 'Linux' and of size 500 MiB.
+
+Command (m for help): n   
+Partition type
+   p   primary (1 primary, 0 extended, 3 free)
+   e   extended (container for logical partitions)
+Select (default p): 
+
+Using default response p.
+Partition number (2-4, default 2): 
+First sector (1026048-2097151, default 1026048): 
+Last sector, +sectors or +size{K,M,G,T,P} (1026048-2097151, default 2097151): +500M
+
+Created a new partition 2 of type 'Linux' and of size 500 MiB.
+
+Command (m for help): w
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Syncing disks.
+
+
+5)  $   sudo mkswap /dev/vdb1
+Setting up swapspace version 1, size = 500 MiB (524283904 bytes)
+no label, UUID=97c104f8-f6af-4f9b-8ab3-5e31015d7c88
+
+6)  $   sudo swapon /dev/vdb1
+
+7)  $   lsblk
+
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vda    253:0    0   11G  0 disk 
+└─vda1 253:1    0   10G  0 part /
+vdb    253:16   0    1G  0 disk 
+├─vdb1 253:17   0  500M  0 part [SWAP]
+└─vdb2 253:18   0  500M  0 part 
+vdc    253:32   0    1G  0 disk 
+vdd    253:48   0    1G  0 disk 
+vde    253:64   0    1G  0 disk 
+
+
+8)  $   sudo vi /etc/fstab
+/dev/vdb1 none swap defaults 0 0
+
+
+9)  $   sudo mkfs.xfs /dev/vdb2
+
+meta-data=/dev/vdb2              isize=512    agcount=4, agsize=32000 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1
+data     =                       bsize=4096   blocks=128000, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=1368, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+
+
+
+
+===============================================================================================================================
+
+Q :
+---
+In this exercise you'll need to create a Logical Volume Manager structure.
+
+
+A. First, add these two physical volumes to LVM: /dev/vdc and /dev/vdd
+
+B. Next, create a volume group called volume1 out of these two physical volumes, /dev/vdc and /dev/vdd
+
+C. Finally, create a logical volume of 1GB on the volume group volume1. The name of this logical volume should be logic1
+
+
+A:
+--
+1)  $   apropos "physical volume"
+lvmdiskscan (8)      - List devices that may be used as physical volumes
+pvcreate (8)         - Initialize physical volume(s) for use by LVM
+
+
+2)  $   man pvcreate
+
+SYNOPSIS
+       pvcreate position_args
+           [ option_args ]
+
+EXAMPLES
+       Initialize a partition and a full device.
+       pvcreate /dev/sdc4 /dev/sde
+
+
+3)  $   sudo pvcreate /dev/vdc /dev/vdd
+  Physical volume "/dev/vdc" successfully created.
+  Physical volume "/dev/vdd" successfully created.
+
+
+4)  $   sudo vgcreate volume1 /dev/vdc /dev/vdd
+  Volume group "volume1" successfully created
+
+
+5)  $   sudo lvcreate --size 1G --name logic1 volume1
+  Logical volume "logic1" created.

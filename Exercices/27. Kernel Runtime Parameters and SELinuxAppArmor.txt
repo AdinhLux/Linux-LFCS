@@ -1,0 +1,167 @@
+Q:
+--
+Find the SELinux labels of sshd process running on this system, save its value in /home/bob/sshd file.
+
+
+A:
+--
+
+1)	$	man ps
+       a      Lift the BSD-style "only yourself" restriction, which is imposed upon the set of all
+              processes when some BSD-style (without "-") options are used or when the ps personality
+              setting is BSD-like.  The set of processes selected in this manner is in addition to the set
+              of processes selected by other means.  An alternate description is that this option causes ps
+              to list all processes with a terminal (tty), or to list all processes when used together with
+              the x option.
+			  
+       Z      Add a column of security data.  Identical to -M (for SELinux).
+	   
+       x      Lift the BSD-style "must have a tty" restriction, which is imposed upon the set of all
+              processes when some BSD-style (without "-") options are used or when the ps personality
+              setting is BSD-like.  The set of processes selected in this manner is in addition to the set
+              of processes selected by other means.  An alternate description is that this option causes ps
+              to list all processes owned by you (same EUID as ps), or to list all processes when used
+              together with the a option.
+	
+	
+2)	$	ps auxZ | grep sshd
+system_u:system_r:sshd_t:s0-s0:c0.c1023 root 9356 0.0  0.6  92288  6912 ?        Ss   11:45   0:00 /usr/sbin/sshd -D 
+
+
+3)	$	vi /home/bob/sshd
+system_u:system_r:sshd_t:s0-s0:c0.c1023
+
+
+===============================================================================================================================
+
+Q:
+--
+Turn on kernel.modules_disabled kernel runtime parameter, so that loading new kernel modules will be disabled.
+
+
+A:
+--
+
+1)	sudo sysctl -w kernel.modules_disabled=1
+kernel.modules_disabled = 1
+
+
+===============================================================================================================================
+
+Q:
+--
+Check out the SELinux label for the file stored at /bin/sudo. Ignore the SELinux user and role here.
+What is the SELinux type used on this file? Save its value in /home/bob/selabel file.
+
+
+A:
+--
+
+1)	$	ls -Z /bin/sudo
+system_u:object_r:sudo_exec_t:s0 /bin/sudo
+
+
+2)	$	vi /home/bob/selabel
+sudo_exec_t
+
+
+===============================================================================================================================
+
+Q:
+--
+Use the sysctl command to make sure this kernel runtime parameter is actively enabling its settings:
+
+net.ipv6.conf.lo.seg6_enabled
+
+
+A:
+--
+
+1)	sudo sysctl -w net.ipv6.conf.lo.seg6_enabled=1
+
+
+===============================================================================================================================
+
+Q:
+--
+Adjust the value of this kernel runtime parameter, vm.swappiness, to 10.
+
+After you set this to 10, also make the change persistent so that it will be auto-set to this value on the next reboot.
+
+
+A:
+--
+
+1)	$	sudo vi /etc/sysctl.conf
+vm.swappiness=10
+
+
+# Apply the changes
+2)	$	sudo sysctl -p
+
+
+===============================================================================================================================
+
+Q(!!!):
+-------
+Change the SELinux context of /var/index.html file to httpd_sys_content_t
+
+
+A:
+--
+
+1)	$	ls -Z /var/index.html
+unconfined_u:object_r:var_t:s0 /var/index.html
+
+2)	$	sudo chcon -t httpd_sys_content_t /var/index.html
+
+3)	$	ls -Z /var/index.html
+unconfined_u:object_r:httpd_sys_content_t:s0 /var/index.html
+
+
+===============================================================================================================================
+
+Q:
+--
+Temporarily change the SELinux status to Permissive on this system.
+
+
+A:
+--
+
+1)	$	sudo getenforce
+Enforcing
+
+2)	$	sudo setenforce 0
+
+3)	$	sudo getenforce
+Permissive
+
+
+===============================================================================================================================
+
+Q:
+--
+Identify the SELinux Roles for xguest_u SELinux user and save the value(s) in /home/bob/serole file.
+
+
+A:
+--
+
+1)	$	sudo semanage user -l
+
+                Labeling   MLS/       MLS/                          
+SELinux User    Prefix     MCS Level  MCS Range                      SELinux Roles
+
+guest_u         user       s0         s0                             guest_r
+root            user       s0         s0-s0:c0.c1023                 staff_r sysadm_r system_r unconfined_r
+staff_u         user       s0         s0-s0:c0.c1023                 staff_r sysadm_r unconfined_r
+sysadm_u        user       s0         s0-s0:c0.c1023                 sysadm_r
+system_u        user       s0         s0-s0:c0.c1023                 system_r unconfined_r
+unconfined_u    user       s0         s0-s0:c0.c1023                 system_r unconfined_r
+user_u          user       s0         s0                             user_r
+xguest_u        user       s0         s0                             xguest_r
+
+
+2)	$	vi /home/bob/serole
+xguest_r

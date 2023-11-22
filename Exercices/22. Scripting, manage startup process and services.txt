@@ -1,0 +1,265 @@
+Q:
+--
+How do we run script.sh that is located in our current directory ?
+
+
+A:
+--
+
+1)	./script.sh
+
+
+===============================================================================================================================
+
+Q:
+-- 
+What is the correct shebang to add in a script ?
+
+
+A:
+--
+
+1)	#!/bin/bash
+
+
+===============================================================================================================================
+
+Q:
+-- 
+Make sure rpcbind.service unit automatically starts up after Linux boots.
+
+Note: Do not try to reboot the machine for testing.
+
+
+A:
+--
+
+1)	$ sudo systemctl status rpcbind.service
+● rpcbind.service - RPC Bind
+   Loaded: loaded (/usr/lib/systemd/system/rpcbind.service; disabled; vendor preset: enabled)
+   Active: active (running) since Sun 2023-08-13 16:11:11 UTC; 1h 18min ago
+     Docs: man:rpcbind(8)
+ Main PID: 669 (rpcbind)
+    Tasks: 1 (limit: 1340692)
+   Memory: 1.1M
+   CGroup: /system.slice/rpcbind.service
+           └─669 /usr/bin/rpcbind -w -f
+
+2)	$ sudo systemctl enable rpcbind.service
+Created symlink /etc/systemd/system/multi-user.target.wants/rpcbind.service → /usr/lib/systemd/system/rpcbind.service.
+
+3)	$ sudo systemctl status rpcbind.service
+● rpcbind.service - RPC Bind
+   Loaded: loaded (/usr/lib/systemd/system/rpcbind.service; enabled; vendor preset: enabled)
+															   ^
+															   |
+															   |
+															 HERE
+															 
+   Active: active (running) since Sun 2023-08-13 16:11:11 UTC; 1h 19min ago
+     Docs: man:rpcbind(8)
+ Main PID: 669 (rpcbind)
+    Tasks: 1 (limit: 1340692)
+   Memory: 1.1M
+   CGroup: /system.slice/rpcbind.service
+           └─669 /usr/bin/rpcbind -w -f
+		   
+
+===============================================================================================================================
+
+Q:
+-- 
+Under bob's home:
+
+Create a script called script.sh. This script should create a tar archive called archive.tar.gz. The script should archive the directory called dir1.
+
+Please make sure you execute the script at least once.
+
+
+A:
+--
+1)	$ pwd
+/home/bob
+
+2)	$ tar --help
+
+  -a, --auto-compress        use archive suffix to determine the compression
+  -c, --create               create a new archive
+  -f, --file=ARCHIVE         use archive file or device ARCHIVE
+  
+# Let's create without sudo, as owner and not root  
+3)	$ vi script.sh
+
+#!/bin/bash
+tar acf archive.tar.gz dir1
+
+
+4)	$ chmod u+x script.sh
+
+5)	$ ./script.sh
+		   
+
+===============================================================================================================================
+
+Q:
+--
+There is a service unit that automatically starts up the SSH daemon. 
+Use the correct command to find out the PID assigned to the process launched by this service.
+
+
+Save the PID in /home/bob/pid file.
+
+
+A:
+--
+1)	$ systemctl --help
+
+Unit Commands:
+  list-units [PATTERN...]             List units currently in memory
+  
+  
+2)	$ systemctl list-units | grep 'ssh'
+  sshd.service                                                    loaded active running   OpenSSH server daemon                                                        
+  system-sshd\x2dkeygen.slice                                     loaded active active    system-sshd\x2dkeygen.slice                                                  
+  sshd-keygen.target                                              loaded active active    sshd-keygen.target
+  
+  
+3)	$ sudo systemctl status sshd.service | grep 'PID'
+ Main PID: 1011 (sshd)
+ 
+4)	$ vi /home/bob/pid
+
+		   
+===============================================================================================================================
+
+Q:
+--
+Under bob's home:
+Create script2.sh script that displays if the sshd.service unit is enabled or disabled.
+
+
+Remember to make this script executable and try to execute it at least once to verify your answer.
+
+
+A:
+--
+1)	$ pwd
+/home/bob
+
+2)	$ sudo systemctl is-enabled sshd.service
+enabled
+
+3)	$ vi script2.sh
+
+#!/bin/bash
+systemctl is-enabled sshd.service
+
+4)	$ chmod u+x /home/bob/script2.sh
+
+		   
+===============================================================================================================================
+
+Q:
+--
+Create a script /home/bob/perm.sh. 
+This script should set permissions on /home/bob/dir8 directory so that user owner only has x (execute) permissions, group owner and others must not have any permissions at all.
+
+
+Remember to make this script executable and try to execute it at least once to verify your answer.
+
+
+A:
+--
+1)	$ pwd
+/home/bob
+
+2)	$ vi perm.sh
+
+#!/bin/bash
+chmod 0100 /home/bob/dir8
+
+3)	$ chmod u+x /home/bob/perm.sh
+
+		   
+===============================================================================================================================
+
+Q:
+--
+We already have a script named script10.sh under /home/bob/. 
+Make sure this script runs without any errors to display the appropriate output.
+
+
+A:
+--
+1)	$ chmod 700 /home/bob/script10.sh
+2)	$ vi script10.sh
+
+!#/bin/bsh
+cat test.txt
+
+		   
+===============================================================================================================================
+
+Q:
+--
+Copy the output of the sshd.service status to /home/bob/service.txt.
+
+
+A:
+--
+1)	$ systemctl status sshd.service > /home/bob/service.txt
+
+		   
+===============================================================================================================================
+
+Q:
+--
+httpd is already installed, mask its service.
+
+
+A:
+--
+1)	$ sudo systemctl mask httpd.service
+
+		   
+===============================================================================================================================
+
+Q:
+--
+Now unmask the httpd service.
+
+
+A:
+--
+1)	$ sudo systemctl unmask httpd.service
+
+		   
+===============================================================================================================================
+
+Q(!!!):
+-------
+We made some changes on httpd unit file i.e /usr/lib/systemd/system/httpd.service and after that we are getting some warnings while running systemctl status httpd command.
+Fix the same and make sure this command works without any warning.
+
+
+A:
+--
+1)	$ systemctl status httpd.service
+Warning: The unit file, source configuration file or drop-ins of httpd.service changed on disk. Run 'systemct>
+● httpd.service - The Apache HTTP Server
+   Loaded: loaded (/usr/lib/systemd/system/httpd.service; disabled; vendor preset: disabled)
+   Active: active (running) since Sun 2023-08-13 18:48:35 UTC; 38s ago
+     Docs: man:httpd.service(8)
+ Main PID: 5096 (httpd)
+   Status: "Running, listening on: port 80"
+    Tasks: 213 (limit: 1340692)
+   Memory: 19.2M
+   CGroup: /system.slice/httpd.service
+           ├─5096 /usr/sbin/httpd -DFOREGROUND
+           ├─5109 /usr/sbin/httpd -DFOREGROUND
+           ├─5110 /usr/sbin/httpd -DFOREGROUND
+           ├─5111 /usr/sbin/httpd -DFOREGROUND
+           └─5112 /usr/sbin/httpd -DFOREGROUND
+
+# The systemctl daemon-reload command is used to reload the systemd manager configuration. This includes reloading all unit files and recreating the entire dependency tree   
+2)	$ sudo systemctl daemon-reload

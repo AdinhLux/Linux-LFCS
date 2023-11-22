@@ -1,0 +1,210 @@
+Q:
+--
+In what file can we edit the settings of our SSH server ?
+
+
+A:
+--
+1)  /etc/ssh/sshd_config
+
+
+===============================================================================================================================
+
+Q:
+--
+In a squid proxy server, what does this line do?
+
+
+http_access allow localnetwork
+
+
+A. It makes it accept connections from the computers in our local network.
+B. It lets computers in the local network use the http protocol, but not the https protocol.
+C. It makes it accept incoming connections from whatever was defined in the ACL named "localnetwork"
+D. It lets computers use the proxy server to access devices in the "localnetwork" ACL.
+
+
+A:
+--
+1)  C
+
+
+===============================================================================================================================
+
+Q:
+--
+Edit the configuration of the SSH server and disable password logins.
+
+Please make sure to restart the sshd service after making the required changes.
+
+
+A:
+--
+1)  $   sudo vi /etc/ssh/sshd_config
+PasswordAuthentication no
+
+
+2)  $   sudo systemctl restart sshd
+
+
+===============================================================================================================================
+
+Q:
+--
+Edit the system-wide configuration of the SSH client and turn on X11 forwarding.
+
+
+A:
+--
+1)  $   sudo vi /etc/ssh/ssh_config
+ForwardX11 yes
+
+
+===============================================================================================================================
+
+Q:
+--
+Install squid proxy server on this system and start its service.
+
+
+A:
+--
+1)  $   sudo dnf install squid -y
+2)  $   sudo systemctl start squid.service
+3)  $   sudo systemctl enable squid.service
+
+
+===============================================================================================================================
+
+Q:
+--
+Edit the config file of the Squid proxy daemon. Modify it to deny access to the IP addresses defined in the ACL called localnet.
+
+
+A:
+--
+# Change http_access allow localnet line to http_access deny localnet
+1)  $   sudo vi /etc/squid/squid.conf
+  
+
+===============================================================================================================================
+
+Q:
+--
+Edit the configuration of the Squid proxy daemon. Add a src type acl and name it vpn. The IP you should use in this acl is 203.0.110.5. 
+Now add a new rule that tells the proxy server to allow access to the acl named vpn.
+
+
+A:
+--
+1)  $   sudo vi /etc/squid/squid.conf
+
+# Add this line
+acl vpn src 203.0.110.5
+
+# Add below given line in the same file before http_access deny all line:
+http_access allow vpn
+
+
+===============================================================================================================================
+
+Q:
+--
+Edit the configuration of the SSH server and configure it to use only IPv4 IP address family.
+
+
+A:
+--
+1)  $   sudo vi /etc/ssh/sshd_config
+AddressFamily inet
+
+
+===============================================================================================================================
+
+Q:
+--
+Edit the configuration of the Squid proxy daemon. Now add a new rule that allow http access to the external
+
+
+A:
+--
+# Add below given line in this file after http_access allow localhost line:
+1)  $   sudo vi /etc/squid/squid.conf
+
+
+
+# Only allow cachemgr access from localhost
+http_access allow localhost manager
+http_access deny manager
+
+# We strongly recommend the following be uncommented to protect innocent
+# web applications running on the proxy server who think the only
+# one who can access services on "localhost" is a local user
+#http_access deny to_localhost
+
+#
+# INSERT YOUR OWN RULE(S) HERE TO ALLOW ACCESS FROM YOUR CLIENTS
+#
+
+# Example rule allowing access from your local networks.
+# Adapt localnet in the ACL section to list your (internal) IP networks
+# from where browsing should be allowed
+http_access deny localnet
+http_access allow localhost
+http_access allow external
+
+
+===============================================================================================================================
+
+Q:
+--
+Edit the configuration of the Squid proxy daemon , add an acl and http access rule to block facebook.com.
+
+
+A:
+--
+1)  $   sudo vi /etc/squid/squid.conf
+acl facebook dstdomain .facebook.com
+
+
+# And add below given line (http_access deny facebook) after http_access allow localhost line:
+# Example rule allowing access from your local networks.
+# Adapt localnet in the ACL section to list your (internal) IP networks
+# from where browsing should be allowed
+http_access deny localnet
+http_access allow localhost
+http_access allow external
+http_access deny facebook
+
+
+===============================================================================================================================
+
+Q:
+--
+Edit the configuration of the SSH server and re-enable password logins, but disable the SSH login for user root.
+
+
+A:
+--
+1)  $   sudo vi /etc/ssh/sshd_config
+PasswordAuthentication yes
+PermitRootLogin no
+
+
+2)  $   sudo systemctl restart sshd
+
+
+===============================================================================================================================
+
+Q:
+--
+In configuration file of the SSH server, change the maximum number of authentication attempts permitted per connection to 4
+
+
+A:
+--
+1)  $   sudo vi /etc/ssh/sshd_config
+MaxAuthTries 4
+
+
+2)  $   sudo systemctl restart sshd

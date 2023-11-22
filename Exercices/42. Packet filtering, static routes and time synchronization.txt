@@ -1,0 +1,271 @@
+Q:
+--
+Allow Permanent TCP incoming connections to port 7869
+
+
+A:
+--
+1)  $   sudo firewall-cmd --add-port=7869/tcp --permanent
+success
+
+
+===============================================================================================================================
+
+Q:
+--
+Add a permanent firewall rule to allow the https service.
+
+
+A:
+--
+1)  $   sudo firewall-cmd --add-service=https --permanent
+success
+
+
+===============================================================================================================================
+
+Q:
+--
+Use firewall-cmd to list all current firewall rules. You will see UDP traffic to a certain port has been enabled. 
+The rule is temporary, not permanent (runtime rule that disappears at next boot). 
+Remove the firewall rule that allows traffic to this port number.
+
+
+A:
+--
+1)  $   sudo firewall-cmd  --list-all
+public (active)
+  target: default
+  icmp-block-inversion: no
+  interfaces: eth0 eth1
+  sources: 
+  services: cockpit dhcpv6-client ssh
+  ports: 8080/tcp 22/tcp 7869/tcp 53/udp
+  protocols: 
+  forward: no
+  masquerade: no
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+
+
+2)  $   sudo firewall-cmd --remove-port=53/udp
+success
+
+
+===============================================================================================================================
+
+Q:
+--
+Allow all traffic that is coming from any IP in this network range: 10.11.12.0 to 10.11.12.255 (i.e 10.11.12.0/24), add the required rule in the trusted zone and the rule must be permanent.
+
+
+A:
+--
+1)  $   sudo firewall-cmd --add-source=10.11.12.0/24 --zone=trusted --permanent
+success
+
+
+===============================================================================================================================
+
+Q:
+--
+There are a couple of rules we added in the firewall but those are just runtime rules (not permanent).
+
+Make all of these runtime rules permanent.
+
+
+A:
+--
+1)  $   sudo firewall-cmd --list-all
+public (active)
+  target: default
+  icmp-block-inversion: no
+  interfaces: eth0 eth1
+  sources: 
+  services: cockpit dhcpv6-client ssh
+  ports: 8080/tcp 22/tcp 7869/tcp 20/tcp 21/tcp 26/tcp 23/tcp 24/tcp 25/tcp
+  protocols: 
+  forward: no
+  masquerade: no
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+
+
+2)  $   sudo firewall-cmd --runtime-to-permanent
+success
+
+
+# Check again all the rules if they are permanent now:
+3)  $   sudo firewall-cmd --list-all --permanent
+public (active)
+  target: default
+  icmp-block-inversion: no
+  interfaces: eth1
+  sources: 
+  services: cockpit dhcpv6-client ssh
+  ports: 8080/tcp 22/tcp 7869/tcp 20/tcp 21/tcp 26/tcp 23/tcp 24/tcp 25/tcp
+  protocols: 
+  forward: no
+  masquerade: no
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+
+
+===============================================================================================================================
+
+Q:
+--
+Temporarily route all traffic that must reach the 192.168.0.* network through the device that has the IP 172.28.128.100
+
+
+A:
+--
+1)  $   sudo ip route add 192.168.0.0/24 via 172.28.128.100
+
+
+===============================================================================================================================
+
+Q:
+--
+Now, permanently route all traffic that must reach the 192.168.0.* network through the device that has the IP 172.28.128.100
+
+Also tell the NetworkManager to immediately apply the network settings we just changed.
+
+
+A:
+--
+1)  $   sudo nmcli connection modify eth1 +ipv4.routes "192.168.0.0/24 172.28.128.100"
+
+
+# Now tell the NetworkManager to apply the network settings we just changed:
+2)  $   sudo nmcli device reapply eth1
+Connection successfully reapplied to device 'eth1'.
+
+
+===============================================================================================================================
+
+Q:
+--
+Delete the route you just created in the previous question to permanently route all traffic that must reach the 192.168.0.* network through the device that has the IP 172.28.128.100
+
+Also tell the NetworkManager to immediately apply the network settings we just changed.
+
+
+A:
+--
+1)  $   sudo nmcli connection modify eth1 -ipv4.routes "192.168.0.0/24  172.28.128.100"
+2)  $   sudo nmcli device reapply eth1
+Connection successfully reapplied to device 'eth1'.
+
+
+===============================================================================================================================
+
+Q:
+--
+Check out the route table and find out the default gateway for eth0 connection on this system and store the output (only the IP address) in /home/bob/gateway.txt file.
+
+
+A:
+--
+1)  $   ip route show
+default via 192.168.121.1 dev eth0 proto dhcp metric 100 
+default via 172.28.128.1 dev eth1 proto dhcp metric 101 
+172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown 
+172.28.128.0/24 dev eth1 proto kernel scope link src 172.28.128.160 metric 101 
+192.168.121.0/24 dev eth0 proto kernel scope link src 192.168.121.94 metric 100 
+
+
+# Look for the line that contains default via string for eth0 and copy the IP address you see after default via in this line:
+2)  $   vi /home/bob/gateway.txt
+192.168.121.1
+
+
+===============================================================================================================================
+
+Q:
+--
+This system uses dynamic network configuration. We won't change that, but add an extra IP to eth1 interface on this system: 10.0.0.50/24.
+
+
+A:
+--
+1)  $   sudo ip a add 10.0.0.50/24 dev eth1
+
+
+===============================================================================================================================
+
+Q:
+--
+Check all available timezones on this system and filter out American timezones only (for example America/Phoenix, America/Santiago etc).
+
+Further save the filtered output in /home/bob/america file.
+
+
+A:
+--
+1)  $   timedatectl list-timezones | grep America > /home/bob/america
+
+
+===============================================================================================================================
+
+Q:
+--
+Configure the timezone on this system and set it to Asia/Kolkata:
+
+
+A:
+--
+1)  $   sudo timedatectl set-timezone Asia/Kolkata
+
+
+===============================================================================================================================
+
+Q:
+--
+Configure the system to automatically synchronize its time through the chrony daemon. 
+Make sure the daemon is enabled so that it automatically starts every time the system boots.
+
+
+A:
+--
+# chrony installed ?
+1)  $   sudo yum install chrony -y
+
+
+# Start its service, also It should be enabled by default, if not then enable it:
+2)  $   sudo systemctl start chronyd
+        sudo systemctl enable chronyd
+
+
+# You can check if system is configured to automatically synchronise its time through chrony, in the below given command output you should see NTP=yes
+3)  $   sudo timedatectl show
+Timezone=Asia/Kolkata
+LocalRTC=no
+CanNTP=yes
+NTP=yes
+NTPSynchronized=yes
+TimeUSec=Wed 2023-09-13 22:35:39 IST
+RTCTimeUSec=Wed 2023-09-13 22:35:39 IST
+
+
+# If not then run:
+4)  $   sudo timedatectl set-ntp true
+
+
+===============================================================================================================================
+
+Q:
+--
+Using timedatectl configure RTC (real-time clock) to maintain the RTC in local time.
+RTC is a battery-powered computer clock that keeps track of the time even when the system is turned off.
+
+
+A:
+--
+1)  $   sudo timedatectl set-local-rtc 1

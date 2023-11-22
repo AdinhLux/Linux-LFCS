@@ -1,0 +1,219 @@
+Q:
+--
+From below, which keyword can we use to limit the number of processes a user can run ?
+
+
+A:
+--
+1)  nproc
+
+
+===============================================================================================================================
+
+Q:
+--
+How do we allow the user called trinity to execute any sudo command ?
+
+
+A:
+--
+1)  $   sudo gpasswd -a trinity wheel
+
+
+===============================================================================================================================
+
+Q:
+--
+Modify the security limits file and make sure that the user called trinity can run no more than 30 processes in her session.
+This should be both a hard limit and a soft limit, written in a single line.
+
+
+A:
+--
+1)  $   sudo vi  /etc/security/limits.conf
+
+#<domain>      <type>  <item>         <value>
+#
+
+#*               soft    core            0
+#*               hard    rss             10000
+#@student        hard    nproc           20
+#@faculty        soft    nproc           20
+#@faculty        hard    nproc           50
+#ftp             hard    nproc           0
+#@student        -       maxlogins       4
+
+trinity         -       nproc           30
+# End of file
+
+
+===============================================================================================================================
+
+Q:
+--
+Identify all the security limits currently applied in our user's session and save the same in /home/bob/limits file.
+
+You can use the redirection to save your command's output in a file i.e [your-command] > /home/bob/limits
+
+
+A:
+--
+1)  $   ulimit -a > /home/bob/limits
+
+
+===============================================================================================================================
+
+Q:
+--
+Modify the sudoers file in such a way to allow the user called trinity to run any sudo command without needing to provide her password.
+
+
+A:
+--
+# BEWARE of INDENTS
+1)  $   sudo visudo /etc/sudoers
+
+## Allows people in group wheel to run all commands
+%wheel  ALL=(ALL)       ALL
+trinity ALL=(ALL)       NOPASSWD: ALL
+
+
+===============================================================================================================================
+
+Q:
+--
+Modify the sudoers file again. Remove your previous entry for the user called trinity if it still exists.
+Now add a new entry that allows trinity to only run the /usr/bin/mount command with sudo.
+
+
+A:
+--
+1)  $   sudo visudo /etc/sudoers
+
+## Allows people in group wheel to run all commands
+%wheel  ALL=(ALL)       ALL
+trinity ALL=(ALL)       /usr/bin/mount
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+Make changes in security limits file for user stephen so that he can create maximum filesize upto 4 MB. This should be a hard limit.
+
+
+A:
+--
+1)  $   sudo vi  /etc/security/limits.conf
+
+#<domain>      <type>  <item>         <value>
+#
+
+#*               soft    core            0
+#*               hard    rss             10000
+#@student        hard    nproc           20
+#@faculty        soft    nproc           20
+#@faculty        hard    nproc           50
+#ftp             hard    nproc           0
+#@student        -       maxlogins       4
+
+trinity         -       nproc           30
+stephen         hard    fsize           4096
+# End of file
+
+
+===============================================================================================================================
+
+Q:
+--
+Set a soft limit of 20 processes for everyone in the salesteam group.
+
+
+A:
+--
+1)  $   sudo vi  /etc/security/limits.conf
+
+#<domain>      <type>  <item>         <value>
+#
+
+#*               soft    core            0
+#*               hard    rss             10000
+#@student        hard    nproc           20
+#@faculty        soft    nproc           20
+#@faculty        hard    nproc           50
+#ftp             hard    nproc           0
+#@student        -       maxlogins       4
+
+trinity         -       nproc           30
+stephen         hard    fsize           4096
+@salesteam      soft    nproc           20
+# End of file
+
+
+===============================================================================================================================
+
+Q:
+--
+Define a policy for all the users in the salesteam group to run any sudo command.
+
+
+A:
+--
+# BEWARE of INDENTS
+1)  $   sudo visudo
+
+## Allows people in group wheel to run all commands
+%wheel  ALL=(ALL)       ALL
+trinity ALL=(ALL)       /usr/bin/mount
+%salesteam     ALL=(ALL)     ALL
+
+
+===============================================================================================================================
+
+Q:
+--
+Define a policy, so that user trinity be able to run sudo commands as the user sam.
+
+
+A:
+--
+1)  $   sudo visudo
+
+## Allows people in group wheel to run all commands
+%wheel  ALL=(ALL)       ALL
+trinity ALL=(sam)       ALL
+%salesteam     ALL=(ALL)     ALL
+
+
+===============================================================================================================================
+
+Q:
+--
+We applied a hard limit of 10 processes for all the users under developers group, but somehow the limit isn't working. Look into the issue and fix the same.
+
+
+A:
+--
+1)  $   sudo vi  /etc/security/limits.conf
+
+#<domain>      <type>  <item>         <value>
+#
+# developers hard nproc 10
+@developers hard nproc 10
+
+
+===============================================================================================================================
+
+Q:
+--
+Modify the sudoers file again. Remove your previous entry for the user called trinity if it still exists.
+Now add a new entry that allows trinity to run all commands with sudo, but only after entering the password.
+
+
+A:
+--
+1)  $   sudo visudo
+
+## Allows people in group wheel to run all commands
+%wheel  ALL=(ALL)       ALL
+trinity ALL=(ALL)       ALL

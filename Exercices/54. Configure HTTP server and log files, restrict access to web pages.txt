@@ -1,0 +1,285 @@
+Q:
+--
+Where can we find the main settings for the httpd daemon ?
+
+
+A:
+--
+1)  /etc/httpd/conf/httpd.conf
+
+
+===============================================================================================================================
+
+Q:
+--
+How do we tell our HTTP server that the website files should be served from the /var/www/html/directory ?
+
+
+A:
+--
+1)  DocumentRoot "/var/www/html"
+
+
+===============================================================================================================================
+
+Q:
+--
+Install httpd server on this system and start its service.
+
+
+A:
+--
+1)  $   sudo dnf install httpd -y
+2)  $   sudo systemctl start httpd
+
+
+===============================================================================================================================
+
+Q:
+--
+We have the following Directory block in the main configuration file of httpd:
+
+<Directory "/var/www/html/admin/">
+</Directory>
+
+Modify it to allow access to this directory from 127.0.0.1 IP address only.
+
+
+A:
+--
+1)  $   sudo vi /etc/httpd/conf/httpd.conf
+
+<Directory "/var/www/html/admin/">
+  Require ip 127.0.0.1
+</Directory>
+
+
+2)  $   sudo systemctl restart httpd
+
+
+===============================================================================================================================
+
+Q:
+--
+Edit the correct configuration file to disable the mpm_event_module and enable the mpm_prefork_module instead.
+
+
+A:
+--
+# Uncomment LoadModule mpm_prefork_module modules/mod_mpm_prefork.so line
+# Comment LoadModule mpm_event_module modules/mod_mpm_event.so line.
+1)  $   sudo vi /etc/httpd/conf.modules.d/00-mpm.conf
+
+LoadModule mpm_prefork_module modules/mod_mpm_prefork.so
+#LoadModule mpm_event_module modules/mod_mpm_event.so
+
+
+===============================================================================================================================
+
+Q:
+--
+Edit the main config file of the httpd daemon and change the default listening port from 80 to 8090.
+
+Please make sure to restart httpd service after making the required changes.
+
+
+A:
+--
+1)  $   sudo vi /etc/httpd/conf/httpd.conf
+
+Listen 8090
+
+
+2)  $   sudo systemctl restart httpd
+
+
+===============================================================================================================================
+
+Q:
+--
+Edit the main config file of the httpd daemon and change what is collected in the error log. 
+Currently, only warning-level errors, or worse are collected. Change it to debug level.
+
+Please make sure to restart httpd service after making the required changes.
+
+
+A:
+--
+1)  $   sudo vi /etc/httpd/conf/httpd.conf
+
+#
+# LogLevel: Control the number of messages logged to the error_log.
+# Possible values include: debug, info, notice, warn, error, crit,
+# alert, emerg.
+#
+LogLevel debug
+
+
+2)  $   sudo systemctl restart httpd
+
+
+===============================================================================================================================
+
+Q:
+--
+Edit the main config file of the httpd daemon. Find this block: <Directory "/var/www/html">. 
+In here, the Indexes and FollowSymLinks options are enabled for this directory.
+
+Make the required changes to disable Indexes for this directory..
+
+Please make sure to restart httpd service after making the required changes.
+
+
+A:
+--
+1)  $   sudo vi /etc/httpd/conf/httpd.conf
+
+<Directory "/var/www/html">
+    Options FollowSymLinks
+    AllowOverride None
+    Require all granted
+</Directory>
+
+
+2)  $   sudo systemctl restart httpd
+
+
+===============================================================================================================================
+
+Q:
+--
+Edit the main config file of the httpd daemon. Find this block: <Directory "/var/www/html">. 
+Enable the use of .htaccess files in this directory. 
+All types of overrides should be allowed in these files.
+
+
+Please make sure to restart httpd service after making the required changes.
+
+
+A:
+--
+1)  $   sudo vi /etc/httpd/conf/httpd.conf
+
+<Directory "/var/www/html">
+    Options FollowSymLinks
+    AllowOverride All
+    Require all granted
+</Directory>
+
+
+2)  $   sudo systemctl restart httpd
+
+
+===============================================================================================================================
+
+Q:
+--
+Modify the /var/www/html/admin/ Directory block in httpd main configuration file so that it looks like as below:
+
+<Directory "/var/www/html/admin/">
+    AuthType Basic
+    AuthBasicProvider file
+    AuthName "Secret admin page"
+    AuthUserFile /etc/httpd/passwords
+    Require valid-user
+</Directory>
+
+
+It enables password protection to this area of our website.
+
+Create the password file i.e /etc/httpd/passwords and add the user called john with password john123 in the same.
+
+Make sure to restart httpd service after making the required changes.
+
+
+A:
+--
+1)  $   sudo vi /etc/httpd/conf/httpd.conf
+
+<Directory "/var/www/html/admin/">
+    AuthType Basic
+    AuthBasicProvider file
+    AuthName "Secret admin page"
+    AuthUserFile /etc/httpd/passwords
+    Require valid-user
+</Directory>
+
+
+2)  $   sudo htpasswd -c /etc/httpd/passwords john
+New password: 
+Re-type new password: 
+Adding password for user john
+
+
+3)  $   sudo systemctl restart httpd
+
+
+===============================================================================================================================
+
+Q:
+--
+Remove the user called john from the password file you created in the previous question.
+
+
+A:
+--
+1)  $   sudo htpasswd -D /etc/httpd/passwords john
+Deleting password for user john
+
+
+===============================================================================================================================
+
+Q:
+--
+Install the SSL module for httpd and enable it.
+
+
+A:
+--
+1)  $   sudo dnf install mod_ssl -y
+
+# Once installed, the module should be enabled by default. To verify the same, execute below given command. You should see something like: ' ssl_module (shared)'
+2)  $   httpd -M  | grep ssl
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 192.22.202.9. Set the 'ServerName' directive globally to suppress this message
+ ssl_module (shared)
+ 
+
+===============================================================================================================================
+
+Q:
+--
+Update the ErrorLog location to /var/log/httpd/main_error.log in the main configuration file of httpd.
+
+Make sure to restart httpd service after making the required changes.
+
+
+A:
+--
+1)  $   sudo vi /etc/httpd/conf/httpd.conf
+
+ErrorLog "/var/log/httpd/main_error.log"
+
+
+2)  $   sudo systemctl restart httpd
+ 
+
+===============================================================================================================================
+
+Q:
+--
+The %v option in the log format is used to log the name of the virtual host that is serving the request
+
+In the main configuration file of httpd daemon update the combined LogFormat to add %v option, make sure to add it in the beginning (i.e before %h).
+
+Remember to restart httpd service after making the required changes.
+
+
+A:
+--
+# Modify the LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined entry so that it looks like as below :
+1)  $   sudo vi /etc/httpd/conf/httpd.conf
+
+LogFormat "%v %h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+
+
+2)  $   sudo systemctl restart httpd

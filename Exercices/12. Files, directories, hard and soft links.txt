@@ -1,0 +1,298 @@
+Q:
+--
+What is the top-level directory in Linux ?
+
+
+A:
+--
+
+1)  /
+
+
+===============================================================================================================================
+
+Q:
+--
+In what form does Linux organise files and directories ?
+
+
+A:
+--
+
+1)  filesystem tree
+
+
+===============================================================================================================================
+
+Q:
+--
+What is the command to print your current working directory ?
+
+
+A:
+--
+
+1)  pwd
+
+
+===============================================================================================================================
+
+Q:
+--
+You are trying to use ssh alex@localhost to log in through SSH. Your connection is refused. 
+ssh has a command line option to show you the verbose output. 
+That will show a lot more status messages and help you debug why this connection is failing. 
+What is the correct option for that ? (you need not to make ssh connection work at this point)
+
+
+A:
+--
+
+1)  $ man ssh
+2) ssh -v alex@localhost
+
+
+===============================================================================================================================
+
+Q:
+--
+What is the command to climb up one directory ?
+
+
+A:
+--
+
+1)  cd ..
+
+
+===============================================================================================================================
+
+Q:
+--
+Absolute paths always start out with the root directory /. 
+Then we specify the sub-directories we want to descend into, /home/bob/Documents/Invoice.pdf is an example of such a path. 
+In this case, first home, then bob, then Documents. 
+We can see the sub-directory names are separated by a / and we finally get to the file we want to access i.e Invoice.pdf. 
+An absolute path can end with the name of a file or a directory.
+
+
+As per the example given above If we'd want to delete the Documents directory, how would we specify the path?
+
+
+A:
+--
+
+1)  /home/bob/Documents
+
+
+===============================================================================================================================
+
+Q:
+--
+Create a directory named lfcs under /home/bob directory.
+
+
+A:
+--
+
+1)	$ mkdir /home/bob/lfcs
+
+
+===============================================================================================================================
+
+Q:
+--
+Create a blank file named lfcs.txt under /home/bob/lfcs directory.
+
+
+A:
+--
+1)	$ touch /home/bob/lfcs/lfcs.txt
+
+
+===============================================================================================================================
+
+Q:
+--
+Copy /tmp/Invoice directory (including all its contents) to /home/bob directory.
+
+
+A:
+--
+1) $ cp -r /tmp/Invoice /home/bob
+
+
+===============================================================================================================================
+
+Q:
+--
+Copy /home/bob/myfile.txt file to /home/bob/data/ directory, make sure to preserve its attributes.
+
+
+A:
+--
+1)	$ cp --help
+Mandatory arguments to long options are mandatory for short options too.
+  -a, --archive                same as -dR --preserve=all
+      --attributes-only        don't copy the file data, just the attributes
+      --backup[=CONTROL]       make a backup of each existing destination file
+
+2)	$ cp -a /home/bob/myfile.txt /home/bob/data/
+
+
+===============================================================================================================================
+
+Q:
+--
+Copy the /home/bob/lfcs directory (including all its content) into /home/bob/old-data/ directory.
+
+
+A:
+--
+1)	$ cp -r /home/bob/lfcs /home/bob/old-data/
+
+
+===============================================================================================================================
+
+Q:
+--
+Delete /home/bob/lfcs/lfcs.txt file.
+
+
+A:
+--
+1)	$ rm /home/bob/lfcs/lfcs.txt
+
+
+===============================================================================================================================
+
+Q:
+--
+Move all content of /home/bob/lfcs directory to /home/bob/new-data/ directory.
+
+
+A:
+--
+1)	$ mv /home/bob/lfcs/* /home/bob/new-data/
+
+
+===============================================================================================================================
+
+Q:
+--
+Delete directory /home/bob/lfcs
+
+
+A:
+--
+1)	$ rm --help
+  -f, --force           ignore nonexistent files and arguments, never prompt
+  -r, -R, --recursive   remove directories and their contents recursively
+  
+2)	$ rm -rf /home/bob/lfcs
+
+
+===============================================================================================================================
+
+Q:
+--
+Create a soft link to /tmp directory. Create this link in /home/bob directory and call it link_to_tmp.
+
+
+A:
+--
+1)	$ cd /home/bob
+  
+2)	$ ln -s /tmp link_to_tmp
+
+
+===============================================================================================================================
+
+Q:
+--
+Create a hard link to /tmp/hlink file. Create this link in /home/bob/ directory and call it hlink.
+
+
+A:
+--
+1)	$ cd /home/bob
+  
+2)	$ ln /tmp/hlink hlink
+
+
+===============================================================================================================================
+
+Q:
+--
+There is a file called /home/bob/new_file, rename this to /home/bob/old_file.
+
+
+A:
+--
+1)	$ mv /home/bob/new_file /home/bob/old_file
+
+
+===============================================================================================================================
+
+Q:
+--
+Create a directory named 9 under /tmp/1/2/3/4/5/6/7/8 directory. 
+Please note that the structure of sub-directories, from 1 to 8 does not exist. 
+However, mkdir has a command line option to automatically create all of these sub-directories automatically in one shot, instead of 9 consecutive commands. 
+This option is described in the help output or manual pages as make parent directories as needed. 
+Find out what the correct option is and use it to create the directory in one shot.
+
+
+A:
+--
+1)	$ mkdir --help
+ -p, --parents     no error if existing, make parent directories as needed
+ 
+2)	$ mkdir -p /tmp/1/2/3/4/5/6/7/8/9
+ 
+
+===============================================================================================================================
+
+Q:
+--
+ls -l shows you the time when a file has been last modified, but it only shows you the hour and the minute, usually in a form like 17:53. 
+Find another way to make ls display the full/exact last modified time for the files in /home/bob directory.
+
+
+At what exact time was important_file created/modified?
+
+
+A:
+--
+1)	$ ls -l
+total 24
+drwxr-xr-x 2 root root 4096 Jul 30 07:27 Documents
+drwxr-xr-x 3 bob  bob  4096 Jul 30 07:30 Invoice
+drwxr-xr-x 2 bob  bob  4096 Jul 30 07:33 data
+-rw-r--r-- 2 bob  bob     0 Jul 30 07:39 hlink
+-rw-r--r-- 1 root root    0 Dec 18  2015 important_file
+lrwxrwxrwx 1 bob  bob     4 Jul 30 07:39 link_to_tmp -> /tmp
+-rw-r--r-- 1 bob  bob     0 Jul 30 07:25 myfile.txt
+drwxr-xr-x 5 bob  bob  4096 Jul 30 07:35 new-data
+drwxrwxr-x 5 bob  bob  4096 Jul 30 07:33 old-data
+-rw-r--r-- 1 root root   28 Jul 30 07:39 old_file
+ 
+2)	$ ls --help
+  -F, --classify             append indicator (one of */=>@|) to entries
+      --file-type            likewise, except do not append '*'
+      --format=WORD          across -x, commas -m, horizontal -x, long -l,
+                               single-column -1, verbose -l, vertical -C
+      --full-time            like -l --time-style=full-iso
+ 
+3)	$ ls -l --time-style=full-iso
+total 24
+drwxr-xr-x 2 root root 4096 2023-07-30 07:27:06.781877643 +0000 Documents
+drwxr-xr-x 3 bob  bob  4096 2023-07-30 07:30:44.811547657 +0000 Invoice
+drwxr-xr-x 2 bob  bob  4096 2023-07-30 07:33:03.972614767 +0000 data
+-rw-r--r-- 2 bob  bob     0 2023-07-30 07:39:06.535396189 +0000 hlink
+-rw-r--r-- 1 root root    0 2015-12-18 01:30:09.000000000 +0000 important_file
+lrwxrwxrwx 1 bob  bob     4 2023-07-30 07:39:00.535350156 +0000 link_to_tmp -> /tmp
+-rw-r--r-- 1 bob  bob     0 2023-07-30 07:25:28.657126330 +0000 myfile.txt
+drwxr-xr-x 5 bob  bob  4096 2023-07-30 07:35:38.905803248 +0000 new-data
+drwxrwxr-x 5 bob  bob  4096 2023-07-30 07:33:56.193015233 +0000 old-data
+-rw-r--r-- 1 root root   28 2023-07-30 07:39:59.263800722 +0000 old_file

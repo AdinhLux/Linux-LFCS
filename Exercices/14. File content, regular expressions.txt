@@ -1,0 +1,309 @@
+Q:
+--
+Which of the following commands can be used to manipulate strings in a file ?
+
+
+A:
+--
+
+1)  sed
+
+
+===============================================================================================================================
+
+Q:
+--
+Which of the following commands you will use to display the top 5 lines of a file called myfile ?
+
+
+A:
+--
+
+1)  $ head -5 myfile
+
+
+===============================================================================================================================
+
+Q :
+---
+Which of the following commands you can use to filter out the lines that contain a particular pattern ?
+
+
+A:
+--
+
+1)  grep
+
+
+===============================================================================================================================
+
+Q:
+--
+How can we ignore the case (small or capital) differences while comparing two files using diff command ?
+
+
+A:
+--
+
+1)  $ diff -i
+
+
+===============================================================================================================================
+
+Q (!):
+------
+You have below given content in /home/bob/testfile (this is just an example file):
+
+a;b;c;d
+x;y;z
+
+How would you extract/print the b and the y ?
+
+
+A:
+--
+
+1)	$ cut --help
+  -d, --delimiter=DELIM   use DELIM instead of TAB for field delimiter
+  -f, --fields=LIST       select only these fields;  also print any line
+                            that contains no delimiter character, unless
+                            the -s option is specified
+
+
+2)	$ cut -d ';' -f 1 testfile
+a
+x
+
+3)	$ cut -d ';' -f 3 toto.txt 
+c
+z
+
+4)	$ cut -d ';' -f 4 toto.txt 
+d
+
+
+5)	$ cut -d ';' -f 2 testfile
+b
+y
+
+
+===============================================================================================================================
+
+Q (!):
+------
+Change all values enabled to disabled in /home/bob/values.conf config file.
+
+
+A:
+--
+
+# Into single quotes, we have :
+#   - s for substitute command (search and replace)
+#   - g for global search (to replace all occurences)
+
+1)	$ sed 's/enabled/disabled/g' /home/bob/values.conf
+
+2)	$ sed --help
+  -i[SUFFIX], --in-place[=SUFFIX]
+                 edit files in place (makes backup if SUFFIX supplied)
+				 
+3)	$ sed -i 's/enabled/disabled/g' /home/bob/values.conf
+===============================================================================================================================
+
+Q (!):
+------
+While ignoring the case sensitivity, change all values disabled to enabled in /home/bob/values.conf config file.
+
+
+For example, any string like disabled, DISABLED, Disabled etc must match and should be replaced with enabled.
+
+A:
+--
+
+1)	$ sed -i 's/disabled/enabled/gi' /home/bob/values.conf
+
+
+===============================================================================================================================
+
+Q (!):
+------
+Change all values enabled to disabled in /home/bob/values.conf config file from line number 500 to 2000.
+
+
+A:
+--
+1)	$ sed -i '500,2000s/enabled/disabled/g' /home/bob/values.conf
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+Replace all occurrence of string #%$2jh//238720//31223 with $2//23872031223 in /home/bob/data.txt file.
+
+
+A:
+--
+# WRONG : sed -i 's/"#%$2jh//238720//31223"/"$2//23872031223"/gi' /home/bob/data.txt
+1)	$ sed -i 's~#%$2jh//238720//31223~$2//23872031223~g' /home/bob/data.txt
+
+
+===============================================================================================================================
+
+Q:
+--
+Filter out the lines that contain any word that starts with 
+a capital letter and are then followed by exactly two lowercase letters in /etc/nsswitch.conf file and save the output in /home/bob/filtered1 file.
+
+
+You can use the redirection to save your command's output in a file i.e [your-command] > /home/bob/filtered1
+
+
+A:
+--
+# WRONG : egrep 'capital[a-z]{2}' /etc/nsswitch.conf
+1)	$ egrep --help
+  -w, --word-regexp         force PATTERN to match only whole words
+  
+2)	$ egrep -w '[A-Z][a-z]{2}' /etc/nsswitch.conf > /home/bob/filtered1
+
+
+===============================================================================================================================
+
+Q:
+--
+Open /home/bob/testfile file in any editor (vi, nano etc) and move line present on line no:1049 to line no: 5.
+
+
+A:
+--
+1)	$ vi /home/bob/testfile
+2) type :1049                                            # (:<line number>) or the line number and G (<line number>G) in Normal Mode.
+3) type dd
+4) type :5
+5) type P                                                # Press P (uppercase) to paste before your cursor. Press p (lowercase) to paste after your cursor
+6) type :wq
+
+
+===============================================================================================================================
+
+Q:
+--
+Delete first 1000 lines from /home/bob/testfile file.
+
+
+A:
+--
+1)	$ vi /home/bob/testfile
+2) type 1000dd                                           # Make sure cursor is on the very first line, 
+														 # then without entering into the insert mode, enter number 1000 and press dd immediately after that. FInally save the file.
+
+3) type wq
+
+
+===============================================================================================================================
+
+Q:
+--
+/home/bob/file1 and /home/bob/file2 are 99% identical. But there's 1 unique line that exists only in /home/bob/file1 or in /home/bob/file2.
+
+
+Find that line and save the same in /home/bob/file3 file.
+
+
+A:
+--
+1)	$ diff file1 file2 > file3
+
+
+===============================================================================================================================
+
+Q:
+--
+In /home/bob/textfile file there's a number that has 5 digits. Save the same in /home/bob/number file.
+
+
+You can use the redirection to save your command's output in a file i.e [your-command] > /home/bob/number
+
+
+A:
+--
+1)	$ egrep '[0-9]{5}' /home/bob/textfile > /home/bob/number
+  
+
+===============================================================================================================================
+
+Q:
+--
+How many numbers in /home/bob/textfile begin with a number 2, save the count in /home/bob/count file.
+
+
+You can use the redirection to save your command's output in a file i.e [your-command] > /home/bob/count
+
+
+A:
+--
+# WRONG : egrep '2[0-9]*' /home/bob/textfile
+# 3299
+1)	$ egrep '^2' textfile
+2967
+2999
+  
+2)	$ grep -c '^2' textfile
+1111
+
+3)	$ grep -c '^2' textfile > /home/bob/count
+
+
+===============================================================================================================================
+
+Q:
+--
+How many lines in /home/bob/testfile file begin with string Section, regardless of case.
+Save the count in /home/bob/count_lines file.
+
+
+A:
+--
+# BEWARE, HIDDEN CHARACTERS
+[bob@centos-host ~]$ grep -i '^SECTION' textfile
+[bob@centos-host ~]$ grep -i '^SECTION' textfile
+[bob@centos-host ~]$ grep -i '^SECTION' testfile
+Section names. Manual sections will be searched in the order listed here;
+SECTION         1 1p 8 2 3 3p 4 5 6 7 9 0p n l p o 1x 2x 3x 4x 5x 6x 7x 8x
+Section names. Manual sections will be searched in the order listed here;
+SECTION         1 1p 8 2 3 3p 4 5 6 7 9 0p n l p o 1x 2x 3x 4x 5x 6x 7x 8x
+Section names. Manual sections will be searched in the order listed here;
+
+
+1)	$ grep -ic '^SECTION' testfile > /home/bob/count_lines
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+Find all lines in /home/bob/testfile file that contain string man, it must be an exact match.
+
+For example the line like # before /usr/man. or NOCACHE keeps man should match but # given manpath. or For a manpath must not match.
+
+
+Save the filtered lines in /home/bob/man_filtered file.
+
+
+A:
+--
+1)	$ grep -w man testfile > /home/bob/man_filtered
+
+
+===============================================================================================================================
+
+Q :
+---
+Save last 500 lines of /home/bob/textfile file in /home/bob/last file.
+
+
+A:
+--
+# tail -500  /home/bob/textfile > /home/bob/last
+1)	$ tail -n 500 /home/bob/textfile > //home/bob/last

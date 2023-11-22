@@ -1,0 +1,360 @@
+Q:
+--
+What does this command do ?
+
+virsh destroy TestMachine
+
+
+A. It deletes the virtual machine called TestMachine
+B. It forces a power off for the virtual machine called TestMachine
+C. It destroys all data stored in the virtual machine called TestMachine
+D. It deletes both the virtual machine called TestMachine, and the data stored on it
+
+
+A:
+--
+1)  B
+
+
+===============================================================================================================================
+
+Q:
+--
+Which of the following commands would you use to set the virtual machine called VM1 to automatically start up at boot ?
+
+
+A:
+--
+1)  $   virsh autostart VM1
+
+
+===============================================================================================================================
+
+Q:
+--
+Which of the following commands is used to list all docker containers (including stopped containers) present on a system ?
+
+
+A:
+--
+1)  $   docker ps -a
+
+
+===============================================================================================================================
+
+Q:
+--
+Install Mariadb database server on this system and start its service.
+
+
+A:
+--
+1)  $   sudo dnf install mariadb-server -y
+2)  $   sudo systemctl start mariadb
+
+
+===============================================================================================================================
+
+Q:
+--
+Edit the mariadb-server.cnf config file to enable the remote access to your MariaDB server.
+
+Make sure to restart the mariadb service after making the required changes.
+
+
+A:
+--
+# Uncomment below given line, so that it looks like as below
+1)  $   sudo vi /etc/my.cnf.d/mariadb-server.cnf
+
+#
+# Allow server to accept connections on all interfaces.
+#
+bind-address=0.0.0.0
+
+
+2)  $   sudo systemctl restart mariadb
+
+
+===============================================================================================================================
+
+Q:
+--
+Through any method you want, change the password for the MariaDB root user to Secu43@123.
+
+
+A:
+--
+# Follow below given steps:
+# Step 1 : The first step asks for the root password, which hasn’t been set yet so just press ENTER.
+# Step 2 : Next, you will be asked if you want to set a password for user root, enter Y.
+
+# Step 3 : Next you will be prompted to set the root password, so enter required value i.e Secu43@123.
+# Step 4 : After updating the password, accept all the security suggestions.
+1)  $   sudo mysql_secure_installation
+
+
+# Now that you have secured the installation, you can verify if it's working by connecting to the database.
+2)  $   mysql -u root -p
+
+
+===============================================================================================================================
+
+Q:
+--
+Update the MariaDB server config file to change the error logs file to /var/log/mariadb/server_mariadb.log
+
+Make sure to restart the mariadb service after making the required changes.
+
+
+A:
+--
+# Update below given line, so that it looks like as below
+1)  $   sudo vi /etc/my.cnf.d/mariadb-server.cnf
+log-error=/var/log/mariadb/server_mariadb.log
+
+
+2)  $   sudo systemctl restart mariadb
+
+
+===============================================================================================================================
+
+Q:
+--
+Change the MariaDB server port to 3308
+
+Make sure to restart the mariadb service after making the required changes.
+
+
+A:
+--
+1)  $   sudo vi /etc/my.cnf.d/mariadb-server.cnf
+
+[mysqld]
+port=3308
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+log-error=/var/log/mariadb/server_mariadb.log
+pid-file=/run/mariadb/mariadb.pid
+
+
+2)  $   sudo systemctl restart mariadb
+
+
+===============================================================================================================================
+
+Q:
+--
+Pull docker.io/library/nginx image on this system.
+
+
+A:
+--
+1)  $   sudo docker pull docker.io/library/nginx
+
+
+===============================================================================================================================
+
+Q:
+--
+Create and run a new Docker container based on the docker.io/library/nginx image. Three command line options should be used:
+
+
+A. The option to detach from this container's input/output (so you're not stuck inside the container once you run your command)
+B. The option to map port 1234 on the host to port 80 on the container.
+C. The option to name this new container as website.
+
+
+A:
+--
+1)  $   sudo docker run -d -p 1234:80 --name website docker.io/library/nginx
+
+
+===============================================================================================================================
+
+Q:
+--
+Remove the docker.io/library/nginx docker image.
+
+
+A:
+--
+# First check if that image is being used by any running container, if so then first stop that container and remove it
+1)  $   sudo docker images
+
+REPOSITORY   TAG       IMAGE ID       CREATED       SIZE
+nginx        latest    f5a6b296b8a2   13 days ago   187MB
+mariadb      latest    871a9153c184   2 weeks ago   404MB
+
+
+2)  $   sudo docker ps -a
+
+CONTAINER ID   IMAGE     COMMAND                  CREATED              STATUS              PORTS                                   NAMES
+b71d6b9bcdf5   nginx     "/docker-entrypoint.…"   About a minute ago   Up About a minute   0.0.0.0:1234->80/tcp, :::1234->80/tcp   website
+
+
+3)  $   sudo docker stop b71d6b9bcdf5
+4)  $   sudo docker rm b71d6b9bcdf5
+
+
+# Now remove the image
+
+5)  $   sudo docker rmi f5a6b296b8a2
+
+
+# Or you can force remove the image:
+    $   sudo docker rmi $IMAGE_ID -f
+    
+
+===============================================================================================================================
+
+Q:
+--
+Remove all docker containers (including running, stopped containers) from this system.
+
+
+A:
+--
+1)  $   sudo docker ps -a
+
+CONTAINER ID   IMAGE     COMMAND       CREATED          STATUS                      PORTS     NAMES
+ccc21f25e828   ubuntu    "/bin/bash"   26 seconds ago   Exited (0) 24 seconds ago             blissful_blackwell
+
+
+2)  $   sudo docker stop ccc21f25e828
+3)  $   sudo docker rm ccc21f25e828
+    
+
+===============================================================================================================================
+
+Q:
+--
+We have virsh utility installed that let us interact with virtual machines and qemu-kvm installed that let us create and run them.
+
+Check if any virtual machine is present on this system (stopped or running), if yes then save its name in /home/bob/vm file.
+
+
+A:
+--
+1)  $   sudo virsh list --all
+
+ Id   Name   State
+-----------------------
+ -    VM1    shut off
+
+
+# Look for the value(s) under Name and save it in /home/bob/vm file:
+
+2)  $   vi /home/bob/vm
+VM1
+   
+
+===============================================================================================================================
+
+Q:
+--
+In the previous question you might have noticed that VM1 is in shut off state, start this VM.
+
+
+A:
+--
+1)  $   sudo virsh start VM1
+Domain VM1 started
+  
+
+===============================================================================================================================
+
+Q:
+--
+Now completely remove the VM1 virtual machine.
+
+
+A:
+--
+1)  $   sudo virsh destroy VM1
+Domain VM1 destroyed
+
+
+2)  $   sudo virsh undefine VM1
+Domain VM1 has been undefined
+
+
+===============================================================================================================================
+
+Q:
+--
+We have a configuration file /opt/testmachine2.xml on this system.
+
+Create a virtual machine using this configuration file, and make sure to start it.
+
+
+A:
+--
+1)  $   sudo cat /opt/testmachine2.xml
+
+<domain type="qemu">
+  <name>VM2</name>
+  <memory unit="MiB">125</memory>
+  <vcpu>1</vcpu>
+  <os>
+    <type arch='x86_64'>hvm</type>
+  </os>
+</domain>
+
+
+2)  $   sudo virsh define /opt/testmachine2.xml
+3)  $   sudo virsh list --all
+
+ Id   Name   State
+-----------------------
+ -    VM2    shut off
+
+
+4)  $   sudo virsh start VM2 
+Domain VM2 started
+
+
+===============================================================================================================================
+
+Q:
+--
+Right now, when we start up or reboot this system, the virtual machines on it have to be manually started.
+But we want VM2 virtual machine to start up automatically at boot.
+
+
+A:
+--
+1)  $   sudo virsh autostart VM2
+Domain VM2 marked as autostarted
+
+
+===============================================================================================================================
+
+Q:
+--
+Change the memory size for VM2, set its value to 80M
+
+Make sure the changes are in effect, you can verify the same using sudo virsh dominfo VM2 command.
+
+
+A:
+--
+# Execute below given command to change the maximum memory size
+1)  $   sudo virsh setmaxmem VM2 80M --config
+
+
+# Execute below given command to change the memory size as needed
+2)  $   sudo virsh setmem VM2 80M --config
+
+
+# Shutdown the VM:
+3)  $   sudo virsh shutdown VM2
+Domain VM2 is being shutdown
+
+
+# Or force a power off in our case since we have no operating system in there:
+    $   sudo virsh destroy VM2
+
+
+# Start again the VM
+4)  $   sudo virsh start VM2    

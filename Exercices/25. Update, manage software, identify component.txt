@@ -1,0 +1,185 @@
+Q:
+--
+How do we enable the PowerTools repository on CentOS ?
+
+
+A:
+--
+
+1)	$	sudo dnf config-manager --enable powertools
+
+
+===============================================================================================================================
+
+Q:
+--
+How do we get a list of all CentOS repositories that are enabled or disabled ?
+
+
+A:
+--
+
+1)	$	dnf repolist --all
+
+
+===============================================================================================================================
+
+Q:
+--
+Install the software package called nginx.
+
+
+A:
+--
+
+1)	$	sudo dnf install nginx -y
+
+
+===============================================================================================================================
+
+Q:
+--
+Run this command:
+
+dnf group list
+
+
+From this list, install the group that brings in software related to Container Management.
+
+
+A:
+--
+
+1)	$	dnf group list
+Available Groups:
+   Container Management
+   
+
+2)	$	sudo dnf group install 'Container Management'
+
+
+===============================================================================================================================
+
+Q:
+--
+Remove the Nginx software package.
+
+
+A:
+--
+
+1)	$	sudo dnf remove nginx
+
+
+===============================================================================================================================
+
+Q:
+--
+Identify which software package provides the program at /bin/top and save its name in /home/bob/software file. 
+Just save the name of the package, without the version and architecture information.
+
+For example, for a package called: coreutils-single-8.30-8.el8.x86_64 You would just type coreutils-single, without the last part: -8.30-8.el8.x86_64
+
+
+A:
+--
+
+1)	$	dnf provides top 
+	$	dnf provides /bin/top
+
+procps-ng-3.3.15-6.el8.i686 : System and process monitoring utilities
+Repo        : baseos
+Matched from:
+Filename    : /usr/bin/top
+
+
+2)	$	vi /home/bob/software
+procps-ng
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+Using an appropriate command, list all files contained in the nginx package. 
+In this list, you will see a file called nginx-logo.png. Save its full path in /home/bob/nginx file.
+
+
+A:
+--
+
+1)	$	dnf repoquery --list nginx | grep 'nginx-logo.png'
+/usr/share/nginx/html/nginx-logo.png
+/usr/share/nginx/html/nginx-logo.png
+
+
+2)	$	vi /home/bob/nginx
+/usr/share/nginx/html/nginx-logo.png
+
+
+===============================================================================================================================
+
+Q:
+--
+List what old packages can be upgraded and store the list in /home/bob/upgrade.txt file.
+
+
+A:
+--
+
+1)	$	dnf check-upgrade > /home/bob/upgrade.txt
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+Check the repositories in verbose mode, which are enabled by default and copy the output in /home/bob/verbose.txt file.
+
+
+A:
+--
+
+1)	#          $	dnf list -v > /home/bob/verbose.txt
+	$	sudo dnf repolist -v > /home/bob/verbose.txt
+	
+
+===============================================================================================================================
+
+Q:
+--
+In some cases, we might not be sure about the package name for a particular software. 
+Search the package related to Apache HTTP Server and store the output in /home/bob/webservers.txt file.
+
+
+A:
+--
+
+1)	$	dnf search 'Apache HTTP Server' > /home/bob/webservers.txt
+	
+
+===============================================================================================================================
+
+Q:
+--
+We are working under /etc/samba directory, but we forgot the package name. 
+Find out the package name for /etc/samba config path and store the output in /home/bob/forgot.txt file.
+
+
+A:
+--
+
+1)	$	sudo dnf provides /etc/samba > /home/bob/forgot.txt
+	
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+List all files contained by the curl package and save the output in /home/bob/curl.txt file.
+
+
+A:
+--
+
+1)	#               $	sudo dnf repoquery curl > /home/bob/curl.txt
+	$	sudo dnf repoquery --list curl > /home/bob/curl.txt

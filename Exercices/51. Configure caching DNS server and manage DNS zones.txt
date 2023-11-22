@@ -1,0 +1,254 @@
+Q:
+--
+Which is the configuration file of our Bind DNS server ?
+
+
+A:
+--
+1)  /etc/named.conf
+
+
+===============================================================================================================================
+
+Q:
+--
+Where does bind DNS server store all zone files on a RedHat based linux machine ?
+
+
+A:
+--
+1)  /var/named
+
+
+===============================================================================================================================
+
+Q:
+--
+Install bind DNS server on this system.
+
+
+A:
+--
+1)  $   sudo dnf install bind bind-utils -y
+
+
+===============================================================================================================================
+
+Q:
+--
+Configure the Bind daemon to accept queries from any IP on the Internet. 
+Make sure to start named service after making required changes in the configuration.
+
+
+A:
+--
+# Add allow-query    { 0.0.0.0/0; };
+1)  $   sudo vi /etc/named.conf
+
+options {
+        listen-on port 53 { 127.0.0.1; };
+        listen-on-v6 port 53 { ::1; };
+        directory       "/var/named";
+        dump-file       "/var/named/data/cache_dump.db";
+        statistics-file "/var/named/data/named_stats.txt";
+        memstatistics-file "/var/named/data/named_mem_stats.txt";
+        secroots-file   "/var/named/data/named.secroots";
+        recursing-file  "/var/named/data/named.recursing";
+        allow-query    { 0.0.0.0/0; };
+
+2)  $   sudo systemctl start named.service        
+
+
+===============================================================================================================================
+
+Q:
+--
+We have added a new zone file /var/named/example.com.zone which contains DNS configuration for example.com domain.
+
+
+Query the local DNS server and identify the current A record value for example.com domain. (without updating any relevant configuration) 
+and save the value in /home/bob/a-record file. (only the IP address)
+
+
+A:
+--
+1)  $   dig @localhost example.com ANY
+
+# Note down the IP address for A record in "ANSWER SECTION"
+;; ANSWER SECTION:
+example.com.            86400   IN      RRSIG   A 13 2 86400 20230924035928 20230903031431 32385 example.com. pbDuMrRH68MD+0y8mBGxb+KuMVyL6ECSxowd1IROxeTA0IaQ7P3RKGIt PRQmQGaTbzSDi6y6Y2eWsE6N1EZHlA==
+example.com.            86400   IN      A       93.184.216.34
+example.com.            3600    IN      RRSIG   DNSKEY 13 2 3600 20230927065052 20230905221939 370 example.com. 3KYiJzreLR1ZWlOmyqVzE38EUiHigm0TXTU3Yxa+Pevd7PGzVuVVLJf5 0TEdfzCZdm1WQk3scG65TKiWJ7jDjw==
+example.com.            3600    IN      DNSKEY  257 3 13 kXKkvWU3vGYfTJGl3qBd4qhiWp5aRs7YtkCJxD2d+t7KXqwahww5IgJt xJT2yFItlggazyfXqJEVOmMJ3qT0tQ==
+example.com.            3600    IN      DNSKEY  256 3 13 /42vpFUdATVVhm6BjdSuvJHjAFJ/atP/xC318upEOo+D+p6I8LcvXKVT k8dMLoU5Z9e2RPwn4C4zOaK/jQ0FLg==
+example.com.            86400   IN      RRSIG   DS 8 2 86400 20230922062458 20230915051458 4459 com. L73NWV2KtGHzx1xAiik/mFhB4O0Z1uPuqoMgWUAIcQ6y2hVZ4dBZHCJY Hq8rqbSR4CxUyhhebotWooDG8g7O2KQB88tT/eEelRrod+536B+2wFBy T4aF+xir0w2Y4m1xocxynb5YVpflSqFirh0KJO+eve/w/ZrRUDw7fA4d tIsQfeCblwDv6Bh3iKVLHGNVcsoBMwKjrALyaH5TpjmjZw==
+example.com.            86400   IN      DS      370 13 2 BE74359954660069D5C63D200C39F5603827D7DD02B56F120EE9F3A8 6764247C
+example.com.            172800  IN      NS      a.iana-servers.net.
+example.com.            172800  IN      NS      b.iana-servers.net.
+
+
+2)  $   sudo vi /home/bob/a-record
+93.184.216.34
+
+
+===============================================================================================================================
+
+Q:
+--
+You might have noticed that in the previous question, the A record value for example.com domain is different what we have in /var/named/example.com.zone DNS zone file. 
+
+Which means, this file isn't in use yet or DNS server hasn't read it yet.
+
+Make the required changes so that the local zone file changes can take effect.
+
+
+A:
+--
+1)  $   sudo cat /var/named/example.com.zone
+
+$TTL 1H
+@       IN SOA  @ administrator.example.com. (
+                                        0       ; serial
+                                        1D      ; refresh
+                                        1H      ; retry
+                                        1W      ; expire
+                                        3H )    ; minimum
+@               NS      ns1.example.com.
+@               NS      ns2.example.com.
+ns1             A       10.11.12.9
+ns2             A       10.11.12.10
+@               A       203.0.113.15
+www             CNAME   example.com.
+example.com.    MX 10   mail.example.com.
+                MX 20   mail2.example.com.
+mail            A       203.0.113.80
+mail2           A       203.0.113.81
+server1         AAAA    2001:db8:10::1
+example.com.    TXT     "We can write anything in here!"
+
+
+# Add below given block at the end of the file:
+2)  $   sudo vi /etc/named.conf
+
+zone    "example.com" IN {
+        type master;
+        file "example.com.zone";
+};
+
+
+3)  $   sudo systemctl restart named.service
+
+# Previous A record was 93.184.216.34
+4)  $   dig @localhost example.com ANY
+
+;; ANSWER SECTION:
+example.com.            3600    IN      TXT     "We can write anything in here!"
+example.com.            3600    IN      MX      10 mail.example.com.
+example.com.            3600    IN      MX      20 mail2.example.com.
+example.com.            3600    IN      SOA     example.com. administrator.example.com. 0 86400 3600 604800 10800
+example.com.            3600    IN      NS      ns1.example.com.
+example.com.            3600    IN      NS      ns2.example.com.
+example.com.            3600    IN      A       203.0.113.15
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+Modify /var/named/example.com.zone and add a new entry so that this subdomain :
+
+"database.example.com" has this IP address: 1.2.3.4
+
+
+Don't forget to restart the named.service after you've made your change.
+
+
+A:
+--
+1)  $   sudo vi /var/named/example.com.zone
+# @               NS      database.example.com.
+database                A       1.2.3.4
+
+2)  $   sudo systemctl restart named.service
+
+
+===============================================================================================================================
+
+Q:
+--
+Modify /var/named/example.com.zone and make mysql.example.com an alias for database.example.com by adding the proper CNAME entry. 
+Otherwise said, mysql.example.com should point to database.example.com. Restart the named.service after you've added the new entry.
+
+
+A:
+--
+1)  $   sudo vi /var/named/example.com.zone
+mysql.example.com.      CNAME   database.example.com.
+
+
+2)  $   sudo systemctl restart named.service
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+By default the bind server also fetches DNS data from other DNS servers on the Internet, when it does not have it available in its own cache. 
+But somehow our bind server is not able to query the kodekloud.com domain data.
+
+Make the required configuration changes so that bind server can also fetch the DNS data from other DNS servers on the Internet.
+
+
+A:
+--
+# Look for recursion and make sure its value is set to yes
+1)  $   sudo vi /etc/named.conf
+recursion yes;
+
+
+2)  $   sudo systemctl restart named.service
+
+
+===============================================================================================================================
+
+Q:
+--
+Using dig utility retrieve all record types (including MX, TXT etc) associated with our example.com domain and save the output in /home/bob/records file.
+
+You can use the redirection to save your command's output in a file i.e [your-command] > /home/bob/records
+
+
+A:
+--
+# Notice the ANY option here which will retrieve all records, including MX, TXT etc.
+1)  $   dig @localhost -q example.com ANY > /home/bob/records
+
+
+===============================================================================================================================
+
+Q:
+--
+Change the TTL for example.com domain to tell other DNS servers that, they may query our zone to cache this data for 2 hours.
+
+
+A:
+--
+1)  $   sudo vi /var/named/example.com.zone
+$TTL 2H
+
+
+2)  $   sudo systemctl restart named.service
+
+# You can verify the changes using dig @localhost -q example.com command. You should see 7200 value in the output for all records.
+3)  $   dig @localhost -q example.com
+
+;; ANSWER SECTION:
+example.com.            3600    IN      A       203.0.113.15
+
+;; AUTHORITY SECTION:
+example.com.            3600    IN      NS      ns1.example.com.
+example.com.            3600    IN      NS      ns2.example.com.
+
+;; ADDITIONAL SECTION:
+ns1.example.com.        3600    IN      A       10.11.12.9
+ns2.example.com.        3600    IN      A       10.11.12.10

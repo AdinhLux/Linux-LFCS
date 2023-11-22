@@ -1,0 +1,913 @@
+Q:
+--
+In your home directory you will find a directory called uploads.
+
+
+A. Copy file333 from this directory to the /opt/ directory.
+
+B. Move file683 from this directory to the/usr/ directory.
+
+C. Copy the entire uploads directory to the /opt/ directory while preserving the file permissions.
+
+
+
+A:
+--
+1)  $  sudo cp /home/bob/uploads/file333 /opt/
+2)  $  sudo mv /home//bob//uploads/file683 /usr/
+3)  $  sudo cp -r --preserve=all /home/bob/uploads/ /opt/
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+In your home directory you will find a directory called collection.
+
+
+A. Create a soft link in /opt/ directory. The link should be /opt/bobscollection and it should point to /home/bob/collection/ directory
+
+B. Find all files in the collection directory that have a filename ending with .txt. Move all such files to the /opt/textfiles/ directory.
+
+C. Find all files in the collection directory that are owned by the user called adm. Copy all such files to the /opt/admfiles/ directory.
+
+D. Find all files in the collection directory that were modified less than 1 hour ago. Copy all such files to the /opt/oldfiles/ directory.
+
+
+
+A:
+--
+1)  $  sudo ln -s /home/bob/collection/ /opt/bobscollection
+2)  $  sudo find /home/bob/collection/ -type f -name "*.txt" -exec mv {} /opt/textfiles/ \;
+3)  $  sudo find /home/bob/collection/ -type f -user adm -exec cp {} /opt/admfiles/ \;
+4)  $  sudo find /home/bob/collection/ -type f -mmin -60 -exec cp {} /opt/oldfiles/ \;
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+In this exercise, you'll create a directory for your user and ensure that proper permissions are set.
+
+
+A. First, create the following directory: /opt/bob/
+
+B. Make user bob the owner of this directory. The group owner should remain unchanged.
+
+C. On the /opt/bob/ directory remove all permissions for the group and for other users. 
+   Your user, bob should have rwx permissions but all permissions for group and others should be denied.
+
+
+D. After performing these actions, what is the octal permission number for /opt/bob/ directory ? 
+   For example a directory with these permissions: drwxr-xr-x is equivalent to 755 permissions in octal. 
+   Write the octal permission number for /opt/bob directory to this file: /opt/octal.txt
+
+
+
+A:
+--
+1)  $  sudo mkdir /opt/bob
+2)  $  ls -l /opt/
+
+total 104
+drwxr-xr-x. 2 root root     6 Oct  2 13:08 bob
+
+
+3)  $  sudo chown bob /opt/bob
+4)  $  ls -l /opt/
+
+total 104
+drwxr-xr-x. 2 bob  root     6 Oct  2 13:08 bob
+
+
+5)  $  sudo chmod u=rwx,g=,o= /opt/bob/
+6)  $  stat /opt/bob
+
+  File: /opt/bob
+  Size: 6               Blocks: 0          IO Block: 4096   directory
+Device: fd01h/64769d    Inode: 5131852     Links: 2
+Access: (0700/drwx------)  Uid: ( 1002/     bob)   Gid: (    0/    root)
+
+
+7)  $  sudo vi /opt/octal.txt
+700
+
+
+
+
+=============================================================================================================================================================================
+
+Q (!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!):
+----------------------------------------
+In your home directory you will find some text files. Perform the following actions on these
+
+
+A. First, look for reversed.txt. The text inside makes no sense when you read from top to bottom. 
+   But there is a command that lets you read a file backwards, from bottom to top. Use that command to display this file and redirect the reversed output to /opt/corrected.txt
+
+
+B. Look for a file called shuffled.txt. You will find 200 lines Inside it, in a random order. Do not change the contents of this file throughout this exercise. 
+   There are lines that contain the word line followed by a number between 00 and 99, and some lines that contain the word LINE followed by a number between 00 and 99.
+   Filter out only the lines written in CAPITAL LETTERS, containing the word LINE. 
+   Then sort this filtered output so that these lines appear in their natural order, from LINE00, LINE01, LINE02, all the way to LINE99. 
+   Save this filtered and sorted output to this file: /opt/sortedLINES.txt
+
+
+C. Extract the first 50 lines from shuffled.txt and save them to /opt/first50.txt
+
+D. Extract the last 50 lines from shuffled.txt and save them to /opt/last50.txt
+
+E. From shuffled.txt extract only the lines that end with the number 3. Example output you might see:
+
+line13
+LINE23
+
+Save this filtered output to /opt/filtered.txt
+
+
+Also, remember to log back to the user bob.
+
+
+
+A:
+--
+1)  $  sudo -i
+2)  $  sudo tac /home/bob/reversed.txt >> /opt/corrected.txt
+3)  $  sudo grep 'LINE' /home/bob/shuffled.txt | sort >> /opt/sortedLINES.txt
+4)  $  sudo head -n 50 /home/bob/shuffled.txt >> /opt/first50.txt
+5)  $  sudo tail -n 50 /home/bob/shuffled.txt >> /opt/last50.txt
+6)  $  sudo grep '3\>' /home/bob/shuffled.txt >> /opt/filtered.txt
+
+
+
+
+=============================================================================================================================================================================
+
+Q (!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!):
+------------------------------------------------
+In this exercise, you will work with some archives.
+
+
+A. First, archive the /home/bob/databases/ directory. Save this archive to this file: /opt/archive.tar.bz2 .
+The tar tf /opt/archive.tar.bz2 command should show home/bob/databases/ as the base directory for the files stored in this archive. Here is an example:
+
+home/bob/databases/
+home/bob/databases/file.sql
+home/bob/databases/data.txt
+home/bob/databases/file
+
+
+B. Archive the databases directory again. But this time, do it differently. First of all, save the archive at /opt/archive2.tar.gz.
+This time the tar tf /opt/archive2.tar.gz command should show bob/databases/ as the base directory instead of home/bob/databases/. Here's an example :
+
+bob/databases/
+bob/databases/file.sql
+bob/databases/data.txt
+bob/databases/file
+
+
+C. In your home directory, you will find an archive in the backup.tar.gz file. Extract the contents of this archive in /opt/restored/ directory.
+
+
+
+A:
+--
+1)  $  sudo tar -cjvf /opt/archive.tar.bz2 /home/bob/databases/
+2)  $  # sudo tar -czvf /opt/archive2.tar.gz /home/bob/databases/
+      
+       cd /home
+       sudo tar -czvf /opt/archive2.tar.gz bob/databases/
+
+
+3)  $  sudo tar -xzvf /home/bob/backup.tar.gz -C /opt/restored/
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Create a bash script: /opt/script.sh. Make sure it is owned by the root user. This script should do the following :
+
+
+A. Archive the /var/www/ directory and store this archive in /root/www-backup.tar.gz
+
+B. Set 600 permissions for /root/www-backup.tar.gz archive.
+
+
+Also remember to make this script executable.
+
+
+
+A:
+--
+1)  $  sudo -i
+2)  $  sudo vi /opt/script.sh
+
+#!/bin/bash
+tar -P -czvf /root/www-backup.tar.gz /var/www/
+chmod 600 /root/www-backup.tar.gz
+
+
+3)  $  sudo chmod +x /opt/script.sh
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Perform the following actions:
+
+
+A. Install the dovecot software package
+
+B. Start the dovecot service.
+
+C. Ensure that dovecot will automatically start up every time the system boots.
+
+
+
+A:
+--
+1)  $  sudo dnf install dovecot -y
+2)  $  sudo systemctl start dovecot
+3)  $  sudo systemctl enable dovecot
+Created symlink /etc/systemd/system/multi-user.target.wants/dovecot.service → /usr/lib/systemd/system/dovecot.service.
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+A. What is the SELinux security context for the process running with PID 2 ? Write this context to the /opt/context.txt file. 
+Here is an example: say a user found this when inspecting SELinux aspects of PID 848:
+
+
+LABEL                               PID TTY      STAT   TIME COMMAND
+system_u:system_r:policykit_t:s0    848 ?        Ssl    0:00 /usr/lib/polkit-1/polkitd --no-debug
+
+
+In this case, they would write system_u:system_r:policykit_t:s0 to the /opt/context.txt file.
+
+
+B. Find the PID of the process that has the name oom_reaper . Write this PID number to the /opt/pid.txt file.
+
+
+
+A:
+--
+# Check SElinux context of the process running with PID 2
+1)  $  sudo ps -Z -p 2
+LABEL                               PID TTY          TIME CMD
+system_u:system_r:kernel_t:s0         2 ?        00:00:00 kthreadd
+
+
+2)  $  sudo vi /opt/context.txt
+system_u:system_r:kernel_t:s0
+
+
+3)  $  sudo ps ax | grep oom_reaper
+
+    PID TTY      STAT   TIME COMMAND
+     20 ?        S      0:00 [oom_reaper]
+  31080 pts/0    S+     0:00 grep --color=auto oom_reaper
+
+
+4)  $  sudo vi /opt/pid.txt
+20
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Analyze the system logs and find out what is the last user that had a password change. Save the name of this user to the /opt/user.txt file.
+
+
+
+A:
+--
+1)  $  sudo tail -f /var/log/secure | grep 'password changed'
+Oct  4 12:08:29 localhost passwd[31129]: pam_unix(passwd:chauthtok): password changed for ray
+
+
+2)  $  sudo vi /opt/user.txt
+ray
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Setup the following three cron jobs for root user:
+
+
+A. Make sure that /usr/local/bin/script1.sh runs every Monday at 4AM
+
+B. Make sure that /usr/local/bin/script2.sh runs every first day of the month at 04:30 AM
+
+C. Make sure that /usr/local/bin/script3.sh runs every day at 1AM, 2AM and 3AM. 
+   For script3.sh make sure to create a single cron job, not three separate ones for each hour.
+
+
+
+A:
+--
+1)  $  sudo -i
+2)  $  cat /etc/crontab 
+
+# Example of job definition:
+# .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+# |  |  |  |  |
+# *  *  *  *  * user-name  command to be executed
+
+
+3)  $  sudo crontab -e
+
+0 4 * * 1 /usr/local/bin/script1.sh
+30 4 1 * * /usr/local/bin/script2.sh
+0 1,2,3 * * * /usr/local/bin/script3.sh
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+A. How much total RAM does this system have? Write one of these answers:
+
+More than 1GB
+or
+Less than 1GB
+
+to the following file /opt/memory.txt
+
+
+B. How much space in MBs does the /usr/bin/ directory use on our disk?
+
+Write your answer to this file /opt/dirsize.txt.
+
+Example of a valid answer format:318M.
+
+
+
+A:
+--
+# Look for the 'total' value from 'Mem'
+1)  $  free -m
+
+              total        used        free      shared  buff/cache   available
+Mem:            968         235         176           5         556         575
+Swap:          2047           9        2038
+
+
+2)  $  sudo vi /opt/memory.txt
+Less than 1GB
+
+
+# How much space /usr/bin is consuming
+3)  $  du -sh /usr/bin/
+313M    /usr/bin/
+
+
+4)  $  sudo vi /opt/dirsize.txt
+313M
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+A. The user called ray is the member of some groups. Write his groups to the /opt/groups.txt file. Separate each group with a space.
+For example, if ray would belong to a group called ray and a group called developers then you would write this text to that file: ray developers.
+
+
+B. Delete the user called ray along with his home directory.
+
+
+
+A:
+--
+# Find out the groups of user ray
+1)  $  id ray
+
+uid=1003(ray) gid=1003(ray) groups=1003(ray),1001(admin)
+
+
+2)  $  sudo vi /opt/groups.txt
+ray admin
+
+
+# Delete user with home directory
+3)  $  sudo userdel -r ray
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Create a new user called jane and then perform the following actions:
+
+
+A. Set her password to examPassed
+
+B. Make sure that she can run sudo commands.
+
+C. Set her account to expire on 2028-12-10. This is account expiration, not to be confused with password expiration, or password locking, which are different things.
+
+D. There is an another user called david . Mark the password for david as expired. This will effectively force him to change his password next time he logs in.
+
+
+
+A:
+--
+1)  $  sudo useradd -p $(openssl passwd -1 examPassed) jane
+2)  $  sudo usermod -G wheel jane
+3)  $  sudo usermod -e 2028-12-10 jane
+4)  $  sudo passwd -e david
+Expiring password for user david.
+passwd: Success
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Update the system-wide environment profile that does the following:
+
+For every user that logs in to this system, it sets an environment variable called KODEKLOUD to the following value: https://kodekloud.com/
+Otherwise said, after a user logs in to this system, any user, if they type the env command, they should see this in their output:
+
+KODEKLOUD=https://kodekloud.com/
+
+
+
+A:
+--
+# Update system-wide environment profile
+1)  $  sudo vi /etc/environment
+KODEKLOUD=https://kodekloud.com/
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Currently, when you use the su command it will ask for root's password to allow you to log in as user root. 
+Modify the PAM configuration for the su command so that you no longer have to type that password.
+
+More specifically, modify the PAM config for su so that users in the wheel group are not required to type that, because they're implicitly trusted.
+
+
+
+A:
+--
+# Uncomment line
+1)  $  sudo vi /etc/pam.d/su
+
+# Uncomment the following line to implicitly trust users in the "wheel" group.
+auth            sufficient      pam_wheel.so trust use_uid
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+SSH into the node01 using user bob and password caleston123, and perform the following actions:
+
+
+A. What are the IP addresses used by this system ? 
+   Write each IP (preferably on a separate line) in this file: /opt/IPs.txt Only IPv4 addresses should be considered, ignore loopback IP and IPv6 addresses if you see any.
+
+
+B. What DNS resolvers does this system use? Write the IPs of the resolvers to this file: /opt/resolvers.txt
+
+C. What are the default gateways used by this system? Write the IP address of each default gateway to /opt/gateway.txt
+
+
+
+A:
+--
+1)  $  ssh bob@node01
+2)  $  ip a
+
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 52:54:00:74:04:91 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.121.206/24 brd 192.168.121.255 scope global dynamic noprefixroute eth0
+       valid_lft 2016sec preferred_lft 2016sec
+    inet6 fe80::5054:ff:fe74:491/64 scope link 
+       valid_lft forever preferred_lft forever
+3: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 52:54:00:e4:f9:4c brd ff:ff:ff:ff:ff:ff
+    inet 172.28.128.130/24 brd 172.28.128.255 scope global dynamic noprefixroute eth1
+       valid_lft 2248sec preferred_lft 2248sec
+    inet6 fe80::5054:ff:fee4:f94c/64 scope link 
+       valid_lft forever preferred_lft forever
+
+
+3)  $  sudo vi /opt/IPs.txt
+
+192.168.121.206
+172.28.128.130
+
+
+# Find out the DNS resolvers
+4)  $  cat /etc/resolv.conf | grep nameserver
+
+nameserver 192.168.121.1
+nameserver 172.28.128.1
+
+
+5)  $  sudo vi /opt/resolvers.txt
+
+192.168.121.1
+172.28.128.1
+
+
+# Find out default gateway
+6)  $  ip r
+
+default via 192.168.121.1 dev eth0 proto dhcp metric 100 
+default via 172.28.128.1 dev eth1 proto dhcp metric 101 
+172.28.128.0/24 dev eth1 proto kernel scope link src 172.28.128.130 metric 101 
+192.168.121.0/24 dev eth0 proto kernel scope link src 192.168.121.206 metric 100 
+
+
+7)  $  sudo vi /opt/gateway.txt
+
+192.168.121.1
+172.28.128.1
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+A bind DNS server is installed on this system. Find the DNS zone file for the example.com domain and open it for editing.
+
+
+A. An inexperienced sysadmin added two lines but made a small mistake that made those lines invalid. 
+   Due to that the named service is not coming up now. Can you spot and correct those two lines? Also make sure to start named service after that.
+
+
+B. Add a new nameserver called ns3.example.com. This nameserver should have the following IP address: 10.11.12.11
+
+C. After you've made your modifications, don't forget to increment the serial number (0 to 1).
+
+
+
+A:
+--
+# Try to start and check the status
+1)  $  sudo systemctl start named
+Failed to start name.service: Unit name.service not found.
+
+
+2)  $  sudo systemctl status named
+Unit named.service could not be found.
+
+
+# Based on status output, there is a typo in CNAME and TXT
+# typos : CNAM and TX
+3)  $  sudo ls /var/named/
+
+data  dynamic  example.com.zone  named.ca  named.empty  named.localhost  named.loopback  slaves
+
+
+4)  $  sudo vi /var/named/example.com.zone
+
+$TTL 1H
+@       IN SOA  @ administrator.example.com. (
+                                        0       ; serial
+                                        1D      ; refresh
+                                        1H      ; retry
+                                        1W      ; expire
+                                        3H )    ; minimum
+@               NS      ns1.example.com.
+@               NS      ns2.example.com.
+ns1             A       10.11.12.9
+ns2             A       10.11.12.10
+@               A       203.0.113.15
+# www             CNAM   example.com.
+www             CNAME   example.com.
+example.com.    MX 10   mail.example.com.
+                MX 20   mail2.example.com.
+mail            A       203.0.113.80
+mail2           A       203.0.113.81
+server1         AAAA    2001:db8:10::1
+# example.com.    TX     "We can write anything in here!"
+example.com.    TXT     "We can write anything in here!"
+
+
+4)  $  sudo systemctl start named
+
+# Adding the new NS
+# Also increment the serial number from 0 to 1
+5)  $  sudo vi /var/named/example.com.zone
+$TTL 1H
+@       IN SOA  @ administrator.example.com. (
+                                        1       ; serial
+                                        1D      ; refresh
+                                        1H      ; retry
+                                        1W      ; expire
+                                        3H )    ; minimum
+@               NS      ns1.example.com.
+@               NS      ns2.example.com.
+@               NS      ns3.example.com.
+ns1             A       10.11.12.9
+ns2             A       10.11.12.10
+ns3             A       10.11.12.11
+
+
+6)  $  sudo systemctl restart named
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Since you have already installed dovecot on this system. Edit the correct configuration file and change the listening port for IMAPS(Encrypted IMAP) from 993 to 990.
+
+
+
+A:
+--
+# Finding out service using port 993
+1)  $  sudo ss -natp | grep 993
+
+State           Recv-Q       Send-Q               Local Address:Port                 Peer Address:Port             
+LISTEN      0        100                0.0.0.0:993             0.0.0.0:*        users:(("dovecot",pid=31046,fd=43))                                            
+LISTEN      0        100                   [::]:993                [::]:*        users:(("dovecot",pid=31046,fd=44))               
+
+
+# Under "inet_listener imaps {" change the port
+2)  $  sudo vi /etc/dovecot/conf.d/10-master.conf
+
+service imap-login {
+  inet_listener imap {
+    #port = 143
+  }
+  inet_listener imaps {
+    port = 990
+    #ssl = yes
+  }
+
+  # Number of connections to handle before starting a new process. Typically
+  # the only useful values are 0 (unlimited) or 1. 1 is more secure, but 0
+  # is faster. <doc/wiki/LoginProcess.txt>
+  #service_count = 1
+
+  # Number of processes to always keep waiting for more connections.
+  #process_min_avail = 0
+
+  # If you set service_count=0, you probably need to grow this.
+  #vsz_limit = $default_vsz_limit
+}
+
+
+3)  $  sudo systemctl restart dovecot
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Edit the main config file of the httpd daemon. Make the following changes:
+
+
+A. Change the location of the error logs file. Errors should now be collected at /var/log/httpd/httpd_errors.log
+
+B. Make sure that only errors with a debug severity and higher are collected to that error logs.
+
+
+
+A:
+--
+# Change "ErrorLog" and "LogLevel"
+1)  $  sudo vi /etc/httpd/conf/httpd.conf
+
+#
+# ErrorLog: The location of the error log file.
+# If you do not specify an ErrorLog directive within a <VirtualHost>
+# container, error messages relating to that virtual host will be
+# logged here.  If you *do* define an error logfile for a <VirtualHost>
+# container, that host's errors will be logged there and not here.
+#
+# ErrorLog "logs/error_log"
+ErrorLog "/var/log/httpd/httpd_errors.log"
+
+#
+# LogLevel: Control the number of messages logged to the error_log.
+# Possible values include: debug, info, notice, warn, error, crit,
+# alert, emerg.
+#
+# LogLevel warn
+LogLevel debug
+
+  
+2)  $ sudo systemctl restart httpd
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+A. Currently, only the root user can add files to the /var/www/ directory. 
+   Add the proper ACL permission so that user bob can also add files to this directory. 
+   Of course, it should also be able to list directory contents and cd into the directory.
+
+
+B. Someone accidentally added some ACL permissions to the /mnt/ directory. Clean that up and remove ALL ACL permissions from /mnt/
+
+
+
+A:
+--
+1)  $  sudo setfacl -m u:bob:rwx /var/www/
+2)  $  sudo setfacl -b /mnt/
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Prepare the disk at /dev/vde for encryption:
+
+
+A. Format it with LUKS. Choose the password ExamPassed
+
+B. Open the encrypted device and map it to the virtual unencrypted device called examdrive
+
+C. Create an xfs filesystem on this unencrypted mapped device, examdrive
+
+
+
+A:
+--
+1)  $  sudo cryptsetup luksFormat /dev/vde
+
+WARNING!
+========
+This will overwrite data on /dev/vde irrevocably.
+
+Are you sure? (Type 'yes' in capital letters): YES
+Enter passphrase for /dev/vde: ExamPassed
+Verify passphrase: ExamPassed
+
+
+2)  $  sudo cryptsetup open /dev/vde examdrive
+Enter passphrase for /dev/vde: ExamPassed
+
+
+3)  $  sudo mkfs.xfs /dev/mapper/examdrive
+
+meta-data=/dev/mapper/examdrive  isize=512    agcount=4, agsize=64512 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1
+data     =                       bsize=4096   blocks=258048, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=1566, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Create a mirrored (level 1) RAID array with these two devices: /dev/vdc and /dev/vdd.
+The array should be created at /dev/md0.
+
+
+
+A:
+--
+1)  $  sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/vdc /dev/vdd
+
+mdadm: Note: this array has metadata at the start and
+    may not be suitable as a boot device.  If you plan to
+    store '/boot' on this device please ensure that
+    your boot-loader understands md/v1.x metadata, or use
+    --metadata=0.90
+Continue creating array? yes
+mdadm: Defaulting to version 1.2 metadata
+mdadm: array /dev/md0 started.
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Change the disk quota for the group called nginx. Limit the inodes that this group can create. 
+Set a soft limit of 3500 inodes and a hard limit of 4000 inodes on /mnt partition.
+
+
+
+A:
+--
+# For /dev/vdb1 under "inodes" set values for soft and hard
+1)  $  sudo edquota -g nginx
+
+Disk quotas for group nginx (gid 1004):
+  Filesystem                   blocks       soft       hard     inodes     soft     hard
+  /dev/vdb1                         0          0          0          0        0        0
+  /dev/vdb1                         0          0          0          0     3500     4000
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Make sure you're logged in as the user called bob and you perform this task using user bob only (without sudo). 
+If you're currently logged in as root, exit from this user session and return to your main user session under bob.
+
+
+A. Find all directories in the /home/bob/library/ directory. 
+   This means files should not appear in the result list. Narrow your search to directories only. 
+   Some directories are unreadable and will show up as errors (stderr) in this result list. 
+   In your find command, redirect all error messages to this file /home/bob/errors.out.
+
+
+B. Now, redirect all standard messages (non-errors, stdout) to /home/bob/standard.out
+
+
+C. Perform the same search as above, but this time, redirect BOTH error messages and standard messages (stdout,stderr) to the same file: /home/bob/all.out 
+   Basically, what you would see in your terminal if you would use the find command normally (without any redirects) is the exact content 
+   you should have in /home/bob/all.out, with results, errors and standard output, appearing in the same order.
+
+
+
+A:
+--
+# Save all errors
+1)  $  find library/ -type d 2> errors.out
+2)  $  cat  errors.out
+
+find: ‘library/dir3848’: Permission denied
+
+
+# Save stdout
+3)  $  find library/ -type d > standard.out
+4)  $  cat standard.out
+
+library/dir9896
+
+
+# Save both stderr and stdout
+5)  $  find library/ -type d > all.out 2>&1
+6)  $  cat all.out
+
+find: ‘library/dir8868’: Permission denied
+library/dir8872

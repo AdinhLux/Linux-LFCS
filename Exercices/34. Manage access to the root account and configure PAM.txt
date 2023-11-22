@@ -1,0 +1,180 @@
+Q:
+--
+If our user has sudo privileges, how do we change the password for the root account ?
+
+
+A:
+--
+1)  $   sudo passwd root
+#    $   sudo passwd -u root
+
+
+===============================================================================================================================
+
+Q:
+--
+Where can we find PAM configuration files ?
+
+
+A:
+--
+1)  /etc/pam.d/
+
+
+===============================================================================================================================
+
+Q:
+--
+The root account is currently locked. Use the correct command to unlock it.
+
+
+A:
+--
+1)  $   passwd --help
+Usage: passwd [OPTION...] <accountName>
+  -u, --unlock            unlock the password for the named account (root only)
+
+2)  $   sudo passwd --unlock root
+Unlocking password for user root.
+passwd: Success
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+The current password for the root account is N3wpass. Change it to S3cure123.
+
+
+A:
+--
+1)  $   sudo passwd root
+Changing password for user root.
+New password: 
+Retype new password: 
+passwd: all authentication tokens updated successfully.
+
+
+===============================================================================================================================
+
+Q:
+--
+Lock the root user account.
+
+
+A:
+--
+1)  $   sudo passwd --lock root
+Locking password for user root.
+passwd: Success
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+Edit the PAM configuration file for the su utility so that this utility only accepts the requests from users that are part of the wheel group.
+
+
+A:
+--
+1)  $   cat /etc/pam.d/su
+
+#%PAM-1.0
+auth            required        pam_env.so
+auth            sufficient      pam_rootok.so
+# Uncomment the following line to implicitly trust users in the "wheel" group.
+#auth           sufficient      pam_wheel.so trust use_uid
+# Uncomment the following line to require a user to be in the "wheel" group.
+#auth           required        pam_wheel.so use_uid
+auth            substack        system-auth
+auth            include         postlogin
+account         sufficient      pam_succeed_if.so uid = 0 use_uid quiet
+account         include         system-auth
+password        include         system-auth
+session         include         system-auth
+session         include         postlogin
+session         optional        pam_xauth.so
+
+
+2)  $   sudo vi /etc/pam.d/su
+
+# Uncomment the following line to require a user to be in the "wheel" group.
+auth           required        pam_wheel.so use_uid
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+Edit again the PAM configuration file for the su utility so that the requests from the users that are the member of the wheel group should be accepted immediately, without asking for any password.
+
+
+A:
+--
+1)  $   cat /etc/pam.d/su
+
+#%PAM-1.0
+auth            required        pam_env.so
+auth            sufficient      pam_rootok.so
+# Uncomment the following line to implicitly trust users in the "wheel" group.
+#auth           sufficient      pam_wheel.so trust use_uid
+# Uncomment the following line to require a user to be in the "wheel" group.
+auth            required        pam_wheel.so use_uid
+auth            substack        system-auth
+auth            include         postlogin
+account         sufficient      pam_succeed_if.so uid = 0 use_uid quiet
+account         include         system-auth
+password        include         system-auth
+session         include         system-auth
+session         include         postlogin
+session         optional        pam_xauth.so
+
+
+2)  $   sudo vi /etc/pam.d/su
+
+# Uncomment the following line to require a user to be in the "wheel" group.
+auth           sufficient      pam_wheel.so trust use_uid
+
+
+===============================================================================================================================
+
+Q (!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!):
+-----------------------------------------------------------------------
+Restrict the root access to SSH service via PAM
+
+You can use the pam_listfile.so module which offers great flexibility in limiting the privileges of specific accounts. 
+Please make sure you don't restrict the root SSH access from the SSH configuration.
+
+
+A:
+--
+1)  $   cat /etc/pam.d/sshd
+
+#%PAM-1.0
+auth       substack     password-auth
+auth       include      postlogin
+account    required     pam_sepermit.so
+account    required     pam_nologin.so
+account    include      password-auth
+password   include      password-auth
+# pam_selinux.so close should be the first session rule
+session    required     pam_selinux.so close
+session    required     pam_loginuid.so
+# pam_selinux.so open should only be followed by sessions to be executed in the user context
+session    required     pam_selinux.so open env_params
+session    required     pam_namespace.so
+session    optional     pam_keyinit.so force revoke
+session    optional     pam_motd.so
+session    include      password-auth
+session    include      postlogin
+
+
+# Add below given line at the end of the file and save it:
+2)  $   sudo vi /etc/pam.d/sshd
+auth    required       pam_listfile.so onerr=succeed  item=user  sense=deny  file=/etc/ssh/deniedusers
+
+
+# Now create /etc/ssh/deniedusers file. Add root user in the file, so its content should look like this
+3)  $   sudo vi /etc/ssh/deniedusers
+root

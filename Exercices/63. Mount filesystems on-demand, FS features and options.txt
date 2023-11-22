@@ -1,0 +1,203 @@
+Q:
+--
+Which file can we use to tell the NFS server what directories it should share to the network ?
+
+
+A:
+--
+1)  /etc/exports
+
+
+===============================================================================================================================
+
+Q:
+--
+We learned about and how we can tell it to automatically mount something when a user tries to access a specific directory. 
+In one of its configuration files we can add a line like this:
+
+/misc /etc/auto.misc
+
+What is the path to the configuration file where we would add such content ?
+
+
+A:
+--
+1)  /etc/auto.master
+
+
+===============================================================================================================================
+
+Q:
+--
+Install autofs on this system and start its service.
+
+
+A:
+--
+1)  $   sudo dnf install autofs -y
+2)  $   sudo systemctl start autofs.service
+3)  $   sudo systemctl enable autofs.service
+
+
+===============================================================================================================================
+
+Q:
+--
+Install nfs-utils on this system and start its service.
+
+
+A:
+--
+1)  $   sudo dnf install nfs-utils -y
+2)  $   sudo systemctl start nfs-server.service
+3)  $   sudo systemctl enable nfs-server.service
+
+
+===============================================================================================================================
+
+Q:
+--
+Let's export /etc directory using NFS for 127.0.0.1 IP address. 
+Also, the ro option should be applied, making this share read-only. 
+Clients will only be able to read, but not write to this network shared directory.
+
+
+A:
+--
+1)  $   sudo vi /etc/exports
+/etc 127.0.0.1(ro)
+
+
+2)  $   sudo systemctl reload nfs-server
+
+
+===============================================================================================================================
+
+Q:
+--
+Tell autofs to auto-mount a directory called /shares. 
+If this directory does not exist, autofs should automatically create it. 
+The /shares directory should be defined in a file called /etc/auto.shares.
+
+
+Further, autofs should automatically mount a network share 127.0.0.1:/etc in /shares/mynetworkshare/ and should show us the contents of 127.0.0.1:/etc in /shares/mynetworkshare/ directory.
+
+
+A:
+--
+# Tell autofs that it should mount some NFS share, on demand, this is the first file we need to edit:
+1)  $   sudo vi /etc/auto.master
+/shares /etc/auto.shares
+
+
+2)  $   sudo vi /etc/auto.shares
+mynetworkshare -fstype=auto 127.0.0.1:/etc
+
+
+3)  $   sudo systemctl reload autofs
+4)  $   ls /shares/mynetworkshare
+
+adjtime                  ethertypes      magic                     rpm
+aliases                  exports         makedumpfile.conf.sample  rsyslog.conf
+alternatives             exports.d       man_db.conf               rsyslog.d
+...
+
+
+===============================================================================================================================
+
+Q:
+--
+Edit /etc/auto.shares file and add another line here so that the following happens:
+
+
+1. When a user tries to access /shares/videos/, then autofs should auto-mount a network share.
+2. The network share is on local server, so use this IP address: 127.0.0.1
+3. The NFS server should share this directory with us: /data/videos.
+
+
+A:
+--
+# Here, we tell autofs to mount our network share, on demand by adding below given line in it :
+1)  $   sudo vi /etc/auto.shares
+videos -fstype=auto 127.0.0.1:/data/videos
+
+
+# Tell autofs to pick these changes :
+2)  $   sudo systemctl reload autofs
+
+
+# To verify your changes, you can try to run below given command :
+3)  $   ls /shares/videos
+vid1.mp4  vid2.mp4
+
+
+===============================================================================================================================
+
+Q:
+--
+We have /dev/vda1 mounted in /.
+What are the mount options used with /dev/vda1?
+
+For example: rw or ro, logbufs, logbsize etc.
+Identify those all options for /dev/vda1 and save them in /home/bob/moptions file.
+
+
+A:
+--
+1)  $   findmnt /dev/vda1
+TARGET SOURCE    FSTYPE OPTIONS
+/      /dev/vda1 xfs    rw,relatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,noquota
+
+
+2)  $   vi /home/bob/moptions
+rw,relatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,noquota
+
+
+===============================================================================================================================
+
+Q:
+--
+Unmount /dev/vdb1 from the /mnt/ directory.
+
+
+A:
+--
+1)  $   sudo umount /mnt
+
+
+===============================================================================================================================
+
+Q:
+--
+Mount /dev/vdb1 back into the /mnt/ directory. But this time, use these mount options: ro,noexec,nosuid.
+
+
+A:
+--
+1)  $   sudo mount -o ro,noexec,nosuid /dev/vdb1 /mnt
+
+
+===============================================================================================================================
+
+Q:
+--
+/dev/vdb1 is currently mounted with the rooption, so it's read-only. Remount it with the rw option so it becomes read-write.
+
+
+A:
+--
+1)  $   sudo mount -o remount,rw,noexec,nosuid /dev/vdb1 /mnt
+
+
+===============================================================================================================================
+
+Q:
+--
+Edit /etc/fstab so that the ext4 filesystem on /dev/vdb1 is automatically mounted into /mnt at boot time.
+But also make sure that this filesystem is mounted as read-only. Otherwise said, use these two mount options: defaults and ro.
+
+
+A:
+--
+1)  $   sudo vi /etc/fstab
+/dev/vdb1 /mnt ext4 defaults,ro 0 2 

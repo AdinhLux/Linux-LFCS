@@ -1,0 +1,205 @@
+Q:
+--
+What file do we edit to add a new email alias ?
+
+
+A:
+--
+1)  /etc/aliases
+
+
+===============================================================================================================================
+
+Q:
+--
+What command do we use to inform our email daemon that our aliases have changed ?
+
+
+A:
+--
+1)  $   sudo newaliases
+
+
+===============================================================================================================================
+
+Q:
+--
+Our system is configured to receive emails sent to username@example.com. We have this email alias:
+
+advertising: alex
+
+
+What does it do?
+
+A. All emails sent to alex@example.com will be stored in the inbox of the user account advertising
+B. All emails sent to advertising@example.com will be stored in the inbox of the user account alex.
+
+
+A:
+--
+1)  B
+
+
+===============================================================================================================================
+
+Q:
+--
+Install postfix email server and mailx email client on this system. Also make sure to start postfix service.
+
+
+A:
+--
+1)  $   sudo dnf install postfix mailx -y
+2)  $   sudo systemctl start postfix.service
+
+
+===============================================================================================================================
+
+Q:
+--
+Our system is configured to receive emails sent to <username>@example.com.
+Send an email to user john from user bob and make sure the subject of the email is Hi John
+
+You can write anything in the body of the email.
+
+
+A:
+--
+# Make sure you are logged in as user bob while running the above given command.
+1)  $   echo "This is a test email" | mailx -s "Hi John" john
+
+
+===============================================================================================================================
+
+Q:
+--
+Create an alias that takes all emails received at bob@example.com and forwards it to john@example.com.
+
+
+A:
+--
+1)  $   sudo vi /etc/aliases
+bob: john
+
+
+2)  $   sudo newaliases
+
+
+===============================================================================================================================
+
+Q:
+--
+Install dovecot on this system and start its service.
+
+
+A:
+--
+1)  $   sudo dnf install dovecot -y
+2)  $   sudo systemctl start dovecot.service
+
+
+===============================================================================================================================
+
+Q:
+--
+Change Dovecot's configuration and disable SSL/TLS encryption.
+
+Make sure to restart dovecot's service after making the required changes.
+
+
+A:
+--
+# Change ssl parameter value to no
+1)  $   sudo vi /etc/dovecot/conf.d/10-ssl.conf
+ssl = no
+
+
+2)  $   sudo systemctl restart dovecot
+
+
+===============================================================================================================================
+
+Q:
+--
+You can find out the IP address of eth0 interface on this system using ip a command.
+
+Change Dovecot's configuration so that it listens for incoming connections only on the IP address you found.
+
+
+Make sure to restart dovecot's service after making the required changes.
+
+
+A:
+--
+# Find out the IP address of eth0 interface on this system
+1)  $   ip a
+
+1503: eth0@if1504: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default 
+    link/ether 02:42:c0:08:be:06 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet 192.8.190.6/24 brd 192.8.190.255 scope global eth0
+       valid_lft forever preferred_lft forever
+1507: eth1@if1508: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default 
+    link/ether 02:42:ac:19:00:26 brd ff:ff:ff:ff:ff:ff link-netnsid 1
+    inet 172.25.0.38/24 brd 172.25.0.255 scope global eth1
+       valid_lft forever preferred_lft forever
+
+
+# Uncomment below given line then add the required IP
+2)  $   sudo vi /etc/dovecot/dovecot.conf
+# listen = *, ::
+listen = 192.8.190.6
+
+
+3)  $   sudo systemctl restart dovecot
+
+
+===============================================================================================================================
+
+Q:
+--
+Can you figure out in what Dovecot config file we can find quota related settings ? 
+
+Edit that config file and make sure that the maximum accepted mail size is set to 200M
+
+
+A:
+--
+# Modify below line in this file. Make sure you uncomment this line
+1)  $   sudo vi /etc/dovecot/conf.d/90-quota.conf
+quota_max_mail_size = 200M
+
+
+2)  $   sudo systemctl restart dovecot
+
+
+===============================================================================================================================
+
+Q:
+--
+Send an email to root@example.com from the currently logged in user i.e bob.
+
+The body of the message should be Welcome to the LFCS Labs! and you can set any subject for this email.
+
+
+A:
+--
+1)  $   echo "Welcome to the LFCS Labs!" | mailx -s "Hi" root@example.com
+2)  $   sudo cat /var/spool/mail/root
+
+From bob@example.com  Sun Sep 17 07:40:45 2023
+Return-Path: <bob@example.com>
+X-Original-To: root@example.com
+Delivered-To: root@example.com
+Received: by www.example.com (Postfix, from userid 1000)
+        id 88FA81D4C522; Sun, 17 Sep 2023 07:40:45 +0000 (UTC)
+Date: Sun, 17 Sep 2023 07:40:45 +0000
+To: root@example.com
+Subject: Hi
+User-Agent: Heirloom mailx 12.5 7/5/10
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Message-Id: <20230917074045.88FA81D4C522@www.example.com>
+From: bob@example.com
+
+Welcome to the LFCS Labs!

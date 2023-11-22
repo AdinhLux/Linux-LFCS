@@ -1,0 +1,1217 @@
+Q:
+--
+In your home directory you will find a directory called collection. Take the following steps:
+
+
+A. Copy this entire "collection" directory to the /opt/ directory. 
+   But make sure to preserve all permission and ownership information about the files it contains. 
+   Hint: consult the manual for the copying command and look for the "archive" option. Use that to preserve all permission/ownership info.
+
+B. With your copy safely in place, you can now remove this entire collection directory from your home directory
+
+C. Finally, create a new directory called collection2 in your /opt/ directory.
+
+
+A:
+--
+1)  $  man cp
+
+SYNOPSIS
+       cp [OPTION]... [-T] SOURCE DEST
+       cp [OPTION]... SOURCE... DIRECTORY
+       cp [OPTION]... -t DIRECTORY SOURCE..
+
+DESCRIPTION
+       --preserve[=ATTR_LIST]
+              preserve the specified attributes (default:  mode,ownership,timestamps),  if  possible  addi‐
+              tional attributes: context, links, xattr, all
+
+2)  $  sudo cp --preserve=all -r /home/bob/collection/ /opt/
+3)  $  sudo rm -r /home/bob/collection/
+4)  $  sudo mkdir /opt/collection2
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+There is a directory called /opt/databases/. This should belong to your user, called bob. 
+But someone entered the wrong commands and messed up the permissions and ownership information. Correct these in the following way:
+
+
+A. Change the user owner and group owner for this directory. 
+   /opt/databases/ should be owned by the user called bob and the group also called bob. 
+   Make sure to make this a recursive change, so that ownership is changed for the directory itself along with the files/directories it contains.
+
+
+B. The permissions for /opt/databases/ directory are 777 currently, which are way too open. Anyone can read and write to this directory. 
+   Change these permissions so that only the user called bob can read, write and execute within /opt/databases/ directory. Permissions for the group and for others should be all denied. 
+   These permissions should only be applied to the directory itself, not to the files/directories inside.
+
+
+C. Change permissions for all files inside the /opt/databases/ directory (file1, file2, file3). 
+   The user bob should have permissions to read and write to these files, but not to execute them. 
+   The group should have read only permissions on these files, nothing else. And others should not have any permissions at all (all denied).
+
+
+A:
+--
+1)  $  sudo chown bob:bob -R /opt/databases/
+2)  $  stat /opt/databases/
+
+  File: /opt/databases/
+  Size: 45              Blocks: 0          IO Block: 4096   directory
+Device: fd01h/64769d    Inode: 17042709    Links: 2
+Access: (0333/d-wx-wx-wx)  Uid: ( 1002/     bob)   Gid: ( 1002/     bob)
+Context: unconfined_u:object_r:usr_t:s0
+
+
+3)  $  sudo chmod u=rwx,g=,o= /opt/databases/
+4)  $  stat /opt/databases/
+  File: /opt/databases/
+  Size: 45              Blocks: 0          IO Block: 4096   directory
+Device: fd01h/64769d    Inode: 17042709    Links: 2
+Access: (0700/drwx------)  Uid: ( 1002/     bob)   Gid: ( 1002/     bob)
+Context: unconfined_u:object_r:usr_t:s0
+
+
+5)  $  ls -l /opt/databases/
+
+total 0
+-rwxrwxrwx. 1 bob bob 0 Oct  1 07:43 file1
+-rwxrwxrwx. 1 bob bob 0 Oct  1 07:43 file2
+-rwxrwxrwx. 1 bob bob 0 Oct  1 07:43 file3
+
+
+6)  $  find /opt/databases/ -type f -exec chmod u=rw,g=r,o= {} \;
+7)  $  ls -l /opt/databases/
+
+total 0
+-rw-r-----. 1 bob bob 0 Oct  1 07:43 file1
+-rw-r-----. 1 bob bob 0 Oct  1 07:43 file2
+-rw-r-----. 1 bob bob 0 Oct  1 07:43 file3
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+The /opt/assets/ directory contains couple of files. You'll need to find some special files inside it.
+
+
+A. Find and delete all the files which have the following octal permissions: 666.
+
+B. Find all the files that are exactly 1KB in size and copy them to /opt/exactly/ directory.
+
+C. Find all the files that are larger than 2KB and move them to /opt/larger/ directory.
+
+
+A:
+--
+1)  $  sudo find /opt/assets/ -type f -perm 666 -exec rm {} \;
+2)  $  sudo find /opt/assets/ -type f -size 1k -exec cp {} /opt/exactly/ \;
+3)  $  sudo find /opt/assets/ -type f -size +2k -exec mv {} /opt/larger/ \;
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+In this exercise, you will work with the /opt/services.txt file.
+
+
+A. First, use the correct command to filter out/display only the commented lines from this file. 
+   That means every line that starts with the # character. 
+   If # is not the first character on the line, then that line should not be a match. 
+   After you've successfully found the correct command to only display the commented lines, redirect this output (save it) to this file /opt/commented.txt
+
+B. Add a new line to the /opt/services.txt file. Add this line at the end of the file. The line should contain this text: examservice 888/tcp # Our special service
+
+C. Change every occurrence of the word SSH in /opt/services.txt file to the word NULL. 
+   Keep in mind that the word is in all UPPERCASE letters. So only SSH should be changed to NULL, not the ssh word (with lowercase letters).
+
+
+Remember to switch back to user bob.
+
+
+A:
+--
+1)  $  sudo -i
+2)  $  sudo grep '^#' /opt/services.txt > /opt/commented.txt
+
+3)  $  sudo vi /opt/services.txt
+examservice 888/tcp # Our special service
+
+
+4)  $  sudo sed s/'SSH'/NULL/g /opt/services.txt | grep 'ssh'
+
+ssh             22/tcp                          # The Secure Shell (NULL) Protocol
+ssh             22/udp                          # The Secure Shell (NULL) Protocol
+x11-ssh-offset  6010/tcp                        # NULL X11 forwarding offset
+ssh             22/sctp                 # NULL
+sshell          614/tcp                 # SSLshell
+sshell          614/udp                 #       SSLshell
+netconf-ssh     830/tcp                 # NETCONF over NULL
+netconf-ssh     830/udp                 # NETCONF over NULL
+sdo-ssh         3897/tcp                # Simple Distributed Objects over NULL
+sdo-ssh         3897/udp                # Simple Distributed Objects over NULL
+netconf-ch-ssh  4334/tcp                # NETCONF Call Home (NULL) 
+snmpssh         5161/tcp                # SNMP over NULL Transport Model
+snmpssh-trap    5162/tcp                # SNMP Notification over NULL Transport Model
+tl1-ssh         6252/tcp                # TL1 over NULL
+tl1-ssh         6252/udp                # TL1 over NULL
+ssh-mgmt        17235/tcp               # NULL Tectia Manager
+ssh-mgmt        17235/udp               # NULL Tectia Manager
+
+
+5)  $  sudo sed -i s/'SSH'/NULL/g /opt/services.txt
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Time to backup some directories and restore some files.
+
+A.First, in your home directory you will find a directory called somedata. 
+  Archive this entire directory with TAR and BZIP2 to /opt/archive.tar.bz2 file.
+
+B.Next, you will find this archive in your home directory: backup.tar.bz2
+  Extract all of the files inside it to the /opt/restore/ directory.
+
+
+A:
+--
+1)  $  sudo tar -cf /opt/archive.tar /home/bob/somedata
+tar: Removing leading `/' from member names
+
+
+2)  $  sudo bzip2 -k /opt/archive.tar
+
+3)  $  sudo tar -xvf /home/bob/backup.tar.bz2 -C /opt/restore/
+file1
+file2
+file3
+file4
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Write a bash script /home/bob/script.sh that does the following:
+
+lists all the files present inside /opt/ directory, pipes this output to the sha256sum command and then saves the output of the sha256sum command in /home/bob/binhash.txt file.
+Use the regular command to list the directory contents without any options like long listing format, hidden files etc. Make sure to give it executable permissions.
+
+
+A:
+--
+1)  $  man sha256sum
+
+SYNOPSIS
+       sha256sum [OPTION]... [FILE]...
+
+DESCRIPTION
+       Print or check SHA256 (256-bit) checksums.
+
+       With no FILE, or when FILE is -, read standard input.
+
+
+2)  $  vi /home/bob/script.sh 
+
+#! /bin/bash
+ls /opt/ | sha256sum > /home/bob/binhash.txt
+
+
+3)  $  sudo stat /home/bob/script.sh 
+
+  File: /home/bob/script.sh
+  Size: 66              Blocks: 8          IO Block: 4096   regular file
+Device: fd01h/64769d    Inode: 17158495    Links: 1
+Access: (0664/-rw-rw-r--)  Uid: ( 1002/     bob)   Gid: ( 1002/     bob)
+
+
+4)  $  sudo chmod +x /home/bob/script.sh
+5)  $  sudo stat /home/bob/script.sh 
+
+  File: /home/bob/script.sh
+  Size: 66              Blocks: 8          IO Block: 4096   regular file
+Device: fd01h/64769d    Inode: 17158495    Links: 1
+Access: (0775/-rwxrwxr-x)  Uid: ( 1002/     bob)   Gid: ( 1002/     bob)
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+The contents of /opt/dir1/ and /opt/dir2/ directories are almost identical. 
+However, there is one unique file that only exists in dir2. Save the name of that file in /opt/specialfile.txt. 
+For example, if /opt/dir2/file994 would be the unique file, you would write file994 in /opt/specialfile.txt.
+
+
+A:
+--
+1)  $  sudo -i
+2)  $  sudo diff /opt/dir1/ /opt/dir2/ > /opt/specialfile.txt
+Only in /opt/dir2/: file555
+
+
+
+=============================================================================================================================================================================
+
+Q (!!!):
+--------
+Due to some issue our server rebooted unexpectedly. 
+The httpd daemon is installed but our website doesn't seem to be working. Let us debug the problem.
+
+
+A. Check if httpd service is enabled or disabled to start automatically at boot? If it is enabled, write enabled in /opt/service.txt file or if it is disabled, write disabled in the same file.
+
+B. If httpd service is disabled, then enable it to automatically start when the system boots.
+
+C. Change the port that httpd is listening on from 80 to 9090
+
+D. Start the httpd service.
+
+
+A:
+--
+1)  $  systemctl status httpd.service
+
+● httpd.service - The Apache HTTP Server
+   Loaded: loaded (/usr/lib/systemd/system/httpd.service; disabled; vendor preset: disabled)
+   Active: inactive (dead)
+     Docs: man:httpd.service(8)
+
+
+2)  $  sudo vi /opt/service.txt
+disabled
+
+
+3)  $  sudo systemctl enable  httpd
+Created symlink /etc/systemd/system/multi-user.target.wants/httpd.service → /usr/lib/systemd/system/httpd.service.
+
+
+# Perform below given steps to change httpd port from 80 to 9090
+4)  $  sudo sed -i 's/Listen 80/Listen 9090/g' /etc/httpd/conf/httpd.conf
+
+
+5)  $  sudo systemctl start httpd.service
+6)  $  systemctl status httpd.service
+● httpd.service - The Apache HTTP Server
+   Loaded: loaded (/usr/lib/systemd/system/httpd.service; enabled; vendor preset: disabled)
+   Active: active (running) since Mon 2023-10-02 07:51:28 UTC; 5s ago
+     Docs: man:httpd.service(8)
+ Main PID: 31236 (httpd)
+   Status: "Started, listening on: port 9090"
+    Tasks: 213 (limit: 5970)
+   Memory: 25.5M
+
+
+
+=============================================================================================================================================================================
+
+Q (!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!):
+-------------------------------------------------
+A process called memcached is running on this system. Change its nice value to +10.
+
+
+A:
+--
+1)  $  apropos nice
+nice (1)             - run a program with modified scheduling priority
+nice (3p)            - change the nice value of a process
+
+
+2)  $  man nice
+
+SYNOPSIS
+       nice [OPTION] [COMMAND [ARG]...]
+
+DESCRIPTION
+       Run COMMAND with an adjusted niceness, which affects process scheduling.  With no COMMAND, print the
+       current niceness.  Niceness values range from -20 (most favorable  to  the  process)  to  19  (least
+       favorable to the process).
+
+       Mandatory arguments to long options are mandatory for short options too.
+
+       -n, --adjustment=N
+              add integer N to the niceness (default 10)
+
+
+3)  $  nice
+0
+
+
+4)  $  nice -n 10 memcached
+failed to listen on TCP port 11211: Address already in use
+
+
+5)  $  apropos nice
+renice (1)           - alter priority of running processes
+
+
+6)  $  man renice
+
+SYNOPSIS
+       renice [-n] priority [-g|-p|-u] identifier...
+
+EXAMPLES
+       The following command would change the priority of the processes with PIDs 987 and 32, plus all pro‐
+       cesses owned by the users daemon and root:
+
+              renice +1 987 -u daemon root -p 32
+
+
+7)  $  ps lax | grep 'memcached'
+F   UID     PID    PPID PRI  NI    VSZ   RSS WCHAN  STAT TTY        TIME COMMAND
+4   984   31574       1  20   0 460072  5108 -      Ssl  ?          0:00 /usr/bin/memcached -p 11211 -u memcached -m 64 -c 1024 -l 127.0.0.1,::1
+0  1002   31777   30260  20   0  12112  1064 -      R+   pts/0      0:00 grep --color=auto memcached
+
+
+8)  $  sudo renice 10 31574
+31574 (process ID) old priority 0, new priority 10
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+In this exercise you will create two scheduled jobs.
+
+
+A. First, create an anacron job with the following parameters:
+
+* Job will run once every three days.
+* The job delay is 10 minutes.
+* The job identifier (name) is exam.
+* The command it should run is /opt/anacron.sh.
+
+
+B. Next, create an at job. Schedule it to run at this exact date: August 21 2040. The at job should run the following command:
+
+echo 'Wow, this took a long time!' > finally.txt
+
+
+A:
+--
+1)  $  man anacron
+
+DESCRIPTION
+       Anacron reads a list of jobs from the /etc/anacrontab configuration file (see anacrontab(5)).   This
+       file  contains the list of jobs that Anacron controls.  Each job entry specifies a period in days, a
+       delay in minutes, a unique job identifier, and a shell command.
+
+
+2)  $  sudo vi /etc/anacrontab
+
+#period in days   delay in minutes   job-identifier   command
+1       5       cron.daily              nice run-parts /etc/cron.daily
+7       25      cron.weekly             nice run-parts /etc/cron.weekly
+@monthly 45     cron.monthly            nice run-parts /etc/cron.monthloy
+# 3 10 exam /bin/bash /opt/anacron.sh
+3 10 exam /opt/anacron.sh
+
+
+3)  $  at 'August 21 2040'
+warning: commands will be executed using /bin/sh
+at> echo 'Wow, this took a long time!' > finally.txt
+at>  <EOT>                                # CTRL + D
+job 1 at Tue Aug 21 10:04:00 2040
+
+
+
+=============================================================================================================================================================================
+
+Q (!!!):
+--------
+A. Find out which software package provided this file: /usr/bin/botti on the system.
+
+B. Next remove that software package.
+
+
+A:
+--
+# You can find out which package installed this (here the name is 'irssi')
+1)  $  dnf provides /usr/bin/botti
+
+irssi-1.1.1-3.el8.x86_64 : Modular text mode IRC client with Perl scripting
+Repo        : @System
+Matched from:
+Filename    : /usr/bin/botti
+
+irssi-1.1.1-3.el8.x86_64 : Modular text mode IRC client with Perl scripting
+Repo        : appstream
+Matched from:
+Filename    : /usr/bin/botti
+
+
+# We can remove our config file and reinstall to get back our original file ($ dnf reinstall irssi)
+# 2)  $  sudo rm /usr/bin/botti
+
+2)  $  man rpm
+
+   QUERY OPTIONS
+       The general form of an rpm query command is
+
+       rpm {-q|--query} [select-options] [query-options]
+
+       You  may  specify the format that package information should be printed in. To do
+       this, you use the
+
+        --qf|--queryformat QUERYFMT
+
+        
+3)  $  # rpm -qf /usr/bin/botti
+       sudo dnf remove irssi -y
+
+
+
+=============================================================================================================================================================================
+
+Q (!!!):
+--------
+At /dev/vde1 you will find an ext4 filesystem that is currently corrupted. Use the correct command to fix it.
+
+
+A:
+--
+1)  $  # xfs_repair -v /dev/vde1
+       sudo fsck /dev/vde1
+
+fsck from util-linux 2.32.1
+e2fsck 1.45.6 (20-Mar-2020)
+ext2fs_open2: Bad magic number in super-block
+fsck.ext2: Superblock invalid, trying backup blocks...
+/dev/vde1 was not cleanly unmounted, check forced.
+Resize inode not valid.  Recreate<y>? yes
+Pass 1: Checking inodes, blocks, and sizes
+Pass 2: Checking directory structure
+Pass 3: Checking directory connectivity
+Pass 4: Checking reference counts
+Pass 5: Checking group summary information
+Block bitmap differences:  +(32768--32896) +(98304--98432) +(163840--163968)
+Fix<y>? yes
+Free blocks count wrong for group #0 (28520, counted=28521).
+Fix<y>? yes
+Free blocks count wrong (253028, counted=253029).
+Fix<y>? yes
+Padding at end of inode bitmap is not set. Fix<y>? yes
+
+/dev/vde1: ***** FILE SYSTEM WAS MODIFIED *****
+/dev/vde1: 11/65536 files (0.0% non-contiguous), 8859/261888 blocks
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Execute the steps below to perform actions over users and groups:
+
+
+A. Create a new user called jane.
+
+B. Create a new group called developers.
+
+C. Add the user called jane to the developers group. This should be a secondary/supplementary group, her primary group should remain unchanged.
+
+D. Configure a resource limit for the developers group so that this group cannot exceed 5 logins (maxlogins).
+
+
+A:
+--
+1)  $  sudo useradd jane
+2)  $  sudo groupadd developers
+
+# -g change the primary group
+# -G change the secondary group
+3)  $  sudo usermod -G developers jane
+
+4)  $  groups jane
+jane : jane developers
+
+5)  $  sudo vi /etc/security/limits.conf
+
+#<domain>      <type>  <item>         <value>
+#
+
+#*               soft    core            0
+#*               hard    rss             10000
+#@student        hard    nproc           20
+#@faculty        soft    nproc           20
+#@faculty        hard    nproc           50
+#ftp             hard    nproc           0
+#@student        -       maxlogins       4
+@developers - maxlogins 5
+
+
+
+=============================================================================================================================================================================
+
+Q (!!!):
+--------
+A. Create a new user called john and set D3vU3r321 password for this user.
+
+B. Edit the sudoers file and make sure that john can only run the shutdown command with sudo and without entering any password. 
+   It does not matter if you use localhost or ALL in the host section.
+
+
+A:
+--
+1)  $  sudo useradd john
+2)  $  sudo passwd john
+
+Changing password for user john.
+New password: D3vU3r321
+Retype new password: D3vU3r321
+passwd: all authentication tokens updated successfully.
+
+
+3)  $  stat /etc/sudoers
+
+  File: /etc/sudoers
+  Size: 4360            Blocks: 16         IO Block: 4096   regular file
+Device: fd01h/64769d    Inode: 605933      Links: 1
+Access: (0440/-r--r-----)  Uid: (    0/    root)   Gid: (    0/    root)
+
+
+# DO NOT CHANGE permissions on /etc/sudoers. USE visudo
+4)  $  apropos -s 1,8 sudoer
+cvtsudoers (1)       - convert between sudoers file formats
+visudo (8)           - edit the sudoers file
+
+
+5)  $  sudo visudo
+
+## Allows people in group wheel to run all commands
+%wheel  ALL=(ALL)       ALL
+john ALL=(ALL)       NOPASSWD: /sbin/shutdown
+
+
+
+=============================================================================================================================================================================
+
+Q (!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!):
+---------------------------------------------------------
+Modify the following kernel runtime parameter:
+vm.swappiness
+
+
+Set a value 10 for it. 
+This can be a temporary change, so the parameter should temporarily keep this value in the current session, but the change should be forgotten at next boot.
+
+
+A:
+--
+1)  $  apropos -s 1,8 "configure kernel"
+sysctl (8)           - configure kernel parameters at runtime
+systemd-sysctl (8)   - Configure kernel parameters at boot
+systemd-sysctl.service (8) - Configure kernel parameters at boot
+
+
+2)  $  man sysctl
+
+SYNOPSIS
+       sysctl [options] [variable[=value]] [...]
+       sysctl -p [file or regexp] [...]
+
+DESCRIPTION
+       sysctl  is  used to modify kernel parameters at runtime.  The parameters available are those listed
+       under /proc/sys/.  Procfs is required for sysctl support in Linux.  You can use sysctl to both read
+       and write sysctl data.
+
+PARAMETERS
+       variable
+              The  name  of  a  key to read from.  An example is kernel.ostype.  The '/' separator is also
+              accepted in place of a '.'.
+
+       variable=value
+              To set a key, use the form variable=value where variable is the key and value is  the  value
+              to set it to.  If the value contains quotes or characters which are parsed by the shell, you
+              may need to enclose the value in double quotes.
+
+       -w, --write
+              Use this option when all arguments prescribe a key to be set.
+
+
+3)  $  sudo sysctl -w vm.swappiness=10
+vm.swappiness = 10
+
+
+
+=============================================================================================================================================================================
+
+Q (!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!):
+---------------------------------------------------------
+Inspect the httpd service and figure out its unit file. Further, find out the SELinux label that it has. Save this label to this file:
+/opt/label.txt
+
+
+For example, the SELinux label for /bin/sudo shows up like this system_u:object_r:sudo_exec_t:s0 /usr/bin/sudo 
+In that case, you would write system_u:object_r:sudo_exec_t:s0 to that file, skipping the /usr/bin/sudo part.
+
+
+A:
+--
+# Finding unit file in 'loaded'
+1)  $  systemctl status httpd
+
+● httpd.service - The Apache HTTP Server
+   Loaded: loaded (/usr/lib/systemd/system/httpd.service; enabled; vendor preset: disabled)
+   Active: active (running) since Mon 2023-10-02 08:00:38 UTC; 8s ago
+
+
+# Finding SELinux label
+2)  $  ls -Z /usr/lib/systemd/system/httpd.service
+system_u:object_r:httpd_unit_file_t:s0 /usr/lib/systemd/system/httpd.service
+
+
+3)  $  sudo vi /opt/label.txt
+system_u:object_r:httpd_unit_file_t:s0
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+SSH into node01 using user bob and password caleston123 , further perform the following actions on it:
+
+
+A. List all firewall rules and save the output in /opt/rules.txt file. 
+   Make sure to append the file so that you don't overwrite any existing content of the file.
+
+
+B. Add a new firewall rule so that traffic to port 80/tcp is allowed on this host. 
+   This rule should be applied immediately, for the current session. But also make this rule permanent so that it remains active for new sessions as well.
+
+
+Don't forget to log out from this system when you finish this exercise.
+
+
+A:
+--
+1)  $  ssh bob@node01
+bob@node01's password: caleston123
+
+
+2)  $  sudo su -
+# 3)  $  firewall-cmd --list-all > /opt/rules.txt
+# 4)  $  cat /opt/rules.txt
+
+public (active)
+  target: default
+  icmp-block-inversion: no
+  interfaces: eth0 eth1
+  sources: 
+  services: cockpit dhcpv6-client ssh
+  ports: 
+  protocols: 
+  masquerade: no
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules:
+
+# >> is used for APPENDING (in case of this file already exists)
+5)  $  firewall-cmd --list-all >> /opt/rules.txt
+6)  $  cat /opt/rules.txt
+
+public (active)
+  target: default
+  icmp-block-inversion: no
+  interfaces: eth0 eth1
+  sources: 
+  services: cockpit dhcpv6-client ssh
+  ports: 80/tcp
+  protocols: 
+  masquerade: no
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+
+
+# Allowing 80/tcp port permanently
+4)  $  firewall-cmd --add-port=80/tcp --permanent
+5)  $  systemctl restart firewalld
+6)  $  exit
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Now, let's set up some email aliases:
+
+
+A. Add an email alias so that all emails sent to the user called bob are redirected to the user called root
+
+B. Add another email alias so that all emails sent to the user called john are redirected to an external email address: john@example.com
+
+
+A:
+--
+1)  $  apropos alias
+aliases (5)          - Postfix local alias database format
+newaliases (1)       - Postfix to Sendmail compatibility interface
+
+
+2)  $  sudo vi /etc/aliases
+bob: root
+john: john@example.com
+
+
+# Refreshing the new aliases
+3)  $  sudo newaliases
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+SSH into node01 host using user bob and password caleston123 . You'll need to make some changes to the configuration of the SSH daemon (not the client).
+
+
+A. First, disable the SSH root user login.
+
+B. Next, make sure the login grace time is changed from the default 2 minutes to 1 minute.
+
+
+Don't forget to log out from this system when you finish this exercise.
+
+
+A:
+--
+1)  $  ssh bob@node01
+bob@node01's password: caleston123
+
+
+2)  $  apropos ssh
+ssh_config (5)       - OpenSSH SSH client configuration files
+sshd_config (5)      - OpenSSH SSH daemon configuration file
+
+
+# Editing SSH server configuration
+3)  $  sudo vi /etc/ssh/sshd_config
+LoginGraceTime 1m
+PermitRootLogin no
+
+
+4)  $  sudo systemctl restart sshd
+5)  $  exit
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Edit the main config file of the httpd daemon and make sure that Indexes are disabled for the /var/www/html/ directory.
+
+
+A:
+--
+1)  $  apropos httpd
+httpd.conf (5)       - Configuration files for httpd
+
+
+2)  $  man httpd.conf
+
+SYNOPSIS
+       /etc/httpd/conf/httpd.conf, /etc/httpd/conf.modules.d, /etc/httpd/conf.d
+
+DESCRIPTION
+       The main configuration file for the httpd daemon is /etc/httpd/conf/httpd.conf. The syntax of this
+       file is described at https://httpd.apache.org/docs/2.4/configuring.html, and the full set of
+       available directives is listed at https://httpd.apache.org/docs/2.4/mod/directives.html.
+
+
+3)  $  sudo vi /etc/httpd/conf/httpd.conf
+
+# Further relax access to the default document root:
+<Directory "/var/www/html">
+    #
+    # Possible values for the Options directive are "None", "All",
+    # or any combination of:
+    #   Indexes Includes FollowSymLinks SymLinksifOwnerMatch ExecCGI MultiViews
+    #
+    # Note that "MultiViews" must be named *explicitly* --- "Options All"
+    # doesn't give it to you.
+    #
+    # The Options directive is both complicated and important.  Please see
+    # http://httpd.apache.org/docs/2.4/mod/core.html#options
+    # for more information.
+    #
+#    Options Indexes FollowSymLinks
+    Options FollowSymLinks
+
+    #
+    # AllowOverride controls what directives may be placed in .htaccess files.
+    # It can be "All", "None", or any combination of the keywords:
+    #   Options FileInfo AuthConfig Limit
+    #
+    AllowOverride None
+
+    #
+    # Controls who can get stuff from this server.
+    #
+    Require all granted
+</Directory>
+
+
+4)  $  sudo systemctl restart httpd
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+In this exercise you'll be working with a virtual machine. But first, you need to find out few things.
+
+
+A. List all VMs that exist on this host. Your VM is currently stopped so it won't show up in the regular command that lists virtual machines. 
+   Make sure to add the correct option to list all VMs, even the ones that are not currently running.
+
+B. Start this virtual machine.
+
+
+A:
+--
+1)  $  sudo virsh list --all
+
+ Id   Name   State
+-----------------------
+ -    VM1    shut off
+
+
+2)  $  sudo virsh start VM1
+Domain VM1 started
+
+
+3)  $  sudo virsh list --all
+
+ Id   Name   State
+----------------------
+ 1    VM1    running
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+We have /dev/vdb disk on this system. Perform the following actions on it.
+
+
+A. Create a partition /dev/vdb1 of 400MB in size and format it as xfs file system. 
+   Edit the correct file in /etc/ so that /dev/vdb1 is automatically mounted into the /backups directory every time the system boots up. 
+   Default mount options should be used.
+
+
+B. Create a partition /dev/vdb2 of 100MB in size, format it as ext4 file system and mount it in /mnt/ . 
+   We want to keep some sensitive data on ext4 filesystem and we want to make sure that it's not modified. 
+   To solve this problem, mount /dev/vdb2 into the /mnt directory using read-only mount option. 
+   It does not matter what the other mount options are. Just make sure this mount point is read-only so that users cannot change contents on this filesystem.
+
+
+C. Create a partition /dev/vdb3 of 450MB in size and format it with the xfs filesystem. 
+   To make this easier to spot in the future, among the other filesystems, set the filesystem label to ExamFS when you format it. 
+   Make sure that the label is exactly ExamFS and not examfs or anything that has different letters in UPPERCASE or lowercase. 
+   We will make use of this /dev/vdb3 partition in the upcoming questions so create it before moving to the next question.
+
+
+A:
+--
+1)  $  sudo su -
+2)  $  lsblk
+
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vda    253:0    0   11G  0 disk 
+└─vda1 253:1    0   10G  0 part /
+vdb    253:16   0    1G  0 disk 
+vdc    253:32   0    1G  0 disk 
+vdd    253:48   0    1G  0 disk 
+vde    253:64   0    1G  0 disk 
+└─vde1 253:65   0 1023M  0 part 
+
+
+3)  $  fdisk /dev/vdb
+
+Command (m for help): n
+Partition type
+   p   primary (0 primary, 0 extended, 4 free)
+   e   extended (container for logical partitions)
+Select (default p): 
+Partition number (1-4, default 1): 
+First sector (2048-2097151, default 2048): 
+Last sector, +sectors or +size{K,M,G,T,P} (2048-2097151, default 2097151): 400M
+Value out of range.
+Last sector, +sectors or +size{K,M,G,T,P} (2048-2097151, default 2097151): +400M
+
+Created a new partition 1 of type 'Linux' and of size 400 MiB.
+
+
+Command (m for help): n
+Partition type
+   p   primary (1 primary, 0 extended, 3 free)
+   e   extended (container for logical partitions)
+Select (default p): 
+
+Using default response p.
+Partition number (2-4, default 2): 
+First sector (821248-2097151, default 821248): 
+Last sector, +sectors or +size{K,M,G,T,P} (821248-2097151, default 2097151): +100M
+
+Created a new partition 2 of type 'Linux' and of size 100 MiB.
+
+
+Command (m for help): n
+Partition type
+   p   primary (2 primary, 0 extended, 2 free)
+   e   extended (container for logical partitions)
+Select (default p): 
+
+Using default response p.
+Partition number (3,4, default 3): 
+First sector (1026048-2097151, default 1026048): 
+Last sector, +sectors or +size{K,M,G,T,P} (1026048-2097151, default 2097151): +450M
+
+Created a new partition 3 of type 'Linux' and of size 450 MiB.
+
+Command (m for help): w
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Syncing disks.
+
+
+3)  $  lsblk
+
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vda    253:0    0   11G  0 disk 
+└─vda1 253:1    0   10G  0 part /
+vdb    253:16   0    1G  0 disk 
+├─vdb1 253:17   0  400M  0 part 
+├─vdb2 253:18   0  100M  0 part 
+└─vdb3 253:19   0  450M  0 part 
+vdc    253:32   0    1G  0 disk 
+vdd    253:48   0    1G  0 disk 
+vde    253:64   0    1G  0 disk 
+└─vde1 253:65   0 1023M  0 part 
+
+
+# Format the 3 partitions
+4)  $  mkfs.xfs /dev/vdb1
+
+meta-data=/dev/vdb1              isize=512    agcount=4, agsize=25600 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1
+data     =                       bsize=4096   blocks=102400, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=1368, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+
+
+5)  $  mkfs.ext4 /dev/vdb2
+
+mke2fs 1.45.6 (20-Mar-2020)
+Creating filesystem with 102400 1k blocks and 25688 inodes
+Filesystem UUID: 959786fa-1d0f-49c2-a230-abead2d1868b
+Superblock backups stored on blocks: 
+        8193, 24577, 40961, 57345, 73729
+
+Allocating group tables: done                            
+Writing inode tables: done                            
+Creating journal (4096 blocks): done
+Writing superblocks and filesystem accounting information: done 
+
+
+6)  $  mkfs.xfs -L "ExamFS" /dev/vdb3
+
+meta-data=/dev/vdb3              isize=512    agcount=4, agsize=28800 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1
+data     =                       bsize=4096   blocks=115200, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=1368, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+
+
+# Make sure it is automatically mounted
+7)  $  vi /etc/fstab
+/dev/vdb1 /backups xfs defaults 0 0
+
+
+# Mount this partition as read-only
+8)  $  mount --read-only /dev/vdb2 /mnt/
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Create a mirrored (level 1) RAID array with these two devices: /dev/vdc and /dev/vdd. The array should be created at /dev/md0
+
+
+A:
+--
+1)  $  apropos raid
+mdadm (8)            - manage MD devices aka Linux Software RAID
+
+
+2)  $  man mdadm
+
+NAME
+       mdadm - manage MD devices aka Linux Software RAID
+
+SYNOPSIS
+       mdadm [mode] <raiddevice> [options] <component-devices>
+
+DESCRIPTION
+       RAID devices are virtual devices created from two or more real block devices.  This allows multiple
+       devices (typically disk drives or partitions thereof) to be combined into a single device  to  hold
+       (for  example)  a  single  filesystem.  Some RAID levels include redundancy and so can survive some
+       degree of device failure.
+
+OPTIONS
+Options for selecting a mode are:
+       -C, --create
+              Create a new array.
+
+For create, build, or grow:
+       -n, --raid-devices=
+              Specify  the  number of active devices in the array.  This, plus the number of spare devices
+              (see below) must equal the number of component-devices (including  "missing"  devices)  that
+              are listed on the command line for --create.  Setting a value of 1 is probably a mistake and
+              so requires that --force be specified first.  A value of 1 will then be allowed for  linear,
+              multipath, RAID0 and RAID1.  It is never allowed for RAID4, RAID5 or RAID6.
+              This  number  can only be changed using --grow for RAID1, RAID4, RAID5 and RAID6 arrays, and
+              only on kernels which provide the necessary support.
+
+       -l, --level=
+              Set  RAID  level.  When used with --create, options are: linear, raid0, 0, stripe, raid1, 1,
+              mirror, raid4, 4, raid5, 5, raid6, 6, raid10, 10, multipath, mp, faulty,  container.   Obvi‐
+              ously some of these are synonymous.
+
+              When  a  CONTAINER metadata type is requested, only the container level is permitted, and it
+              does not need to be explicitly given.
+
+              When used with --build, only linear, stripe, raid0, 0, raid1, multipath, mp, and faulty  are
+              valid.
+
+              Can be used with --grow to change the RAID level in some cases.  See LEVEL CHANGES below.
+
+
+3)  $  sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/vdc /dev/vdd
+
+mdadm: Note: this array has metadata at the start and
+    may not be suitable as a boot device.  If you plan to
+    store '/boot' on this device please ensure that
+    your boot-loader understands md/v1.x metadata, or use
+    --metadata=0.90
+Continue creating array? y
+mdadm: Defaulting to version 1.2 metadata
+mdadm: array /dev/md0 started.
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Edit the disk quota for the user called bob. Limit the amount of storage space he can use (not inodes). 
+Set a soft limit of 100MB and a hard limit of 500MB on /mydata partition.
+
+
+A:
+--
+1)  $  apropos df
+
+df (1)               - report file system disk space usage
+df (1p)              - report free disk space
+
+
+2)  $  df -Th
+
+Filesystem     Type      Size  Used Avail Use% Mounted on
+devtmpfs       devtmpfs  467M     0  467M   0% /dev
+tmpfs          tmpfs     485M     0  485M   0% /dev/shm
+tmpfs          tmpfs     485M  6.7M  478M   2% /run
+tmpfs          tmpfs     485M     0  485M   0% /sys/fs/cgroup
+/dev/vda1      xfs        10G  4.7G  5.4G  47% /
+tmpfs          tmpfs      97M     0   97M   0% /run/user/0
+/dev/vdb2      ext4       93M  1.6M   85M   2% /mnt
+/dev/vdb3      xfs       445M   26M  419M   6% /mydata
+
+
+3)  $  apropos quota
+xfs_quota (8)        - manage use of quota on XFS filesystems
+
+
+4)  $  man xfs_quota
+
+NAME
+       xfs_quota - manage use of quota on XFS filesystems
+
+SYNOPSIS
+       xfs_quota  [  -x  ]  [ -f ] [ -p prog ] [ -c cmd ] ... [ -d project ] ... [ -D projects_file ] [ -P
+       projid_file ] [ path ... ]
+       xfs_quota -V
+
+DESCRIPTION
+       xfs_quota is a utility for reporting and editing various aspects of filesystem quota.
+
+       The options to xfs_quota are:
+
+       -c cmd    xfs_quota commands may be run interactively (the default) or as arguments on the  command
+                 line.  Multiple  -c  arguments may be given.  The commands are run in the sequence given,
+                 then the program exits.
+
+       -x        Enable expert mode.  All of the administrative commands (see the  ADMINISTRATOR  COMMANDS
+                 section below) which allow modifications to the quota system are available only in expert
+                 mode.
+
+EXAMPLES
+       Enabling quota enforcement on an XFS filesystem (restrict a user to a set amount of space).
+
+            # mount -o uquota /dev/xvm/home /home
+            # xfs_quota -x -c 'limit bsoft=500m bhard=550m tanya' /home
+            # xfs_quota -x -c report /home
+
+       Enabling project quota on an XFS filesystem (restrict files in log file directories to only using 1
+       gigabyte of space).
+
+            # mount -o prjquota /dev/xvm/var /var
+            # echo 42:/var/log >> /etc/projects
+            # echo logfiles:42 >> /etc/projid
+            # xfs_quota -x -c 'project -s logfiles' /var
+            # xfs_quota -x -c 'limit -p bhard=1g logfiles' /var
+
+       Same as above without a need for configuration files.
+
+            # rm -f /etc/projects /etc/projid
+            # mount -o prjquota /dev/xvm/var /var
+            # xfs_quota -x -c 'project -s -p /var/log 42' /var
+            # xfs_quota -x -c 'limit -p bhard=1g 42' /var
+
+
+5)  $  sudo xfs_quota -x -c 'limit bsoft=100m bhard=500m bob' /mydata/

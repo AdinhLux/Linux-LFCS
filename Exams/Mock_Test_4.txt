@@ -1,0 +1,1167 @@
+Q:
+--
+In your home directory you will find some files and directories.
+
+
+A. First, there is one hidden file under hidden directory, it is not appearing in a regular ls command without the proper command option. 
+   Find this hidden file and copy it to /opt/ directory.
+
+B. There is an another directory called preserved in your home directory. 
+   Move this directory and all the files it contains to /opt/ directory. 
+   In the move operation, make sure to use the proper options to preserve all metadata such as permission, owners, file creation times etc.
+
+
+
+A:
+--
+1)  $  ls -la /home/bob/hidden/
+total 4
+drwxr-xr-x. 2 bob bob   25 Oct  4 18:28 .
+drwx------. 9 bob bob 4096 Oct  4 18:29 ..
+-rw-r--r--. 1 bob bob    0 Oct  4 18:28 .hiddenfile
+
+
+2)  $  sudo cp /home/bob/hidden/.hiddenfile /opt/
+3)  $  sudo cp -r --preserve=all /home/bob/preserved/ /opt/
+
+4)  $  man rm
+NAME
+       rm - remove files or directories
+
+SYNOPSIS
+       rm [OPTION]... [FILE]...
+
+OPTIONS
+       Remove (unlink) the FILE(s).
+
+       -f, --force
+              ignore nonexistent files and arguments, never prompt       
+
+       -r, -R, --recursive
+              remove directories and their contents recursively
+
+
+5)  $  sudo rm -rf /home/bob/preserved/
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Create a new directory: /opt/new/ then go through these steps:
+
+
+A. Create an empty file in that directory called empty. The full path to this file should be /opt/new/empty
+
+B. Create a hard link to this file in your home directory. /home/bob/samefile should be hard linked with /opt/new/empty
+
+C. Create a soft link to /opt/new/ directory in your home directory. /home/bob/softlink should be a soft link that points to /opt/new/
+
+
+
+A:
+--
+1)  $  sudo mkdir /opt/new/
+2)  $  sudo touch /opt/new/empty
+3)  $  sudo ln /opt/new/empty /home/bob/samefile
+4)  $  sudo ln -s /opt/new/ /home/bob/softlink
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Create a new directory: /opt/bob/ then go through these steps:
+
+
+A. Change the user owner of this directory to bob and the group owner to ftp.
+
+B. Create 100 empty files (file{00..99}) in /opt/bob/ directory. 
+   Now make sure that all of these files are owned by the user bob and the group ftp
+
+C. Currently, any user can read these files. Leave user and group permissions unchanged. 
+   However, make sure that all other users cannot read these files, file00, file01, all the way to file99. 
+   Change permissions ONLY ON THE FILES, leave permissions on the /opt/bob/ directory itself unchanged.
+
+D. Remove ALL PERMISSIONS on the /opt/bob/file53 file. This means that user, group and other users should not have any permissions.
+
+
+
+A:
+--
+1)  $  sudo mkdir /opt/bob/
+2)  $  sudo chown bob:ftp /opt/bob/
+3)  $  ls -l /opt/
+total 4
+drwxr-xr-x. 2 bob  ftp   6 Oct  4 14:02 bob
+
+
+4)  $  sudo touch /opt/bob/file{00..99}
+5)  $  ls -l /opt/bob/
+total 0
+-rw-r--r--. 1 root root 0 Oct  4 18:32 file00
+-rw-r--r--. 1 root root 0 Oct  4 18:32 file01
+-rw-r--r--. 1 root root 0 Oct  4 18:32 file02
+
+
+6)  $  sudo chown -R bob.ftp /opt/bob/
+7)  $   ls -l /opt/bob/
+total 0
+-rw-r--r--. 1 bob ftp 0 Oct  4 18:32 file00
+-rw-r--r--. 1 bob ftp 0 Oct  4 18:32 file01
+
+
+8)  $  sudo chmod 640 /opt/bob/file{00..99}
+9)  $   ls -l /opt/bob/
+total 0
+-rw-r-----. 1 bob ftp 0 Oct  4 18:32 file00
+-rw-r-----. 1 bob ftp 0 Oct  4 18:32 file01
+-rw-r-----. 1 bob ftp 0 Oct  4 18:32 file02
+-rw-r-----. 1 bob ftp 0 Oct  4 18:32 file03
+
+
+10)  $  sudo chmod 000 /opt/bob/file53
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q (!!!!!!!!!!!!!!!!):
+---------------------
+In your home directory you will find a directory called databases.
+
+
+A. Remove the sticky bit special permission from this databases directory.
+
+B. Find the file in databases/ directory that has the SETUID (special permission) set on it. 
+   Remove the SETUID special permission and the executable permission for the user owner from this file.
+
+C. Add the special SETGID (set group ID) permission to the databases directory.
+
+
+
+A:
+--
+0)  $  man chmod
+
+NAME
+       chmod - change file mode bits
+
+SYNOPSIS
+       chmod [OPTION]... MODE[,MODE]... FILE...
+       chmod [OPTION]... OCTAL-MODE FILE...
+       chmod [OPTION]... --reference=RFILE FILE...
+
+DESCRIPTION
+
+       A combination of the letters ugoa controls which users' access to the file will be changed: the user
+       who owns it (u), other users in the file's group (g), other users not in the file's  group  (o),  or
+       all  users  (a).   If none of these are given, the effect is as if (a) were given, but bits that are
+       set in the umask are not affected.
+
+       The letters rwxXst select file mode bits for the affected users: read (r), write  (w),  execute  (or
+       search  for  directories) (x), execute/search only if the file is a directory or already has execute
+       permission for some user (X), set user or group ID on execution (s),  restricted  deletion  flag  or
+       sticky bit (t).  Instead of one or more of these letters, you can specify exactly one of the letters
+       ugo: the permissions granted to the user who owns the file (u), the  permissions  granted  to  other
+       users who are members of the file's group (g), and the permissions granted to users that are in nei‐
+       ther of the two preceding categories (o).
+
+
+# Remove sticky bit permission 
+1)  $  chmod -t databases/
+
+# Find files having the SETUID
+2)  $  find databases/ -perm /4000
+databases/file3594
+
+
+# Remove SETUID and the executable permission for user owner from this file
+3)  $  sudo chmod a-st-x databases/file3594
+
+# Set the SETGID
+4)  $  chmod g+s databases/
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+In your home directory you will find a directory called collection. Perform the following tasks:
+
+
+A. Find the file(s) that are exactly 1 byte in size. Move these files to the /opt/foundfiles/ directory.
+
+B. All of the remaining files in collection/ have some text content inside. 
+   Look through these all files and find the files that contain the letter e or E. 
+   For example, a file with the word help or HELP should match. 
+   Once you found these files, also move them to /opt/foundfiles/ directory.
+
+C. Find the file that is not readable by other users, rest of permissions don't matter. 
+   Once you found this, restore the +r permission for other users. 
+   Make this single change, leaving all other permission unchanged, in their original form.
+
+
+
+A:
+--
+1)  $  sudo find /home/bob/collection/ -type f -size 1c -exec mv {} /opt/foundfiles/ \;
+2)  $  sudo grep -ir 'e' /home/bob/collection/
+/home/bob/collection/file575:THIS IS A SPECIAL FILE!
+/home/bob/collection/file875:This is a special file!
+
+
+3)  $  sudo mv /home/bob/collection/file575 /opt/foundfiles/
+4)  $  sudo mv /home/bob/collection/file875 /opt/foundfiles/
+5)  $  sudo find /home/bob/collection/ -type f -perm 640 -exec sudo chmod o+r {} \;
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+In your home directory you will find two directories, dir1 and dir2. They are almost identical, containing the same filenames.
+
+
+A. There is one unique file in one of the directories, remove this file so that the directories become truly identical.
+
+B. Edit dir1/file007 file and add this text inside: This file has been edited
+
+C. In your home directory, you will find two files yesfile1 and yesfile2 . 
+   These files are almost identical, just one word is different. 
+   What is this unique word? Write this word to this file: /opt/word.txt
+
+D. Change all occurrences of the word yes to no in yesfile1 file.
+
+
+
+A:
+--
+1)  $  ls -l
+total 980
+drwxr-xr-x. 2 root root  24576 Oct  4 18:28 dir1
+drwxr-xr-x. 2 root root  24576 Oct  4 18:28 dir2
+-rw-r--r--. 1 root root  20012 Oct  4 18:28 yesfile1
+-rw-r--r--. 1 root root  20014 Oct  4 18:28 yesfile2
+
+
+2)  $  sudo diff ./dir1 ./dir2
+Only in ./dir2: file387
+
+
+3)  $  sudo rm -f ./dir2/file387
+4)  $  sudo vi ./dir1/file007
+This file has been edited
+
+
+# 2501c2501 tells us line 2501 from file 1 is changed in line 2501 on file 2
+5)  $  sudo diff yesfile1 yesfile2
+2501c2501
+< yes yes yes
+---
+> yes maybe yes
+
+
+6)  $  sudo vi /opt/word.txt
+maybe
+
+
+7)  $  sudo sed -i s/yes/no/g yesfile1
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+In your home directory you will find a directory called uploads.
+
+
+A. Find the file in uploads/ directory that contains a word ending with the letter t. Remove this file.
+
+B. Archive the uploads directory and save the archive to this file: /opt/backup.tar.gz
+
+C. You will find an archive in your home directory called backup.tar.bz2. Restore the files from this archive to the /opt/restore/ directory.
+
+
+
+A:
+--
+# Find and remove "a word ending withe the letter t"
+1)  $  sudo grep -ro '\w*t\b' /home/bob/uploads/
+/home/bob/uploads/upload5564:userdatt
+
+
+2)  $  sudo rm /home/bob/uploads/upload5564
+
+3)  $  sudo tar -czvf /opt/backup.tar.gz /home/bob/uploads/
+4)  $  sudo tar -xf backup.tar.bz2 -C /opt/restore/
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+In your home directory you will find a file containing the manual page for the ls command. The file is called lsmanpage.txt
+
+
+A. Find all the lines in lsmanpage.txt file, that match the exact word sort. 
+   Redirect this filtered output to the /opt/filtered.txt file. 
+   Make sure that this redirect overwrites any existing content in /opt/filtered.txt file.
+
+B. Find all the lines in lsmanpage.txt file, that match the word list , no matter if the letters are uppercase or lowercase (case insensitive search). 
+   Otherwise said, list, List, LIST and all such variations should match. 
+   Add this filtered output to the /opt/filtered.txt file. Make sure not to overwrite the existing content i.e append your filtered output to this file.
+
+C. In your home directory you will find a file named shuffled.txt. 
+   Filter out all the lines that end with the digit 0 then sort this output alphabetically and write the final output to this file: /opt/filtsort.txt 
+   Example of correct output that should end up being saved in this file is:
+
+
+line00
+LINE00
+line10
+
+
+and so on.
+
+
+
+A:
+--
+# Find word 'sort' and 'list'
+1)  $  sudo bash -c "grep -w 'sort' /home/bob/lsmanpage.txt > /opt/filtered.txt"
+
+       List information about the FILEs (the current directory by default).  Sort entries alphabetically if none of -cftuvSUX nor --sort is specified.
+       -c     with  -lt:  sort  by,  and show, ctime (time of last modification of file status information); with -l: show ctime and sort by name; otherwise: sort by ctime,
+       -f     do not sort, enable -aU, disable -ls --color
+              can be augmented with a --sort option, but any use of --sort=none (-U) disables grouping
+       -S     sort by file size, largest first
+       --sort=WORD
+              sort by WORD instead of name: none (-U), size (-S), time (-t), version (-v), extension (-X)
+              with  -l,  show  time  as WORD instead of default modification time: atime or access or use (-u); ctime or status (-c); also use specified time as sort key if
+              --sort=time (newest first)
+       -t     sort by modification time, newest first
+       -u     with -lt: sort by, and show, access time; with -l: show access time and sort by name; otherwise: sort by access time, newest first
+       -U     do not sort; list entries in directory order
+       -v     natural sort of (version) numbers within text
+       -X     sort alphabetically by entry extension
+
+
+2)  $  sudo bash -c "grep -iw 'list' /home/bob/lsmanpage.txt >> /opt/filtered.txt"
+
+       List information about the FILEs (the current directory by default).  Sort entries alphabetically if none of -cftuvSUX nor --sort is specified.
+       -c     with  -lt:  sort  by,  and show, ctime (time of last modification of file status information); with -l: show ctime and sort by name; otherwise: sort by ctime,
+       -f     do not sort, enable -aU, disable -ls --color
+              can be augmented with a --sort option, but any use of --sort=none (-U) disables grouping
+       -S     sort by file size, largest first
+       --sort=WORD
+              sort by WORD instead of name: none (-U), size (-S), time (-t), version (-v), extension (-X)
+              with  -l,  show  time  as WORD instead of default modification time: atime or access or use (-u); ctime or status (-c); also use specified time as sort key if
+              --sort=time (newest first)
+       -t     sort by modification time, newest first
+       -u     with -lt: sort by, and show, access time; with -l: show access time and sort by name; otherwise: sort by access time, newest first
+       -U     do not sort; list entries in directory order
+       -v     natural sort of (version) numbers within text
+       -X     sort alphabetically by entry extension
+[bob@centos-host ~]$ sudo bash -c "grep -iw 'list' /home/bob/lsmanpage.txt"
+       ls - list directory contents
+       List information about the FILEs (the current directory by default).  Sort entries alphabetically if none of -cftuvSUX nor --sort is specified.
+              do not list implied . and ..
+              do not list implied entries ending with ~
+       -C     list entries by columns
+              list directories themselves, not their contents
+       -g     like -l, but do not list owner
+              do not list implied entries matching shell PATTERN (overridden by -a or -A)
+              do not list implied entries matching shell PATTERN
+       -m     fill width with a comma separated list of entries
+              like -l, but list numeric user and group IDs
+       -o     like -l, but do not list group information
+              list subdirectories recursively
+       -U     do not sort; list entries in directory order
+       -x     list entries by lines instead of by columns
+       -1     list one file per line.  Avoid '\n' with -q or -b
+
+
+# Filtering lines that end with the digit 0
+3)  $  sudo bash -c "grep -i '\w*0\b' /home/bob/shuffled.txt > /opt/filtsort.txt"
+
+LINE30
+LINE40
+LINE10
+LINE20
+line70
+LINE50
+line40
+line10
+line30
+line20
+line90
+LINE90
+LINE60
+line00
+LINE70
+LINE00
+LINE80
+line80
+line50
+line60
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+SSH into node01 using user bob and password caleston123
+
+
+A. Change the default boot target of this system to graphical.target
+
+B. Schedule this system to power off at 23:45
+
+
+Remember to exit back from node01 host.
+
+
+
+A:
+--
+1)  $  ssh bob@node01
+bob@node01's password: caleston123
+
+
+2)  $  sudo systemctl set-default graphical.target
+Removed /etc/systemd/system/default.target.
+Created symlink /etc/systemd/system/default.target → /usr/lib/systemd/system/graphical.target.
+
+
+3)  $  sudo shutdown -h 23:45
+Shutdown scheduled for Wed 2023-10-04 23:45:00 UTC, use 'shutdown -c' to cancel.
+
+
+4)  $  exit
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Create a bash script and save it at /opt/script.sh. Make sure this script does the following things:
+
+
+A. It archives the /var/www/ directory and stores this archive in /opt/webserver.tar.gz
+
+B. It then restarts the nginx service.
+
+
+
+A:
+--
+1)  $  man tar
+
+SYNOPSIS
+   Traditional usage
+       tar {A|c|d|r|t|u|x}[GnSkUWOmpsMBiajJzZhPlRvwo] [ARG...]
+
+       -z, --gzip, --gunzip, --ungzip
+              Filter the archive through gzip(1).
+
+
+2)  $  sudo vi /opt/script.sh
+
+#!/bin/bash
+sudo tar -czvf /opt/webserver.tar.gz /var/www/
+sudo systemctl restart nginx
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Look for a process which has the word cached in its name. Then perform the following actions:
+
+
+A. Save the PID number of this process to this file: /opt/pid.txt
+
+B. List the opened files used by this process and save this list to /opt/openedfiles.txt
+
+
+
+A:
+--
+1)  $  sudo netstat -p | grep cached
+Active Internet connections (w/o servers)
+Proto RefCnt Flags       Type       State         I-Node   PID/Program name     Path
+unix  3      [ ]         STREAM     CONNECTED     66377    24792/memcached    
+
+
+2)  $  sudo bash -c "echo '24792' >> /opt/pid.txt"
+3)  $  cat /opt/pid.txt 
+24792
+
+
+4)  $  lsof -p 24792
+lsof: WARNING: can't stat() overlay file system /var/lib/docker/overlay2/0e8d4e166f073b4e03d34d8b22456e952b909763153d56526f1fd01cf626f172/merged
+      Output information may be incomplete.
+lsof: WARNING: can't stat() nsfs file system /run/docker/netns/2b8f205283a2
+      Output information may be incomplete.
+COMMAND     PID      USER   FD      TYPE DEVICE SIZE/OFF NODE NAME
+memcached 24792 memcached  cwd   unknown                      /proc/24792/cwd (readlink: Permission denied)
+memcached 24792 memcached  rtd   unknown                      /proc/24792/root (readlink: Permission denied)
+memcached 24792 memcached  txt   unknown                      /proc/24792/exe (readlink: Permission denied) 
+
+
+5)  $  sudo bash -c "lsof -p '24792'  >> /opt/openedfiles.txt"
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+A user tried to run a command with sudo (root) privileges but entered the wrong password.
+Look through your system logs and find out the exact username that failed to provide the correct password. Then save this username to /opt/userfail.txt
+For example, if the user called smith provided the wrong password then you just write smith to that file.
+
+
+
+A:
+--
+1)  $  sudo cat /var/log/secure | grep "sudo:auth"
+Oct  4 18:55:04 centos-host sudo[31975]: pam_unix(sudo:auth): authentication failure; logname= uid=1003 euid=0 tty= ruser=jane rhost=  user=jane
+Oct  4 18:55:06 centos-host sudo[31975]: pam_unix(sudo:auth): conversation failed
+Oct  4 18:55:06 centos-host sudo[31975]: pam_unix(sudo:auth): auth could not identify password for [jane]
+
+
+2)  $  sudo bash -c "echo 'jane' > /opt/userfail.txt"
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Create a cron job for user root that will run every Monday, and Friday, at 3AM (03:00). This should be a single cron job. 
+This job should run a command that archives the /etc/ directory and stores this archive at /opt/etcbackup.tar.gz
+
+
+
+A:
+--
+1)  $  cat /etc/crontab 
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+
+# For details see man 4 crontabs
+
+# Example of job definition:
+# .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+# |  |  |  |  |
+# *  *  *  *  * user-name  command to be executed
+
+
+2)  $  sudo crontab -e
+0 3 * * mon,fri tar -czvf /opt/etcbackup.tar.gz /etc/
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+A. Upgrade tzdata packages on this system to the latest version available.
+
+B. Next, install the software package group called RPM Development Tools.
+
+C. Finally, find out what software package installed this file: /etc/zlogin. Then remove that package from the system.
+
+
+
+A:
+--
+1)  $  sudo dnf update tzdata -y
+2)  $  sudo dnf groupinstall "RPM Development Tools"
+3)  $  sudo dnf provides /etc/zlogin
+
+zsh-5.5.1-6.el8_1.2.x86_64 : Powerful interactive shell
+Repo        : @System
+Matched from:
+Filename    : /etc/zlogin
+
+zsh-5.5.1-6.el8_1.2.x86_64 : Powerful interactive shell
+Repo        : baseos
+Matched from:
+Filename    : /etc/zlogin
+
+
+4)  $  sudo dnf remove zsh -y
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+There's an ext4 filesystem at /dev/vde1. It's currently corrupted. Repair this filesystem.
+
+
+
+A:
+--
+1)  $  sudo fsck /dev/vde1
+
+fsck from util-linux 2.32.1
+e2fsck 1.45.6 (20-Mar-2020)
+ext2fs_open2: Bad magic number in super-block
+fsck.ext2: Superblock invalid, trying backup blocks...
+/dev/vde1 was not cleanly unmounted, check forced.
+Resize inode not valid.  Recreate<y>? yes
+Pass 1: Checking inodes, blocks, and sizes
+Pass 2: Checking directory structure
+Pass 3: Checking directory connectivity
+Pass 4: Checking reference counts
+Pass 5: Checking group summary information
+Block bitmap differences:  +(32768--32896) +(98304--98432) +(163840--163968)
+Fix<y>? yes
+Free blocks count wrong for group #0 (28520, counted=28521).
+Fix<y>? yes
+Free blocks count wrong (253028, counted=253029).
+Fix<y>? yes
+Padding at end of inode bitmap is not set. Fix<y>? yes
+
+/dev/vde1: ***** FILE SYSTEM WAS MODIFIED *****
+/dev/vde1: 11/65536 files (0.0% non-contiguous), 8859/261888 blocks
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+In this exercise you will work with kernel runtime parameters.
+
+
+A. List all kernel parameters that contain the word cache. Redirect this filtered output to the file /opt/kruntime.txt
+
+B. Set the kernel runtime parameter vm.swappiness to this value: 5. 
+   Make this both a persistent change and a non-persistent change. 
+   Otherwise said, every time this system boots in the future, the value of vm.swappiness should be set to 5, automatically. 
+   But vm.swappiness should be changed to 5 for your current boot session as well.
+
+
+
+A:
+--
+1)  $  sudo sysctl -a | grep cache
+
+fs.quota.cache_hits = 0
+net.ipv4.cipso_cache_bucket_size = 10
+net.ipv4.cipso_cache_enable = 1
+net.ipv6.calipso_cache_bucket_size = 10
+net.ipv6.calipso_cache_enable = 1
+vm.drop_caches = 0
+vm.vfs_cache_pressure = 100
+
+
+2)  $  sudo sysctl -a | sudo bash -c 'grep cache > /opt/kruntime.txt'
+3)  $  cat /opt/kruntime.txt
+
+fs.quota.cache_hits = 0
+net.ipv4.cipso_cache_bucket_size = 10
+net.ipv4.cipso_cache_enable = 1
+net.ipv6.calipso_cache_bucket_size = 10
+net.ipv6.calipso_cache_enable = 1
+vm.drop_caches = 0
+vm.vfs_cache_pressure = 100
+
+4)  $  apropos sysctl.conf
+sysctl.conf (5)      - sysctl preload/configuration file
+
+
+5)  $  man sysctl.conf
+
+NOTES
+       As the /etc/sysctl.conf file is used to override default kernel parameter values, only a small  num‐
+       ber  of  parameters  is predefined in the file.  Use /sbin/sysctl -a or follow sysctl(8) to list all
+       possible parameters. The description of individual parameters can be found in the kernel  documenta‐
+       tion.
+
+
+6)  $  sudo vi /etc/sysctl.conf
+
+# sysctl settings are defined through files in
+# /usr/lib/sysctl.d/, /run/sysctl.d/, and /etc/sysctl.d/.
+#
+# Vendors settings live in /usr/lib/sysctl.d/.
+# To override a whole file, create a new file with the same in
+# /etc/sysctl.d/ and put new settings there. To override
+# only specific settings, add a file with a lexically later
+# name in /etc/sysctl.d/ and put new settings there.
+#
+# For more information, see sysctl.conf(5) and sysctl.d(5).
+net.ipv4.ip_forward=1
+vm.swappiness=5
+
+
+
+# Apply the changes
+7)  $  sudo sysctl -p
+net.ipv4.ip_forward = 1
+vm.swappiness = 5
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+There's a user account with the name smith on this system. Perform the following actions:
+
+
+A. Remove smith from the adm group.
+
+B. Set smith password to Exam4Passed
+
+C. Change their login shell to /bin/sh
+
+D. Set a resource limit for this user. Make sure that smith can launch not more than 30 processes. This should be a hard limit.
+
+
+
+A:
+--
+1)  $  sudo gpasswd -d smith adm
+Removing user smith from group adm
+
+
+2)  $  echo 'smith:Exam4Passed' | sudo chpasswd
+3)  $  sudo usermod --shell /bin/sh smith
+4)  $  sudo vi /etc/security/limits.conf
+
+#<domain>      <type>  <item>         <value>
+#
+
+#*               soft    core            0
+#*               hard    rss             10000
+#@student        hard    nproc           20
+#@faculty        soft    nproc           20
+#@faculty        hard    nproc           50
+#ftp             hard    nproc           0
+#@student        -       maxlogins       4
+smith hard nproc 30
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+Inspect your system and find out what application is listening for incoming connections on TCP port 11211. 
+Write the PID number for the process associated with that application, to the following file: /opt/pidof11211.txt
+
+
+
+A:
+--
+1)  $  sudo ss -ntap | grep 11211
+
+LISTEN 0      128          127.0.0.1:11211       0.0.0.0:*     users:(("memcached",pid=24792,fd=27))                    
+LISTEN 0      128              [::1]:11211          [::]:*     users:(("memcached",pid=24792,fd=28)) 
+
+
+2)  $  sudo vi /opt/pidof11211.txt
+24792
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+SSH into node01 using user bob and password caleston123
+
+
+A. Find out what DNS resolver(s) this system is using, save the IP address of at least one of the DNS resolvers to the following file: /opt/resolverandroutes.txt
+
+B. Print out the routing table of this system and save the output to the same file: /opt/resolverandroutes.txt Make sure you don't overwrite the previous file contents.
+
+C. Add a static host to this system. The hostname you should add is webserver and it should statically resolve to the following IP address: 1.1.1.1
+
+
+Remember to exit back from node01 host.
+
+
+
+A:
+--
+1)  $  ssh bob@node01
+
+bob@node01's password: caleston123
+
+
+2)  $  sudo su -
+
+# Find out the DNS resolver and save IP addresses
+3)  $  cat /etc/resolv.conf | grep nameserver
+
+nameserver 192.168.121.1
+nameserver 172.28.128.1
+
+
+4)  $  vi /opt/resolverandroutes.txt
+
+192.168.121.1
+172.28.128.1
+
+
+
+# Save routing table
+5)  $  ip r >> /opt/resolverandroutes.txt
+
+default via 192.168.121.1 dev eth0 proto dhcp metric 100 
+default via 172.28.128.1 dev eth1 proto dhcp metric 101 
+172.28.128.0/24 dev eth1 proto kernel scope link src 172.28.128.33 metric 101 
+192.168.121.0/24 dev eth0 proto kernel scope link src 192.168.121.166 metric 100 
+
+
+6)  $  cat /opt/resolverandroutes.txt
+192.168.121.1
+172.28.128.1
+default via 192.168.121.1 dev eth0 proto dhcp metric 100 
+default via 172.28.128.1 dev eth1 proto dhcp metric 101 
+172.28.128.0/24 dev eth1 proto kernel scope link src 172.28.128.33 metric 101 
+192.168.121.0/24 dev eth0 proto kernel scope link src 192.168.121.166 metric 100 
+
+
+# Add static host
+7)  $  vi /etc/hosts
+
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+127.0.1.1 node01 node01
+1.1.1.1 webserver
+
+
+8)  $  exit
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+In this exercise, you will work with Docker. Perform the following actions:
+
+
+A. List the containers available on this system. In your output, you should see only one docker instance available. 
+   Save its name (the one you see under the NAMES field in that output) to this file: /opt/containername.txt
+
+B. Remove the following docker image: nginx. You can make any change you think is necessary to achieve this.
+
+C. Create a new container called exam4 that will run the httpd daemon. Use the httpd docker image for this container. 
+   Make sure port 8081 on the host is mapped to port 80 of the container.
+
+
+
+A:
+--
+1)  $  sudo docker ps -a
+
+CONTAINER ID   IMAGE     COMMAND                  CREATED          STATUS                      PORTS     NAMES
+85c360eb9dc4   mariadb   "docker-entrypoint.s…"   38 minutes ago   Exited (1) 38 minutes ago             exam1
+
+
+2)  $  sudo vi /opt/containername.txt
+exam1
+
+
+3)  $  sudo docker image list
+REPOSITORY   TAG       IMAGE ID       CREATED        SIZE
+mariadb      latest    1a580bde192c   36 hours ago   404MB
+nginx        latest    61395b4c586d   2 weeks ago    187MB
+
+
+4)  $  sudo docker rmi nginx
+Untagged: nginx:latest
+Untagged: nginx@sha256:32da30332506740a2f7c34d5dc70467b7f14ec67d912703568daff790ab3f755
+Deleted: sha256:61395b4c586da2b9b3b7ca903ea6a448e6783dfdd7f768ff2c1a0f3360aaba99
+Deleted: sha256:1c69f36a0d9b59b762eaba410fa9fd01b85140670a8d49199a7b37702cc956c0
+Deleted: sha256:bac209bfab6997cccf20779ae98d5f77a66867734499ecf604a50a5826f6b8a4
+Deleted: sha256:859676f4cd3004af025a02dade096ad6f9391d94d1b1a983fc6098debe435055
+Deleted: sha256:cbbd97cee0d824e5e82f9a4b2e93c5eb3c66fd72a2624d5c1521dc3395bfd1e2
+Deleted: sha256:0b41545d8c3de3b78778d591a8da3d9dfa5fa8807baef5edf21e5eb94ded792d
+Deleted: sha256:7e87866b23143eb30086086a669b2e902368a5836446a885b2411d3feef18bef
+Deleted: sha256:d310e774110ab038b30c6a5f7b7f7dd527dbe527854496bd30194b9ee6ea496e
+
+
+5)  $  sudo docker run --name exam4 -p 8081:80 -d httpd
+6)  $  sudo docker ps -a
+CONTAINER ID   IMAGE     COMMAND                  CREATED          STATUS                      PORTS                                   NAMES
+0c99ce8cd440   httpd     "httpd-foreground"       9 seconds ago    Up 8 seconds                0.0.0.0:8081->80/tcp, :::8081->80/tcp   exam4
+85c360eb9dc4   mariadb   "docker-entrypoint.s…"   41 minutes ago   Exited (1) 41 minutes ago                                           exam1
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+There is one virtual machine created on this system, but it's currently in a stopped state.
+
+
+A. Start this virtual machine.
+
+B. Also, make sure this virtual machine will automatically start every time the system boots up.
+
+
+
+A:
+--
+1)  $  sudo virsh list --all
+
+ Id   Name   State
+-----------------------
+ -    VM1    shut off
+
+
+2)  $  sudo virsh start VM1
+
+Domain VM1 started
+
+
+3)  $  sudo virsh autostart VM1
+
+Domain VM1 marked as autostarted
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+You have a disk available at /dev/vdb.
+
+
+A. Create a 500MB partition on this disk.
+
+B. Create an ext4 filesystem with a block size of 2048 bytes on this partition.
+
+C. Manually mount this filesystem in the /mnt directory.
+
+
+
+A:
+--
+1)  $  sudo -i
+2)  $  fdisk /dev/vdb
+
+Welcome to fdisk (util-linux 2.32.1).
+Changes will remain in memory only, until you decide to write them.
+Be careful before using the write command.
+
+Device does not contain a recognized partition table.
+Created a new DOS disklabel with disk identifier 0x0343ce11.
+
+Command (m for help): n
+Partition type
+   p   primary (0 primary, 0 extended, 4 free)
+   e   extended (container for logical partitions)
+Select (default p): 
+
+Using default response p.
+Partition number (1-4, default 1): 
+First sector (2048-2097151, default 2048): 
+Last sector, +sectors or +size{K,M,G,T,P} (2048-2097151, default 2097151): 500M
+Value out of range.
+Last sector, +sectors or +size{K,M,G,T,P} (2048-2097151, default 2097151): +500M
+
+Created a new partition 1 of type 'Linux' and of size 500 MiB.
+
+Command (m for help): w
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Syncing disks.
+
+
+3)  $  lsblk
+
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vda    253:0    0   11G  0 disk 
+└─vda1 253:1    0   10G  0 part /
+vdb    253:16   0    1G  0 disk 
+└─vdb1 253:17   0  500M  0 part 
+vdc    253:32   0    1G  0 disk 
+vdd    253:48   0    1G  0 disk 
+vde    253:64   0    1G  0 disk 
+└─vde1 253:65   0 1023M  0 part
+
+
+4)  $  sudo mkfs.ext4 -b 2048 /dev/vdb1
+
+mke2fs 1.45.6 (20-Mar-2020)
+Creating filesystem with 256000 2k blocks and 128000 inodes
+Filesystem UUID: c5d1e8ba-fda2-4ec4-adf0-df0946cab270
+Superblock backups stored on blocks: 
+        16384, 49152, 81920, 114688, 147456
+
+Allocating group tables: done                            
+Writing inode tables: done                            
+Creating journal (4096 blocks): done
+Writing superblocks and filesystem accounting information: done 
+
+
+5)  $  mount /dev/vdb1 /mnt/
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+In your home directory you will find two files.
+
+
+A. Edit this file, imm.txt and add the following text under the existing line: New line added successfully
+
+B. Edit this file, app.txt and correct that equation. It should be 1+1=2 instead.
+
+
+
+A:
+--
+1)  $   apropos chattr
+chattr (1)           - change file attributes on a Linux file system
+
+
+2)  $  man chattr
+
+SYNOPSIS
+       chattr [ -RVf ] [ -v version ] [ -p project ] [ mode ] files...
+
+DESCRIPTION
+       chattr changes the file attributes on a Linux file system.
+
+       The format of a symbolic mode is +-=[aAcCdDeFijPsStTu].
+
+ATTRIBUTES
+       a      A file with the 'a' attribute set can only be opened in append mode for writing.   Only  the
+              superuser  or  a  process possessing the CAP_LINUX_IMMUTABLE capability can set or clear this
+              attribute.
+
+       i      A  file  with  the 'i' attribute cannot be modified: it cannot be deleted or renamed, no link
+              can be created to this file, most of the file's metadata can not be modified,  and  the  file
+              can  not  be  opened  in  write  mode.   Only  the  superuser  or  a  process  possessing the
+              CAP_LINUX_IMMUTABLE capability can set or clear this attribute.
+
+
+3)  $  sudo chattr -i imm.txt
+4)  $  vi imm.txt
+
+Keep this line, add your content under this line:
+New line added successfully
+   
+
+5)  $  sudo chattr -a app.txt
+6)  $  vi app.txt
+1+1=2
+
+
+
+
+
+=============================================================================================================================================================================
+
+Q:
+--
+There is a LVM structure available. Perform the following actions:
+
+
+A. Remove the following PV, physical volume: /dev/vdd
+
+B. Create a VG, volume group. The name of this volume should be examVG. This VG should consist of only the /dev/vdc physical volume.
+
+C. Create an LV, logical volume. Its size should be 100 megabytes. Its name should be examLV. Of course, this LV should be created on the examVG volume group.
+
+D. Create an xfs filesystem with a block size of 1024 bytes on the examLV logical volume.
+
+
+
+A:
+--
+1)  $  sudo pvremove /dev/vdd
+  Labels on physical volume "/dev/vdd" successfully wiped.
+
+
+2)  $  sudo vgcreate examVG /dev/vdc
+  Volume group "examVG" successfully created
+
+
+3)  $  sudo lvcreate -L 100MB -n examLV examVG
+  Logical volume "examLV" created.
+
+
+4)  $  sudo mkfs.xfs -b size=1024 /dev/examVG/examLV
+
+meta-data=/dev/examVG/examLV     isize=512    agcount=4, agsize=25600 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1
+data     =                       bsize=1024   blocks=102400, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=1024   blocks=3527, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0

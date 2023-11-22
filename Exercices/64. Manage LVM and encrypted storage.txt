@@ -1,0 +1,289 @@
+Q:
+--
+Install lvm on this system.
+
+
+A:
+--
+1)  $   sudo dnf install lvm2 -y
+
+
+===============================================================================================================================
+
+Q:
+--
+Add these four disks as PVs (Physical Volumes) to LVM: /dev/vdb, /dev/vdc, /dev/vdd and /dev/vde.
+
+
+A:
+--
+1)  $   sudo pvcreate /dev/vdb /dev/vdc /dev/vdd /dev/vde
+
+  Physical volume "/dev/vdb" successfully created.
+  Physical volume "/dev/vdc" successfully created.
+  Physical volume "/dev/vdd" successfully created.
+  Physical volume "/dev/vde" successfully created.
+
+
+===============================================================================================================================
+
+Q:
+--
+Use the correct command to display a list of Physical Volumes (PVs) used by LVM. 
+What is the PSize of /dev/vdc? Save the value in /home/bob/pvsize file.
+
+Note that, if the value is 10.00g then the file content should be 10
+
+
+A:
+--
+1)  $   sudo pvs
+
+  PV         VG Fmt  Attr PSize PFree
+  /dev/vdb      lvm2 ---  1.00g 1.00g
+  /dev/vdc      lvm2 ---  1.00g 1.00g
+  /dev/vdd      lvm2 ---  1.00g 1.00g
+  /dev/vde      lvm2 ---  1.00g 1.00g
+
+
+2)  $   sudo vi /home/bob/pvsize
+1   
+
+
+===============================================================================================================================
+
+Q:
+--
+Remove the /dev/vde physical volume from LVM.
+
+
+A:
+--
+1)  $   sudo pvremove /dev/vde
+  Labels on physical volume "/dev/vde" successfully wiped.
+  
+
+===============================================================================================================================
+
+Q:
+--
+Create a Volume Group (VG) named volume1. It should be created on these two Physical Volumes: /dev/vdb and /dev/vdc.
+
+
+A:
+--
+1)  $   sudo vgcreate volume1 /dev/vdb /dev/vdc
+  Volume group "volume1" successfully created
+
+
+===============================================================================================================================
+
+Q:
+--
+Imagine that our volume group, volume1 is running out of free space. 
+It currently uses /dev/vdb and /dev/vdc to store data.
+Add /dev/vdd to this volume group so that we gain more usable storage space.
+
+
+A:
+--
+1)  $   sudo vgextend volume1 /dev/vdd
+  Volume group "volume1" successfully extended
+  
+
+===============================================================================================================================
+
+Q (!!!):
+-------
+Remove /dev/vdd from the volume group volume1.
+
+
+A:
+--
+# 1)  $   sudo vgremove volume1 /dev/vdd
+1)  $   sudo vgreduce volume1 /dev/vdd
+  Removed "/dev/vdd" from volume group "volume1"
+
+
+===============================================================================================================================
+
+Q:
+--
+Use the command that displays all of the volume groups. What is the VSize of volume1 ?
+
+Save the respective value in /home/bob/volume1 file.
+
+Note that, if the value is 10.00g then the file content should be 10.00g
+
+
+A:
+--
+1)  $   sudo vgs
+  VG      #PV #LV #SN Attr   VSize VFree
+  volume1   2   0   0 wz--n- 1.99g 1.99g
+
+
+2)  $   sudo vi /home/bob/volume1
+1.99g
+
+
+===============================================================================================================================
+
+Q:
+--
+Create a Logical Volume (LV). It should have these properties:
+
+1. The size of the LV should be 1.5 Gigabytes.
+2. Its name should be smalldata.
+3. The logical volume should be created on the volume group named volume1.
+
+
+A:
+--
+1)  $   sudo lvcreate --size 1.5G --name smalldata volume1 
+  Logical volume "smalldata" created.
+
+
+===============================================================================================================================
+
+Q:
+--
+Resize the Logical Volume called smalldata to 1 Gigabyte.
+This logical volume resides on the volume group called volume1.
+
+
+A:
+--
+1)  $  sudo lvresize --size 1G volume1/smalldata
+
+  WARNING: Reducing active logical volume to 1.00 GiB.
+  THIS MAY DESTROY YOUR DATA (filesystem etc.)
+Do you really want to reduce volume1/smalldata? [y/n]: y
+  Size of logical volume volume1/smalldata changed from 1.50 GiB (384 extents) to 1.00 GiB (256 extents).
+  Logical volume volume1/smalldata successfully resized.
+
+
+===============================================================================================================================
+
+Q:
+--
+Create an XFS filesystem on the logical volume called smalldata.
+This logical volume exists on the volume group called volume1.
+
+
+A:
+--
+1)  $  sudo mkfs.xfs /dev/volume1/smalldata
+
+meta-data=/dev/volume1/smalldata isize=512    agcount=4, agsize=65536 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1
+data     =                       bsize=4096   blocks=262144, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=2560, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+
+
+===============================================================================================================================
+
+Q:
+--
+Destroy/Remove the Logical Volume called smalldata.
+
+
+A:
+--
+1)  $   sudo lvremove volume1/smalldata
+Do you really want to remove active logical volume volume1/smalldata? [y/n]: y
+  Logical volume "smalldata" successfully removed.
+
+
+===============================================================================================================================
+
+Q:
+--
+Setup /dev/vde as an encrypted disk. The mapped device should be called secretdisk.
+Use plain type encryption (not LUKS) and the password must be S3curepass.
+
+
+A:
+--
+1)  $   sudo cryptsetup --verify-passphrase open --type plain /dev/vde secretdisk
+Enter passphrase for /dev/vde: 
+Verify passphrase: 
+
+
+===============================================================================================================================
+
+Q:
+--
+The encrypted device /dev/vde is mapped to the unencrypted device called secretdisk. Can you remember where in the /dev directory this device is located ?
+
+Create an XFS filesystem on this mapped device called secretdisk.
+
+
+A:
+--
+1)  $   sudo mkfs.xfs /dev/mapper/secretdisk
+
+meta-data=/dev/mapper/secretdisk isize=512    agcount=4, agsize=65536 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1
+data     =                       bsize=4096   blocks=262144, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=2560, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+
+
+===============================================================================================================================
+
+Q:
+--
+Close the unencrypted mapped device called secretdisk.
+
+
+A:
+--
+1)  $   sudo cryptsetup close secretdisk
+
+
+===============================================================================================================================
+
+Q:
+--
+Format the /dev/vde device to be used with LUKS encryption. Use S3curepass password.
+
+
+A:
+--
+1)  $   sudo cryptsetup luksFormat /dev/vde
+
+
+WARNING!
+========
+This will overwrite data on /dev/vde irrevocably.
+
+Are you sure? (Type 'yes' in capital letters): YES
+Enter passphrase for /dev/vde: 
+Verify passphrase: 
+
+
+===============================================================================================================================
+
+Q:
+--
+Now /dev/vde is formatted to be used with LUKS encryption. 
+Use cryptsetup to open /dev/vde with LUKS-type encryption (password is S3curepass). 
+/dev/vde should be mapped to an unencrypted device called secretdisk.
+
+
+A:
+--
+1)  $   sudo cryptsetup open /dev/vde secretdisk
+Enter passphrase for /dev/vde: 

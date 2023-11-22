@@ -1,0 +1,223 @@
+Q:
+--
+How can we print the value of an environment variable ?
+
+
+A:
+--
+
+1)	$	echo $MYVAR
+
+
+===============================================================================================================================
+
+Q:
+--
+Which of the following environment variables holds the value of user's home directory ?
+
+
+A:
+--
+
+1)	$HOME
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+Which of the following files can be used to set the globally available environment variables in a Linux based system ?
+
+
+A:
+--
+
+1)	/etc/environment file can be used to set the globally available environment variables in a Linux based system.
+
+
+===============================================================================================================================
+
+Q:
+--
+Print our current user's (bob) environment and save the output in /home/bob/env file.
+
+You can use the redirection to save your command's output in a file i.e [your-command] > /home/bob/env
+
+
+A:
+--
+
+1)	$   printenv
+    $   env
+
+2)  $   printenv > /home/bob/env
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+Add an environment variable for user bob.
+
+The variable name should be MYVAR and its value should be TRUE
+
+
+A:
+--
+# Edit .bashrc file and add the variable at the end of the file
+1)	$   vi ~/.bashrc
+export MYVAR=TRUE
+
+
+# Save the file and run:
+2)  $   source ~/.bashrc
+
+
+===============================================================================================================================
+
+Q:
+--
+Identify the value of GLOBALENV environment variable and save the same in /home/bob/globalenv file.
+
+You can use the redirection to save your command's output in a file i.e [your-command] > /home/bob/globalenv
+
+
+A:
+--
+
+1)	$  echo $GLOBALENV > /home/bob/globalenv
+
+
+===============================================================================================================================
+
+Q:
+--
+Whenever we add a new user to the system, some files are copied, from a template directory to the user's home directory.
+
+Manually copy those files into /home/bob/default_data directory.
+
+
+A:
+--
+
+1)  ls -al /etc/skel/
+total 24
+drwxr-xr-x 2 root root 4096 Feb  7  2023 .
+drwxr-xr-x 1 root root 4096 Sep  4 13:37 ..
+-rw-r--r-- 1 root root   18 Jun 20  2022 .bash_logout
+-rw-r--r-- 1 root root  141 Jun 20  2022 .bash_pr
+
+
+2)  $   sudo cp -r /etc/skel/ /home/bob/default_data/
+3)  $   ls -al /home/bob/default_data/
+total 16
+drwxrwxr-x 3 bob  bob  4096 Sep  4 14:27 .
+drwx------ 1 bob  bob  4096 Sep  4 14:25 ..
+drwxr-xr-x 2 root root 4096 Sep  4 14:27 skel
+
+
+4)  $   sudo rm -r /home/bob/default_data/skel/
+5)  $   sudo cp -r /etc/skel/.* /home/bob/default_data/
+        sudo cp /etc/skel/.bash* /home/bob/default_data/
+cp: will not create hard link '/home/bob/default_data/skel' to directory '/home/bob/default_data/.'
+
+
+6)  $   ls -al /home/bob/default_data/
+total 1408
+drwxrwxr-x 86 bob  bob    4096 Sep  4 14:30 .
+drwx------  1 bob  bob    4096 Sep  4 14:25 ..
+-rw-r--r--  1 root root     18 Sep  4 14:30 .bash_logout
+-rw-r--r--  1 root root    141 Sep  4 14:30 .bash_profile
+-rw-r--r--  1 root root    376 Sep  4 14:30 .bashrc
+drwxr-xr-x  3 root root   4096 Sep  4 14:30 .java
+-rw-------  1 root root      0 Sep  4 14:30 .pwd.lock
+-rw-r--r--  1 root root    208 Sep  4 14:30 .updated
+-rw-r--r--  1 root root     94 Sep  4 14:30 GREP_COLORS
+drwxr-xr-x  6 root root   4096 Sep  4 14:30 X11
+
+
+===============================================================================================================================
+
+Q:
+--
+Modify the system-wide environment file and make sure that the variable GLOBALOPTION is set to this value: ON. Otherwise said, after you modify that file, any user that logs in and types
+
+echo $GLOBALOPTION
+
+
+should get this result:
+
+ON
+
+
+A:
+--
+# Edit /etc/environment file
+1)  $   sudo vi /etc/environment
+GLOBALOPTION=ON
+
+
+# Then execute following command on the terminal for the changes to take effect
+2)  $   source /etc/environment
+
+
+===============================================================================================================================
+
+Q:
+--
+Make sure that this command gets executed for any user that logs in to the system:
+
+echo Welcome to our server!
+
+
+A:
+--
+# Create a file with .sh extension at location /etc/profile.d/
+1)  $   sudo vi /etc/profile.d/welcome.sh
+echo "Welcome to our server!"
+
+
+===============================================================================================================================
+
+Q:
+--
+Make sure that every time a new user account is added to the system, a file called README is copied to the new user's home directory.
+
+
+A:
+--
+# Whenever we create a new user in Linux the files in /etc/skel directory get copied into the user's home, 
+so we can create a README in /etc/skel directory so that it gets copied to the newly created user's home.
+1)  sudo touch /etc/skel/README
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+Set a variable named LFCS with value Welcome to the KodeKloud LFCS Labs! for every user that logs into this system.
+
+Note: You may need to login again to make the changes take effect, so run sudo su - <current-user-name>.
+
+
+A:
+--
+# Type String without quotes
+1)  $   sudo vi /etc/environment
+LFCS=Welcome to the KodeKloud LFCS Labs!
+
+
+===============================================================================================================================
+
+Q:
+--
+Update the value of $PATH variable for user bob to include $HOME/.config/bin location in the path.
+
+
+A:
+--
+1)  $   vi /home/bob/.bashrc
+PATH="$HOME/.local/bin:$HOME/bin:$HOME/.config/bin:$PATH"
+
+
+2)  $   source ~/.bashrc

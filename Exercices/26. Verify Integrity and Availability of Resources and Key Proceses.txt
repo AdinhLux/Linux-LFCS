@@ -1,0 +1,163 @@
+Q:
+--
+Identify what % space of / partition is in use on our system. Save the value in /home/bob/used file.
+
+
+For example if used space is 10% then the file content should be 10%
+
+
+A:
+--
+
+1)	$	df -h
+
+Filesystem      Size  Used Avail Use% Mounted on
+devtmpfs        467M     0  467M   0% /dev
+tmpfs           485M     0  485M   0% /dev/shm
+tmpfs           485M  6.5M  478M   2% /run
+tmpfs           485M     0  485M   0% /sys/fs/cgroup
+/dev/vda1        10G  4.2G  5.9G  42% /
+tmpfs            97M     0   97M   0% /run/user/0
+
+
+2)	$	df / -h
+
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda1        10G  4.2G  5.9G  42% /
+
+
+3)	$	vi /home/bob/used
+42%
+
+
+===============================================================================================================================
+
+Q:
+--
+Figure out how much storage space the /bin/ directory is using and save the value in /home/bob/bin file.
+
+
+A:
+--
+
+1)	$	df /bin/ -h
+
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda1        10G  4.2G  5.9G  42% /
+
+
+2)	$	du -sh /bin/
+
+312M    /bin/
+
+
+3)	$	vi /home/bob/bin
+
+312M
+
+
+===============================================================================================================================
+
+Q:
+--
+Use the correct command to check out the memory on this system (in megabytes). In /home/bob/memory file, save the total amount of RAM that this system has.
+
+For example, if you see 512 in the command's output, the file contents should be 512
+
+
+A:
+--
+
+1)	$	free -h
+              total        used        free      shared  buff/cache   available
+Mem:          968Mi       186Mi       180Mi       3.0Mi       602Mi       631Mi
+Swap:         2.0Gi       8.0Mi       2.0Gi
+
+
+2)	$	free --mega
+              total        used        free      shared  buff/cache   available
+Mem:           1016         195         188           3         631         662
+Swap:          2147           9        2138
+
+
+3)	$	vi /home/bob/memory
+1016
+
+
+===============================================================================================================================
+
+Q:
+--
+Use the correct command to check out from how long this system is up. In /home/bob/up file, save the time value in hours, minutes or days (whichever is applicable).
+
+For example, if you see 1:07 in the command's output, the file content should be 1.
+Similarly, if you see something like 51 min in the command's output, the file content should be 51min (without any space).
+
+
+A:
+--
+
+1)	$	uptime
+
+ 07:44:38 up  1:06,  0 users,  load average: 0.00, 0.00, 0.00
+ 
+ 
+2)	$	vi /home/bob/up
+1
+
+
+===============================================================================================================================
+
+Q:
+--
+Use the correct command to identify the CPU core(s) per socket on this system. Save its value in /home/bob/cpu file.
+
+
+A:
+--
+
+1)	$	lscpu
+
+Architecture:        x86_64
+CPU op-mode(s):      32-bit, 64-bit
+Byte Order:          Little Endian
+CPU(s):              1
+On-line CPU(s) list: 0
+Thread(s) per core:  1
+Core(s) per socket:  1
+Socket(s):           1
+NUMA node(s):        1
+Vendor ID:           GenuineIntel
+CPU family:          6
+Model:               85
+Model name:          Intel Xeon Processor (Skylake, IBRS)
+Stepping:            4
+CPU MHz:             2800.256
+BogoMIPS:            5600.51
+Virtualization:      VT-x
+Hypervisor vendor:   KVM
+Virtualization type: full
+L1d cache:           32K
+L1i cache:           32K
+L2 cache:            4096K
+L3 cache:            16384K
+NUMA node0 CPU(s):   0
+Flags:               ...
+
+
+2)	$	vi /home/bob/cpu
+1
+
+
+===============================================================================================================================
+
+Q:
+--
+On /dev/vdb we have an XFS filesystem. 
+Use the correct command to check this filesystem for errors and save the output in /home/bob/fscheck file.
+
+
+A:
+--
+
+1)	$	sudo xfs_repair /dev/vdb > /home/bob/fscheck 2>&1

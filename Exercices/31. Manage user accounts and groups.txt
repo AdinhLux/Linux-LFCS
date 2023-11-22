@@ -1,0 +1,255 @@
+Q:
+--
+Set the jane user account to expire on March 1, 2030.
+
+
+A:
+--
+
+1)	$	usermod --help
+Options:
+  -e, --expiredate EXPIRE_DATE  set account expiration date to EXPIRE_DATE
+
+
+2)  $   sudo usermod -e 2030-03-01 jane
+
+
+===============================================================================================================================
+Q:
+--
+Create a system account called apachedev
+
+
+A:
+--
+
+1)  $   useradd --help
+Options:
+  -r, --system                  create a system account
+
+
+2)  $   sudo useradd --system apachedev
+
+
+===============================================================================================================================
+Q:
+--
+Jane's account i.e jane is expired.
+Unexpire the same and make sure it never expires again.
+
+
+A:
+--
+
+1)  $   sudo usermod --expiredate "" jane 
+
+
+===============================================================================================================================
+Q:
+--
+Create a user account called jack and set its default login shell to be /bin/csh.
+
+
+A:
+--
+
+1)  $   useradd --help
+
+Options:
+  -s, --shell SHELL             login shell of the new account
+
+
+2)  $   sudo useradd jack --shell /bin/csh
+
+
+===============================================================================================================================
+Q:
+--
+Delete the user account called jack and ensure his home directory is removed.
+
+
+A:
+--
+
+1)  $   userdel --help
+
+Options:
+  -r, --remove                  remove home directory and mail spool
+
+
+2)  $   sudo userdel --remove jack
+
+
+===============================================================================================================================
+Q (!!!):
+--------
+Mark the password for jane as expired to force her to immediately change it the next time she logs in.
+
+
+A:
+--
+
+1)  $   chage --help
+Options:
+  -d, --lastday LAST_DAY        set date of last password change to LAST_DAY
+
+
+2)  $   sudo chage --lastday 0 jane
+
+
+===============================================================================================================================
+Q:
+--
+Add the user jane to the group called developers.
+
+
+A:
+--
+
+1)  $   groupadd --help
+Usage: groupadd [options] GROUP
+
+
+2)  $   sudo groupadd developers
+groupadd: group 'developers' already exists
+
+
+3)  $   gpasswd --help
+Usage: gpasswd [option] GROUP
+
+Options:
+  -a, --add USER                add USER to GROUP
+
+
+4)  $   sudo gpasswd --add jane developers
+Adding user jane to group developers
+
+
+===============================================================================================================================
+Q:
+--
+Create a group named cricket and set its GID to 9875
+
+
+A:
+--
+
+1)  $   groupadd --help
+Usage: groupadd [options] GROUP
+
+Options:
+  -g, --gid GID                 use GID for the new group
+
+
+2)  $   sudo groupadd --gid 9875 cricket
+
+
+===============================================================================================================================
+Q:
+--
+You already created group cricket in the previous question, now rename this group to soccer while preserving the same GID.
+
+
+A:
+--
+
+1)  $   groupmod --help
+Usage: groupmod [options] GROUP
+
+Options:
+  -g, --gid GID                 change the group ID to GID
+
+
+2)  $   sudo groupmod --new-name soccer cricket
+
+
+===============================================================================================================================
+Q (!!!):
+--------
+Create a user sam with UID 5322, also make it a member of soccer group.
+
+
+A:
+--
+
+1)  $   useradd --help
+Options:
+  -u, --uid UID                 user ID of the new account
+
+
+2)  $   sudo useradd --uid 5322 sam
+3)  $   gpasswd --help
+Options:
+  -a, --add USER                add USER to GROUP
+
+
+4a)  $  sudo gpasswd -a sam soccer
+Adding user sam to group soccer
+
+
+
+4b)  $  sudo useradd -G soccer sam  --uid 5322
+
+
+===============================================================================================================================
+Q:
+--
+Update primary group of user sam and set it to rugby
+
+
+A:
+--
+
+1)  $   usermod --help
+Options:
+  -g, --gid GROUP               force use GROUP as new primary group
+  -G, --groups GROUPS           new list of supplementary GROUPS
+
+
+2)  $   sudo usermod -g rugby sam
+
+
+===============================================================================================================================
+Q:
+--
+Lock the user account called sam
+
+
+A:
+--
+
+1)  $   usermod --help
+Options:
+  -L, --lock                    lock the user account
+
+
+2)  $   sudo usermod --lock sam
+
+
+===============================================================================================================================
+Q:
+--
+Delete the group called appdevs.
+
+
+A:
+--
+
+1)  $   sudo groupdel appdevs
+
+
+===============================================================================================================================
+Q (!!!):
+--------
+Make sure the user jane gets a warning at least 2 days before the password expires.
+
+
+A:
+--
+
+1)  $   chage --help
+Options:
+  -W, --warndays WARN_DAYS      set expiration warning days to WARN_DAYS
+
+
+2)  $   sudo chage -W 2 jane

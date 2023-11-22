@@ -1,0 +1,352 @@
+Q:
+--
+How do we display block devices, such as disks or partitions ?
+
+
+A:
+--
+1)  $   lsblk
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+How do we format a partition as swap space ?
+
+
+A:
+--
+# 1)  $   sudo swapon --verbose /dev/vdb3
+1)  $   sudo mkswap /dev/vdb3
+
+
+===============================================================================================================================
+
+Q:
+--
+Identify the partition name of the virtual disk where / is mounted on this system.
+
+Save the value (only the name without path) in /home/bob/part file.
+
+
+A:
+--
+1)  $   lsblk
+
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vda    253:0    0  11G  0 disk 
+└─vda1 253:1    0  10G  0 part /
+vdb    253:16   0   1G  0 disk 
+vdc    253:32   0   1G  0 disk 
+vdd    253:48   0   1G  0 disk 
+vde    253:64   0   1G  0 disk 
+
+
+2)  $   sudo vi /home/bob/part
+vda1
+
+
+===============================================================================================================================
+
+Q:
+--
+Find out the swapfile used on this system and save its exact path in /home/bob/swap file.
+
+
+A:
+--
+1)  $   sudo swapon --show
+
+NAME      TYPE SIZE USED PRIO
+/swapfile file   2G 8.3M   -2
+
+
+2)  $   sudo vi /home/bob/swap
+/swapfile
+
+
+===============================================================================================================================
+
+Q(!!!):
+-------
+Create three primary partitions on /dev/vdb.
+
+First should have 10MB, second should have 21MB and the third should have 15MB.
+
+
+A:
+--
+# REPEAT the process 3 TIMES !!!!
+# ===============================
+1)  $   sudo fdisk /dev/vdb
+
+Command (m for help): n
+Partition type
+   p   primary (0 primary, 0 extended, 4 free)
+   e   extended (container for logical partitions)
+Select (default p): p 
+Partition number (1-4, default 1): 1
+First sector (2048-2097151, default 2048): 2048
+Last sector, +sectors or +size{K,M,G,T,P} (2048-2097151, default 2097151): +10M
+
+Created a new partition 1 of type 'Linux' and of size 10 MiB.
+
+Command (m for help): w
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Syncing disks.
+
+
+2)  $   lsblk
+
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vda    253:0    0  11G  0 disk 
+└─vda1 253:1    0  10G  0 part /
+vdb    253:16   0   1G  0 disk 
+└─vdb1 253:17   0  10M  0 part 
+vdc    253:32   0   1G  0 disk 
+vdd    253:48   0   1G  0 disk 
+vde    253:64   0   1G  0 disk 
+
+
+3)  $   sudo fdisk -l /dev/vdb
+
+Disk /dev/vdb: 1 GiB, 1073741824 bytes, 2097152 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x03008aa4
+
+Device     Boot Start   End Sectors Size Id Type
+/dev/vdb1        2048 22527   20480  10M 83 Linux
+
+
+.......
+
+
+4)  $   lsblk
+
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vda    253:0    0  11G  0 disk 
+└─vda1 253:1    0  10G  0 part /
+vdb    253:16   0   1G  0 disk 
+├─vdb1 253:17   0  10M  0 part 
+├─vdb2 253:18   0  21M  0 part 
+└─vdb3 253:19   0  15M  0 part 
+vdc    253:32   0   1G  0 disk 
+vdd    253:48   0   1G  0 disk 
+vde    253:64   0   1G  0 disk 
+
+
+5)  $   sudo fdisk -l /dev/vdb
+
+Disk /dev/vdb: 1 GiB, 1073741824 bytes, 2097152 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x3bb2bec8
+
+Device     Boot Start   End Sectors Size Id Type
+/dev/vdb1        2048 22527   20480  10M 83 Linux
+/dev/vdb2       22528 65535   43008  21M 83 Linux
+/dev/vdb3       65536 96255   30720  15M 83 Linux
+
+
+===============================================================================================================================
+
+Q(!!!):
+-------
+Delete the 10MB partition.
+
+
+A:
+--
+1)  $   sudo fdisk /dev/vdb
+
+Command (m for help): d
+Partition number (1-3, default 3): 1
+
+Partition 1 has been deleted.
+
+Command (m for help): p
+Disk /dev/vdb: 1 GiB, 1073741824 bytes, 2097152 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x3bb2bec8
+
+Device     Boot Start   End Sectors Size Id Type
+/dev/vdb2       22528 65535   43008  21M 83 Linux
+/dev/vdb3       65536 96255   30720  15M 83 Linux
+
+Command (m for help): w
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Syncing disks.
+
+
+2)  $   lsblk
+
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vda    253:0    0  11G  0 disk 
+└─vda1 253:1    0  10G  0 part /
+vdb    253:16   0   1G  0 disk 
+├─vdb2 253:18   0  21M  0 part 
+└─vdb3 253:19   0  15M  0 part 
+vdc    253:32   0   1G  0 disk 
+vdd    253:48   0   1G  0 disk 
+vde    253:64   0   1G  0 disk 
+
+
+===============================================================================================================================
+
+Q(!!!):
+-------
+Format the 21MB partition as swap. Next, make it active, tell Linux to start using it as swap memory.
+
+
+A:
+--
+1)  $   sudo mkswap /dev/vdb2
+
+Setting up swapspace version 1, size = 21 MiB (22016000 bytes)
+no label, UUID=e11026df-92eb-4965-bbed-57ad344d2f99
+
+
+2)  $   sudo swapon --show
+
+NAME      TYPE      SIZE USED PRIO
+/swapfile file        2G   8M   -2
+
+
+3)  $   sudo swapon /dev/vdb2
+
+4)  $   sudo swapon --show
+
+NAME      TYPE      SIZE USED PRIO
+/swapfile file        2G   8M   -2
+/dev/vdb2 partition  21M   0B   -3
+
+
+===============================================================================================================================
+
+Q(!!!):
+-------
+Tell Linux to stop using the 21MB partition as swap.
+
+
+A:
+--
+1)  $   sudo swapoff /dev/vdb2
+2)  $   sudo swapon --show
+
+NAME      TYPE SIZE USED PRIO
+/swapfile file   2G 7.8M   -2
+
+
+===============================================================================================================================
+
+Q(!!!):
+-------
+Increase the existing swap (i.e /swapfile) size by 1GB.
+
+
+A:
+--
+1)  $   stat /swapfile
+
+  File: /swapfile
+  Size: 2147483648      Blocks: 4194304    IO Block: 4096   regular file
+Device: fd01h/64769d    Inode: 392424      Links: 1
+Access: (0600/-rw-------)  Uid: (    0/    root)   Gid: (    0/    root)
+Context: system_u:object_r:swapfile_t:s0
+Access: 2023-09-21 13:28:07.744000000 +0000
+Modify: 2020-12-04 17:40:23.621000000 +0000
+Change: 2020-12-04 17:40:23.621000000 +0000
+ Birth: -
+
+
+# 2a)  $   sudo dd if=/dev/zero of=/swapfile bs=1M count=1024 oflag=append conv=notrunc
+
+# 1024+0 records in
+# 1024+0 records out
+# 1073741824 bytes (1.1 GB, 1.0 GiB) copied, 2.07011 s, 519 MB/s
+
+
+# 3a)  $   stat /swapfile
+
+#   File: /swapfile
+#   Size: 3221225472      Blocks: 8390528    IO Block: 4096   regular file
+# Device: fd01h/64769d    Inode: 392424      Links: 1
+# Access: (0600/-rw-------)  Uid: (    0/    root)   Gid: (    0/    root)
+# Context: system_u:object_r:swapfile_t:s0
+# Access: 2023-09-21 13:54:39.694644299 +0000
+# Modify: 2023-09-21 13:54:39.694644299 +0000
+# Change: 2023-09-21 13:54:39.694644299 +0000
+#  Birth: -
+
+
+2b)  $   sudo dd if=/dev/zero of=/swapfile bs=1M count=1000 oflag=append conv=notrunc
+
+1000+0 records in
+1000+0 records out
+1048576000 bytes (1.0 GB, 1000 MiB) copied, 2.09113 s, 501 MB/s
+
+
+3b) $   stat /swapfile
+  File: /swapfile
+  Size: 3196059648      Blocks: 8390528    IO Block: 4096   regular file
+Device: fd01h/64769d    Inode: 392424      Links: 1
+Access: (0600/-rw-------)  Uid: (    0/    root)   Gid: (    0/    root)
+Context: system_u:object_r:swapfile_t:s0
+Access: 2023-09-21 13:39:09.174000000 +0000
+Modify: 2023-09-21 14:17:47.928017603 +0000
+Change: 2023-09-21 14:17:47.928017603 +0000
+ Birth: -
+
+
+# Disable the swap file and setup it again
+3)  $   sudo swapoff /swapfile
+4)  $   sudo mkswap /swapfile
+
+# mkswap: /swapfile: warning: wiping old swap signature.
+# Setting up swapspace version 1, size = 3 GiB (3221221376 bytes)
+# no label, UUID=b03765e7-feb6-4fd7-ab42-33314eba6314
+
+mkswap: /swapfile: warning: wiping old swap signature.
+Setting up swapspace version 1, size = 3 GiB (3196055552 bytes)
+no label, UUID=56148050-2ccb-4213-a17c-b11fe4284467
+
+
+===============================================================================================================================
+
+Q(!!!):
+-------
+Resize the /dev/vdb3 partition (which you created earlier) to 21MB.
+
+
+A:
+--
+1)  $   lsblk
+
+
+
+2)  $   sudo cfdisk /dev/vdb
+
+New size: 21M
+Are you sure you want to write the partition table to disk? yes
+
+
+3)  $   lsblk
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vda    253:0    0  11G  0 disk 
+└─vda1 253:1    0  10G  0 part /
+vdb    253:16   0   1G  0 disk 
+├─vdb2 253:18   0  21M  0 part 
+└─vdb3 253:19   0  21M  0 part 
+vdc    253:32   0   1G  0 disk 
+vdd    253:48   0   1G  0 disk 

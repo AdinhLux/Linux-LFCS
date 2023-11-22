@@ -1,0 +1,174 @@
+Q:
+--
+Which one of these is also called a mirrored array ?
+
+
+A:
+--
+1)  Disks grouped in level 1 RAID
+
+
+===============================================================================================================================
+
+Q:
+--
+What command can you use to view a summary status of your RAID arrays ?
+
+
+A:
+--
+1)  cat /proc/mdstat
+
+
+===============================================================================================================================
+
+Q:
+--
+In your home directory you will find a file named archive. List the ACL permissions associated with this file.
+
+What permissions are listed for john in this ACL ?
+
+
+A:
+--
+1)  $   getfacl /home/bob/archive
+
+getfacl: Removing leading '/' from absolute path names
+# file: home/bob/archive
+# owner: bob
+# group: bob
+user::rw-
+user:john:r--
+group::r--
+mask::r--
+other::r--
+
+
+2)  read
+
+
+===============================================================================================================================
+
+Q:
+--
+mdadm is a tool for creating, managing, and monitoring RAID devices using the md driver.
+
+Install mdadm on this system.
+
+
+A:
+--
+1)  $   sudo dnf install mdadm -y
+
+
+===============================================================================================================================
+
+Q:
+--
+Create a level 1 RAID array, at /dev/md0, with two devices: /dev/vdc and /dev/vdd.
+
+
+A:
+--
+1)  $   sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/vdc /dev/vdd
+
+mdadm: Note: this array has metadata at the start and
+    may not be suitable as a boot device.  If you plan to
+    store '/boot' on this device please ensure that
+    your boot-loader understands md/v1.x metadata, or use
+    --metadata=0.90
+Continue creating array? yes
+mdadm: Defaulting to version 1.2 metadata
+mdadm: array /dev/md0 started.
+
+
+===============================================================================================================================
+
+Q:
+--
+Add another device, /dev/vde, to the previously created array, /dev/md0.
+
+
+A:
+--
+1)  $   sudo mdadm --manage /dev/md0 --add /dev/vde
+mdadm: added /dev/vde
+
+
+===============================================================================================================================
+
+Q:
+--
+In your home directory you will find a file named specialfile. 
+Add an ACL permission to this file so that the user called john can read and write to it.
+
+
+A:
+--
+1)  $   sudo setfacl --modify user:john:rw specialfile
+
+
+===============================================================================================================================
+
+Q:
+--
+From the file called specialfile remove the ACL permissions for the user called john.
+
+
+A:
+--
+1)  $   sudo setfacl --remove user:john specialfile
+
+
+===============================================================================================================================
+
+Q:
+--
+To the file called specialfile add an ACL permission for the group called mail. The mail group should get permissions to read and execute this file.
+
+
+A:
+--
+1)  $   sudo setfacl --modify group:mail:rx specialfile
+
+
+===============================================================================================================================
+
+Q:
+--
+In your home directory you will find a directory called collection. 
+Use the setfacl command recursively, so that ACL entries are modified on the directory itself but also all the files and subdirectories it may contain. 
+The ACL permissions should allow the user called john to read, write and execute all entries within this directory.
+
+
+A:
+--
+1)  $   setfacl --recursive --modify user:john:rwx collection/
+
+
+===============================================================================================================================
+
+Q:
+--
+Remove the file called specialfile from your home directory. 
+You will notice that not even sudo rm can remove this file. 
+That's because the file is currently immutable. 
+Remove the immutable flag from it and then delete the file.
+
+
+A:
+--
+1)  $   sudo chattr -i specialfile
+2)  $   rm specialfile
+
+
+===============================================================================================================================
+
+Q:
+--
+Edit disk quotas for the user called john. Set a soft limit of 100 megabytes and hard limit of 500 megabytes on /mnt partition.
+
+
+A:
+--
+1)  $   sudo xfs_quota -x -c 'limit bsoft=100m bhard=500m john' /mnt/

@@ -1,0 +1,157 @@
+Q:
+--
+On a system booting through legacy BIOS mode, what file would you edit before generating a new grub configuration file ?
+
+
+A:
+--
+
+1)	/etc/default/grub
+
+
+===============================================================================================================================
+
+Q:
+--
+After you edited the file mentioned previously, what command would you use to generate the new grub configuration file ?
+
+
+A:
+--
+# To generate the new grub configuration file.
+1)	sudo grub2-mkconfig -o /boot/grub2/grub.cfg
+
+
+===============================================================================================================================
+
+Q:
+--
+Schedule this system to power off two hours later from now.
+
+
+A:
+--
+1)	$ shutdown --help
+     --help      Show this help
+  -H --halt      Halt the machine
+  -P --poweroff  Power-off the machine
+  -r --reboot    Reboot the machine
+  -h             Equivalent to --poweroff, overridden by --halt
+  -k             Don't halt/power-off/reboot, just send warnings
+     --no-wall   Don't send wall message before halt/power-off/reboot
+  -c             Cancel a pending shutdown
+  
+2)	$ sudo shutdown +120
+
+
+===============================================================================================================================
+
+Q:
+--
+The system is currently booting to a text-only console.
+Change it to boot to a graphical desktop by default.
+
+
+A:
+--
+1)	$ systemctl get-default
+multi-user.target
+
+2)	$ systemctl --help
+Unit File Commands:
+  get-default                         Get the name of the default target
+  set-default TARGET                  Set the default target
+  
+  
+3)	$ systemctl set-default ( + double TAP)
+basic.target                   local-fs-pre.target            runlevel4.target
+...
+graphical.target               reboot.target                  suspend.target
+
+
+4)	$ sudo systemctl set-default graphical.target
+Removed /etc/systemd/system/default.target.
+Created symlink /etc/systemd/system/default.target → /usr/lib/systemd/system/graphical.target.
+
+
+5)	$ systemctl get-default
+graphical.target
+
+
+===============================================================================================================================
+
+Q:
+--
+The system is currently booting to a text-only console.
+Change it to boot to a graphical desktop by default.
+
+
+A:
+--
+1)	$ sudo vi /etc/default/grub
+
+# GRUB_TIMEOUT=1
+GRUB_TIMEOUT=5
+GRUB_DISTRIBUTOR="$(sed 's, release .*$,,g' /etc/system-release)"
+GRUB_DEFAULT=saved
+GRUB_DISABLE_SUBMENU=true
+GRUB_TERMINAL_OUTPUT="console"
+GRUB_CMDLINE_LINUX="no_timer_check console=tty0 console=ttyS0,115200n8 net.ifnames=0 biosdevname=0 elevator=noop"
+GRUB_DISABLE_RECOVERY="true"
+GRUB_ENABLE_BLSCFG=true
+
+
+===============================================================================================================================
+
+Q:
+--
+Install grub to /dev/vda.
+
+Make sure to save the installation command output to /home/bob/grub.txt file.
+
+
+A:
+--
+1)	$ sudo grub2-install /dev/vda > /home/bob/grub.txt 2>&1
+
+
+===============================================================================================================================
+
+Q (!!!):
+--------
+Find out what is the system's current default boot target and save the value in /home/bob/boot-target.txt file.
+
+
+A:
+--
+1)	$ lsblk
+
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vda    253:0    0  11G  0 disk 
+└─vda1 253:1    0  10G  0 part /
+vdb    253:16   0   1G  0 disk 
+vdc    253:32   0   1G  0 disk 
+vdd    253:48   0   1G  0 disk 
+vde    253:64   0   1G  0 disk 
+
+
+2)	$ systemctl get-default
+basic.target
+
+
+3) systemctl get-default > /home/bob/boot-target.txt
+
+
+===============================================================================================================================
+
+Q:
+--
+Cancel the scheduled shutdown you configured in the beginning.
+
+
+A:
+--
+1)	$ shutdown --help
+  -c             Cancel a pending shutdown
+  
+2)	$ sudo shutdown -c

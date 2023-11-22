@@ -1,0 +1,227 @@
+Q:
+--
+Create a tar archive logs.tar (under bob's home) of /var/log/ directory.
+
+
+A:
+--
+
+1)	$ pwd
+/home/bob
+
+# [c] Stands for create. This option is mandatory when a file is created. 
+# [f] The file option tells tar to create an archive file. Tar will send the output to stdout if this option is omitted.
+#  -P, --absolute-names
+              Don't strip leading slashes from file names when creating archives.
+2)	$ sudo tar cfP logs.tar /var/log/
+
+
+===============================================================================================================================
+
+Q:
+--
+Create a compressed tar archive logs.tar.gz (under bob's home) of /var/log/ directory.
+
+
+A:
+--
+# [z] The z option enables gzip compression. 
+1)  $ sudo tar czfP logs.tar.gz /var/log/
+
+
+===============================================================================================================================
+
+Q :
+---
+List the content of /home/bob/logs.tar archive and save the output in /home/bob/tar_data.txt file.
+
+
+A:
+--
+1)	$ tar --help
+  -t, --list                 list the contents of an archive
+      --test-label           test the archive volume label and exit
+	  
+2)	$ tar tfP /home/bob/logs.tar > /home/bob/tar_data.txt
+
+
+===============================================================================================================================
+
+Q:
+--
+Extract the contents of /home/bob/archive.tar.gz to the /tmp directory.
+
+
+A:
+--
+
+1)  $ tar --extract --file /home/bob/archive.tar.gz --directory /tmp/
+
+OR
+
+1)	$ tar xf /home/bob/archive.tar.gz -C /tmp
+
+
+===============================================================================================================================
+
+Q:
+--
+Execute /home/bob/script.sh script and save all normal output (except errors/warnings) in /home/bob/output_stdout.txt file.
+
+
+A:
+--
+
+1)	$ sudo /home/bob/script.sh 1>/home/bob/output_stdout.txt
+
+OR
+
+1)	$ sudo ./script.sh > /home/bob/output_stdout.txt
+
+
+===============================================================================================================================
+
+Q:
+--
+Execute /home/bob/script.sh script and save all command output (both errors/warnings and normal output) in /home/bob/output.txt file.
+
+
+A:
+--
+
+1)	$ sudo /home/bob/script.sh > /home/bob/output.txt 2>&1
+
+OR
+
+1)	$ sudo ./script.sh > /home/bob/output.txt 2>&1
+
+
+===============================================================================================================================
+
+Q:
+--
+Execute /home/bob/script.sh script and save all errors only in /home/bob/output_errors.txt file.
+
+
+A:
+--
+
+1)	$ sudo /home/bob/script.sh 2> /home/bob/output_errors.txt
+
+OR
+
+1)	$ sudo ./script.sh 2> /home/bob/output_errors.txt
+
+
+===============================================================================================================================
+
+Q:
+--
+Create a bzip archive under bob's home named file.txt.bz2 out of /home/bob/file.txt, but preserve the original file. 
+At the end of the exercise you should have both:
+
+
+A:
+--
+1)	$ bzip2 --keep /home/bob/file.txt
+
+
+===============================================================================================================================
+
+Q:
+--
+Extract the contents of /home/bob/archive.tar.gz to the /opt directory.
+
+
+A:
+--
+1)	$ sudo tar --extract --file /home/bob/archive.tar.gz --directory /opt/
+
+OR
+
+1)	$ sudo tar xf /home/bob/archive.tar.gz -C /opt
+
+
+===============================================================================================================================
+
+Q:
+--
+Use the cat command, and redirection, to add (append) the contents of /home/bob/file.txt to /home/bob/destination.txt.
+
+
+A:
+--
+1)	$ cat /home/bob/file.txt >> /home/bob/destination.txt
+
+
+===============================================================================================================================
+
+Q:
+--
+Create a file.tar archive of /home/bob/file directory under /home/bob location.
+
+
+A:
+--
+# WRONG : 1)	$ sudo tar cf file.tar /home/bob/file/
+#               tar: Removing leading `/' from member names
+
+1)	$ sudo tar --create --file file.tar  file
+
+
+===============================================================================================================================
+
+Q:
+--
+Create gzip archive of games.txt file , which is present under /home/bob directory.
+
+
+A:
+--
+1)	$ gzip games.txt
+
+
+===============================================================================================================================
+
+Q:
+--
+We have a /home/bob/lfcs.txt.xz file, uncompress it under /home/bob/.
+
+
+A:
+--
+1)	$ unxz lfcs.txt.xz
+
+
+===============================================================================================================================
+
+Q:
+--
+Sort the contents of /home/bob/values.conf file alphabetically and eliminate any common values, save the sorted output in /home/bob/values.sort file.
+
+
+A:
+--
+1)	$ sort --help
+  -d, --dictionary-order      consider only blanks and alphanumeric characters
+  -u, --unique              with -c, check for strict ordering;
+                              without -c, output only the first of an equal run
+							  
+2)	$ sort -du /home/bob/values.conf > /home/bob/values.sort
+
+
+===============================================================================================================================
+
+Q:
+--
+Sort again the contents of /home/bob/values.conf file alphabetically, eliminate any common values and ignore case.
+
+Finally save the sorted output in /home/bob/values.sorted file.
+
+
+A:
+--
+1)	$ sort --help
+  -f, --ignore-case           fold lower case to upper case characters
+
+2)	$ sort -duf /home/bob/values.conf > /home/bob/values.sorted

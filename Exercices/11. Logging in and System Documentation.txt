@@ -1,0 +1,178 @@
+Q:
+--
+The ssh command has an option to display its version number. 
+Use man to find out what is the correct command line option.
+
+
+A:
+--
+
+1)  $ man ssh
+2) ssh -V
+
+
+===============================================================================================================================
+
+Q:
+--
+Find out using which command you can change the static hostname of your Linux system ?
+
+
+A:
+--
+
+1)  $ apropos hostname
+2) hostnamectl
+
+
+===============================================================================================================================
+
+Q:
+--
+If the apropos command does not work because your manual pages are not indexed, what command you can use to manually refresh these ?
+
+
+A:
+--
+
+1)  $ mandb
+
+
+===============================================================================================================================
+
+Q:
+--
+You are trying to use ssh alex@localhost to log in through SSH. Your connection is refused. 
+ssh has a command line option to show you the verbose output. 
+That will show a lot more status messages and help you debug why this connection is failing. 
+What is the correct option for that ? (you need not to make ssh connection work at this point)
+
+
+A:
+--
+
+1)  $ man ssh
+2) ssh -v alex@localhost
+
+
+===============================================================================================================================
+
+Q:
+--
+You type host in the terminal. What keys do you press to see some suggestions about what you can type here ?
+
+
+A:
+--
+
+1)  TAB TAB
+
+
+===============================================================================================================================
+
+Q:
+--
+What section of the manual pages deals with System administration commands ? 
+
+
+A:
+--
+
+1)  Section 8
+
+
+===============================================================================================================================
+
+Q:
+--
+How many hidden files are there in /home/bob/data/ directory ?
+
+
+A:
+--
+
+1)	$ ls -a /home/bob/data/
+2) 2
+
+
+===============================================================================================================================
+
+Q:
+--
+SSH into dev-host01 host from centos-host and create a blank file called /home/bob/myfile in dev-host01 host.
+
+You should be able to create the file using touch /home/bob/myfile command.
+
+
+Please find below the SSH credentials for dev-host01 host:
+
+Host: dev-host01
+Username: bob
+Password: caleston123
+
+Remember to type exit when you finish this task.
+
+
+A:
+--
+1)	$ ssh bob@dev-host01
+2)	$ touch /home/bob/myfile
+
+
+===============================================================================================================================
+
+Q:
+--
+We are trying to run apropos ssh command to get some details about the commands related to ssh but we are getting this error:
+
+ssh: nothing appropriate.
+
+Look into the issue and fix the same to make apropos ssh command work.
+
+
+A:
+--
+1) $ mandb
+Processing manual pages under /usr/share/man/overrides...
+mandb: warning: cannot create catdir /var/cache/man/overrides
+mandb: can't create index cache /var/cache/man/overrides/1773: No such file or directory
+mandb: can't update index cache /var/cache/man/overrides/1773: No such file or directory
+done.
+
+2) $ apropos ssh
+ssh: nothing appropriate.
+
+3) $ sudo mandb
+Processing manual pages under /usr/share/man/overrides...
+Updating index cache for path `/usr/share/man/overrides/man8'. Wait...done.
+Checking for stray cats under /usr/share/man/overrides...
+Checking for stray cats under /var/cache/man/overrides...
+Processing manual pages under /usr/share/man...
+Updating index cache for path `/usr/share/man/man3'. Wait...mandb: can't open /usr/share/man/man3/rpc.3: No such file or directory
+mandb: warning: /usr/share/man/man3/auth_destroy.3.gz: bad symlink or ROFF `.so' request
+...
+
+4) $ apropos ssh
+docker-machine-ssh (1) - SSH into a virtual machine
+EVP_KDF_SSHKDF (7ssl) - The SSHKDF EVP_KDF implementation
+...
+
+
+===============================================================================================================================
+
+Q:
+--
+Using apropos command, find out the the configuration file for NFS mounts and save its name in /home/bob/nfs file.
+NFS mounts configuration file name is saved in "/home/bob/nfs" file ?
+
+
+A:
+--
+1)	$ apropos "NFS mounts"
+nfsmount.conf (5)    - Configuration file for NFS mounts
+nfsrahead (5)        - Configure the readahead for NFS mounts
+
+2)	$ apropos "NFS mounts" >  /home/bob/nfs
+3)	$ vi /home/bob/nfs
+smount.conf (5)    - Configuration file for NFS mounts
+nfsrahead (5)        - Configure the readahead for NFS mounts
