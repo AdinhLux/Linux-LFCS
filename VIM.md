@@ -85,6 +85,8 @@ Before executing the following commands, **you need to exit <ins>Insert mode</in
 >
 > **`dd`** - Deletes a line of text
 >
+> **`1000dd`** - Deletes the 1000 lines after the text cursor (Don't type **`:`** at the start)
+>
 > **`dw`** - Deletes a word
 >
 > **`D`** - Deletes everything from where your cursor is to the end of the line

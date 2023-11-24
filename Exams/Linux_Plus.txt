@@ -1,0 +1,1599 @@
+Q :
+---
+Find files/directories under /var/log/ directory that the group can write to, but others cannot read or write to it. 
+Save the list of the files/directories (with complete parent path) in /home/bob/data.txt file.
+
+
+A :
+---
+$ sudo find /var/log/ -perm -g=w ! -perm /o=rw > /home/bob/data.txt
+
+
+==================================================================================================================================
+
+Q :
+---
+Find our secret file under /home/bob. You can either look for a file that is exactly 213 kilobytes or a file that has permission 402 in octal.
+
+
+A :
+---
+$ find /home/bob -size 213k -o -perm 402
+
+
+==================================================================================================================================
+
+Q :
+---
+Add the permissions for setuid, setgid and sticky bit on /home/bob/datadir directory.
+
+
+A :
+---
+$ chmod u+s,g+s,o+t /home/bob/datadir
+
+
+==================================================================================================================================
+
+Q :
+---
+Find all directories named pets in /var/directory and save the output (along with directory path) in /home/bob/pets.txt file.
+
+
+A :
+---
+$ sudo find /var/ -type d -name pets > /home/bob/pets.txt
+
+
+==================================================================================================================================
+
+Q :
+---
+Find all the files which have been modified in the last 2 hours in /usr directory.
+
+How many such files did you find ?
+
+
+A :
+---
+$ sudo find /usr/ -type f -mmin -120 | wc -l
+
+
+==================================================================================================================================
+
+Q :
+---
+Find all files between 5mb and 10mb in the /usr directory and save the output (along with parent path) in /home/bob/size.txt file.
+
+
+A :
+---
+$ sudo find /usr -type f -size +5M -size -10M > /home/bob/size.txt
+
+
+==================================================================================================================================
+
+Q :
+---
+You have below given content in /home/bob/testfile (this is just an example file) :
+
+a;b;c;d
+x;y;z
+
+
+A :
+---
+$ man cut
+−d delim  Set the field delimiter to the character delim.  The default is the <tab>.
+−f list   Cut based on a list of fields, assumed to be separated in the file  by  a  delimiter  character  (see  −d).   Each
+                 selected  field  shall  be  output. Output fields shall be separated by a single occurrence of the field delimiter
+                 character. Lines with no field delimiters shall be passed through intact, unless −s is specified. It shall not  be
+                 an error to select fields not present in the input line.
+
+
+$ cut -d ';' -f 2 testfile
+b
+y
+
+
+==================================================================================================================================
+
+Q :
+---
+While ignoring the case sensitivity, change all values disabled to enabled in /home/bob/values.conf config file.
+
+For example, any string like disabled, DISABLED, Disabled etc must match and should be replaced with enabled.
+
+
+A :
+---
+$ man sed
+       [2addr]s/BRE/replacement/flags
+                 Substitute  the  replacement string for instances of the BRE in the pattern space. Any character other than <back‐
+                 slash> or <newline> can be used instead of a <slash> to delimit the BRE and the replacement. Within  the  BRE  and
+                 the replacement, the BRE delimiter itself can be used as a literal character if it is preceded by a <backslash>.
+
+                 The value of flags shall be zero or more of:
+
+                 g         Globally substitute for all non-overlapping instances of the BRE rather than just the first one. If both
+                           g and n are specified, the results are unspecified.
+
+
+$ sed -i 's/disabled/enabled/gi' /home/bob/values.conf
+
+
+==================================================================================================================================
+
+Q :
+---
+Change all values enabled to disabled in /home/bob/values.conf config file from line number 500 to 2000.
+
+
+A :
+---
+$ sed -i '500,2000s/enabled/disabled/g' values.conf
+
+
+==================================================================================================================================
+
+Q :
+---
+Replace all occurrence of string #%$2jh//238720//31223 with $2//23872031223 in /home/bob/data.txt file. (intead of /, we use ~) 
+
+
+A :
+---
+$ cat /home/bob/data.txt
+...
+# Installation instructions #%$2jh//238720//31223
+...
+# Allow initgroups to default to the setting for group. #%$2jh//238720//31223
+# initgroups: files
+networks:   files dns
+protocols:  files
+publickey:  files #%$2jh//238720//31223
+rpc:        files #%$2jh//238720//31223
+...
+
+
+$ sed -i 's~#%$2jh//238720//31223~$2//23872031223~g' /home/bob/data.txt
+
+$ cat /home/bob/data.txt
+...
+# Installation instructions $2//23872031223
+...
+# Allow initgroups to default to the setting for group. $2//23872031223
+# initgroups: files
+networks:   files dns
+protocols:  files
+publickey:  files $2//23872031223
+rpc:        files $2//23872031223
+...
+
+
+==================================================================================================================================
+
+Q :
+---
+Filter out the lines that contain any word that starts with a capital letter and are then followed by exactly two lowercase letters in /etc/nsswitch.conf file 
+and save the output in /home/bob/filtered1 file.
+
+
+A :
+---
+$ egrep -w '[A-Z][a-z]{2}' /etc/nsswitch.conf > /home/bob/filtered1
+
+#       nisplus                 'Use' NIS+ (NIS version 3)
+# 'See' `info libc 'NSS Basics'` for more information.
+
+Basic Regular Expression :
+. replaces any character
+^ matches the start of the string
+$ matches the end of the string
+
+Bracket Expression :
+{} - Curly braces are used for quantifiers to specify the number of occurrences.
+[] Matches any character within the brackets
+
+
+==================================================================================================================================
+
+Q :
+---
+Open /home/bob/testfile file in any editor (vi, nano etc) and move line present on line no:1049 to line no: 5.
+
+
+A :
+---
+$ vi /home/bob/testfile
+
+# :[line_number] - Where after colon (:) we specify the line's number. This command takes you to the line specified
+:1049
+
+# yy - Copies a line & dd - Deletes a line of text
+yy
+dd
+
+# :[line_number] - Where after colon (:) we specify the line's number. This command takes you to the line specified
+:5
+
+# p - Paste whatever has been copied to the unnamed register
+p
+
+
+==================================================================================================================================
+
+Q :
+---
+Delete first 1000 lines from /home/bob/testfile file.
+
+
+A :
+---
+$ vi /home/bob/testfile
+
+# Make sure cursor is on the very first line, 
+# then without entering into the insert mode, enter number 1000 and press dd immediately after that. 
+# FInally save the file.
+#
+# Don't type ':'
+
+1000dd
+
+
+==================================================================================================================================
+
+Q (!!!):
+--------
+How many numbers in /home/bob/textfile begin with a number 2, save the count in /home/bob/count file.
+
+
+A :
+---
+# 1 to 4000
+$ cat /home/bob/textfile 
+$ egrep -w '^2' /home/bob/textfile | wc -l
+2
+
+$ grep -c '^2' textfile
+1111
+
+
+==================================================================================================================================
+
+Q :
+---
+Create a tar archive logs.tar (under bob's home) of /var/log/ directory.
+
+
+A :
+---
+$ sudo ls -l /var/log
+
+total 332
+-rw-rw---- 1 root utmp      0 Feb  8  2023 btmp
+-rw-r--r-- 1 root root   6194 Nov 24 12:24 dnf.librepo.log
+-rw-r--r-- 1 root root   2883 Nov 24 12:24 dnf.log
+-rw-r--r-- 1 root root     58 Nov 24 12:23 dnf.rpm.log
+drwxr-xr-x 2 root root   4096 Aug 31  2021 glusterfs
+-rw-r--r-- 1 root root     60 Nov 24 12:23 hawkey.log
+-rw-rw-r-- 1 root utmp 292292 Nov 24 13:10 lastlog
+drwx------ 3 root root   4096 Jul  4 11:56 libvirt
+drwx------ 2 root root   4096 Feb  8  2023 private
+drwxr-xr-x 1 root root   4096 Jul  4 11:57 rhsm
+drwxr-xr-x 3 root root   4096 Jul  4 11:56 swtpm
+-rw-rw-r-- 1 root utmp    768 Nov 24 11:56 wtmp
+
+
+$ man tar
+   Operation mode
+       The options listed in the table below tell GNU tar what operation it is to perform.  Exactly one  of  them  must  be  given.
+       Meaning of non-optional arguments depends on the operation mode requested.
+
+       -c, --create
+              Create a new archive.  Arguments supply the names of the files to be archived.  Directories are archived recursively,
+              unless the --no-recursion option is given.
+
+   Device selection and switching
+       -f, --file=ARCHIVE
+              Use archive file or device ARCHIVE.  If this option is not given, tar will first  examine  the  environment  variable
+              `TAPE'.   If  it  is  set,  its  value  will be used as the archive name.  Otherwise, tar will assume the compiled-in
+              default.  The default value can be inspected either using the --show-defaults option, or at the end of the tar --help
+              output
+
+   Local file selection
+       -P, --absolute-names
+              Don't strip leading slashes from file names when creating archives.
+
+# When you specify ' --absolute-names ' (' -P '), 
+# tar stores file names including all superior directory names, 
+# and preserves leading slashes
+$ sudo tar -cvf wrong_logs.tar /var/log/
+tar: Removing leading `/' from member names
+/var/log/
+/var/log/rhsm/
+/var/log/lastlog
+/var/log/dnf.rpm.log
+/var/log/wtmp
+/var/log/dnf.log
+/var/log/hawkey.log
+/var/log/dnf.librepo.log
+/var/log/glusterfs/
+/var/log/libvirt/
+/var/log/libvirt/qemu/
+/var/log/swtpm/
+/var/log/swtpm/libvirt/
+/var/log/swtpm/libvirt/qemu/
+/var/log/private/
+/var/log/btmp
+
+
+$ sudo tar -cPvf logs.tar /var/log/
+/var/log/
+/var/log/rhsm/
+/var/log/lastlog
+/var/log/dnf.rpm.log
+/var/log/wtmp
+/var/log/dnf.log
+/var/log/hawkey.log
+/var/log/dnf.librepo.log
+/var/log/glusterfs/
+/var/log/libvirt/
+/var/log/libvirt/qemu/
+/var/log/swtpm/
+/var/log/swtpm/libvirt/
+/var/log/swtpm/libvirt/qemu/
+/var/log/private/
+/var/log/btmp               
+
+
+==================================================================================================================================
+
+Q :
+---
+Create gzip archive of games.txt file , which is present under /home/bob directory.
+
+
+A :
+---
+$ sudo tar -czf /home/bob/games.tar.gz games.txt
+
+# GOOD solution
+$ gzip games.txt
+$ ls
+games.tar.gz  games.txt.gz
+
+
+==================================================================================================================================
+
+Q :
+---
+We have a /home/bob/lfcs.txt.xz file, uncompress it under /home/bob/.
+
+
+A :
+---
+$ tar -xvf /home/bob/lfcs.txt.xz -C /home/bob/
+$ ls
+games.tar.gz  games.txt.gz  lfcs.txt.xz
+
+# GOOD solution
+$ unxz lfcs.txt.xz
+$ ls
+games.tar.gz  games.txt.gz  lfcs.txt
+
+
+==================================================================================================================================
+
+Q :
+---
+Sort the contents of /home/bob/values.conf file alphabetically and eliminate any common values, 
+save the sorted output in /home/bob/values.sort file.
+
+
+A :
+---
+$ man sort
+OPTIONS
+       −u        Unique: suppress all but one in each set of lines  hav‐
+                 ing equal keys.  If used with the −c option, check that
+                 there are no lines with duplicate keys, in addition  to
+                 checking that the input file is sorted.
+
+      −d        Specify that only <blank> characters  and  alphanumeric
+                 characters,   according   to  the  current  setting  of
+                 LC_CTYPE, shall  be  significant  in  comparisons.  The
+                 behavior  is undefined for a sort key to which −i or −n
+                 also applies.
+
+$ sort -du /home/bob/values.conf > /home/bob/values.sort
+
+
+==================================================================================================================================
+
+Q :
+---
+Change grub's default timeout from 1 seconds to 5 second.
+
+
+A :
+---
+$ sudo vi /etc/default/grub
+
+GRUB_TIMEOUT=5
+GRUB_DISTRIBUTOR="$(sed 's, release .*$,,g' /etc/system-release)"
+GRUB_DEFAULT=saved
+GRUB_DISABLE_SUBMENU=true
+GRUB_TERMINAL_OUTPUT="console"
+GRUB_CMDLINE_LINUX="no_timer_check console=tty0 console=ttyS0,115200n8 net.ifnames=0 biosdevname=0 elevator=noop"
+GRUB_DISABLE_RECOVERY="true"
+GRUB_ENABLE_BLSCFG=true
+
+
+==================================================================================================================================
+
+Q :
+---
+Install grub to /dev/vda.
+
+Make sure to save the installation command output to /home/bob/grub.txt file.
+
+
+A :
+---
+$ sudo grub2-install /dev/vda > /home/bob/grub.txt 2>&1
+
+
+==================================================================================================================================
+
+Q :
+---
+List all files that are opened by process with PID 1, this process is owned by the root user. Save the output in /home/bob/files.txt file.
+
+
+A :
+---
+$ sudo lsof -p 1 > /home/bob/files.txt
+
+
+==================================================================================================================================
+
+Q :
+---
+Search the logs for entries related to the SSH daemon i.e sshd. Find out what IP address last connected to this daemon successfully.
+
+Save that IP in /home/bob/ip.txt file.
+
+
+A :
+---
+$ sudo journalctl --unit=sshd.service -n 20 --no-pager | grep 'Accepted'
+
+Nov 25 09:46:40 centos-host sshd[30488]: Accepted publickey for root from 192.11.235.13 port 44750 ssh2: RSA SHA256:QFfmkiFRzDWWvpSGUpXkj/aFQ7SsuSvVRGAmaiw/xvo
+Nov 25 09:48:18 centos-host sshd[30574]: Accepted publickey for root from 192.11.235.13 port 44524 ssh2: RSA SHA256:QFfmkiFRzDWWvpSGUpXkj/aFQ7SsuSvVRGAmaiw/xvo
+Nov 25 09:48:21 centos-host sshd[30605]: Accepted publickey for root from 192.11.235.13 port 44528 ssh2: RSA SHA256:QFfmkiFRzDWWvpSGUpXkj/aFQ7SsuSvVRGAmaiw/xvo
+Nov 25 09:48:22 centos-host sshd[30640]: Accepted publickey for root from 192.11.235.13 port 44538 ssh2: RSA SHA256:QFfmkiFRzDWWvpSGUpXkj/aFQ7SsuSvVRGAmaiw/xvo
+
+
+$ sudo vi /home/bob/ip.txt
+192.11.235.13
+
+
+==================================================================================================================================
+
+Q :
+---
+With the systemctl command, find out the PID of the process currently managed by the sshd.service. Send the SIGHUP signal to this process.
+
+
+A :
+---
+$ systemctl status sshd.service
+ Main PID: 941 (sshd)
+
+$ sudo kill -SIGHUP 941
+
+
+==================================================================================================================================
+
+Q :
+---
+Under /var/log directory, search for all files containing the reboot string and save the search result in /home/bob/reboot.log file.
+
+
+A :
+---
+$ sudo grep -r 'reboot' /var/log/ > reboot.log
+
+
+==================================================================================================================================
+
+Q :
+---
+Using ps command, identify the CPU and Memory usage by only the process having PID 1 and save the entire command output in /home/bob/resources.txt file.
+
+
+A :
+---
+$ ps u 1 > /home/bob/resources.txt
+
+
+==================================================================================================================================
+
+Q :
+---
+Run a command to sleep for 3000 seconds and make sure its running in the background.
+
+
+A :
+---
+# Use &
+$ sleep 3000 &
+[1] 31567
+
+
+==================================================================================================================================
+
+Q :
+---
+How can we force anacron to rerun all jobs, regardless of when they were last executed ?
+
+
+A :
+---
+$ sudo anacron -n -f
+
+
+==================================================================================================================================
+
+Q :
+---
+Add an anacron job with the following specifications:
+
+A. It should run once every 10 days
+B. It should have 5 minutes of delay
+C. The job id should be db_cleanup
+D. The command to run is: /usr/bin/touch /root/anacron_created_this
+
+
+A :
+---
+# When a delay is mentionned, use the file
+$ vi /etc/anacrontab
+10 5 db_cleanup /usr/bin/touch /root/anacron_created_this
+
+
+==================================================================================================================================
+
+Q :
+---
+Add a cron for bob user to execute sudo systemctl restart nginx command on Sundays every week at 6am and 11pm.
+
+
+A :
+---
+$ crontab -e
+0 6,23 * * 0 sudo systemctl restart nginx
+
+
+==================================================================================================================================
+
+Q :
+---
+How do we enable the PowerTools repository on CentOS ?
+
+
+A :
+---
+$ sudo dnf config-manager --enable powertools
+
+
+==================================================================================================================================
+
+Q :
+---
+Using an appropriate command, list all files contained in the nginx package. 
+In this list, you will see a file called nginx-logo.png. Save its full path in /home/bob/nginx file.
+
+
+A :
+---
+$ dnf repoquery --list nginx | grep nginx-logo.png
+/usr/share/nginx/html/nginx-logo.png
+
+$ vi /home/bob/nginx
+
+
+==================================================================================================================================
+
+Q :
+---
+List what old packages can be upgraded and store the list in /home/bob/upgrade.txt file.
+
+
+A :
+---
+$ sudo dnf check-upgrade > upgrade.txt
+
+
+==================================================================================================================================
+
+Q :
+---
+We are working under /etc/samba directory, but we forgot the package name. 
+Find out the package name for /etc/samba config path and store the output in /home/bob/forgot.txt file.
+
+
+A :
+---
+$ sudo dnf provides /etc/samba > forgot.txt
+
+
+==================================================================================================================================
+
+Q :
+---
+Identify what % space of / partition is in use on our system. Save the value in /home/bob/used file.
+
+For example if used space is 10% then the file content should be 10%
+
+
+A :
+---
+$ df /
+Filesystem     1K-blocks    Used Available Use% Mounted on
+/dev/vda1       10474496 4377668   6096828  42% /
+
+
+==================================================================================================================================
+
+Q :
+---
+Figure out how much storage space the /bin/ directory is using and save the value in /home/bob/bin file.
+
+
+A :
+---
+$ du -sh /bin/
+307M    /bin/
+
+
+==================================================================================================================================
+
+Q :
+---
+Use the correct command to check out the memory on this system (in megabytes). In /home/bob/memory file, save the total amount of RAM that this system has.
+
+
+A :
+---
+$ free --mega
+              total        used        free      shared  buff/cache   available
+Mem:           1016         194         156           3         665         662
+Swap:          2147           7        2139
+
+
+==================================================================================================================================
+
+Q :
+---
+Use the correct command to check out from how long this system is up. In /home/bob/up file, save the time value in hours, minutes or days (whichever is applicable).
+
+For example, if you see 1:07 in the command's output, the file content should be 1.
+Similarly, if you see something like 51 min in the command's output, the file content should be 51min (without any space).
+
+
+A :
+---
+$ uptime
+ 19:39:51 up 56 min,  0 users,  load average: 0.00, 0.00, 0.00
+
+
+==================================================================================================================================
+
+Q :
+---
+Use the correct command to identify the CPU core(s) per socket on this system. Save its value in /home/bob/cpu file.
+
+
+A :
+---
+$ lscpu
+Architecture:        x86_64
+CPU op-mode(s):      32-bit, 64-bit
+Byte Order:          Little Endian
+CPU(s):              1
+On-line CPU(s) list: 0
+Thread(s) per core:  1
+Core(s) per socket:  1
+
+
+==================================================================================================================================
+
+Q :
+---
+On /dev/vdb we have an XFS filesystem. Use the correct command to check this filesystem for errors and save the output in /home/bob/fscheck file.
+
+
+A :
+---
+$ sudo xfs_repair /dev/vdb > /home/bob/fscheck 2>&1
+
+
+==================================================================================================================================
+
+Q :
+---
+Turn on kernel.modules_disabled kernel runtime parameter, so that loading new kernel modules will be disabled.
+
+
+A :
+---
+$ sudo sysctl -w kernel.modules_disabled=1
+
+
+==================================================================================================================================
+
+Q :
+---
+Adjust the value of this kernel runtime parameter, vm.swappiness, to 10.
+
+After you set this to 10, also make the change persistent so that it will be auto-set to this value on the next reboot.
+
+
+A :
+---
+$ sudo vi /etc/sysctl.conf
+vm.swappiness=10
+
+$ sudo sysctl -p
+net.ipv4.ip_forward = 1
+vm.swappiness = 10
+
+
+==================================================================================================================================
+
+Q :
+---
+Change the SELinux context of /var/index.html file to httpd_sys_content_t
+
+
+A :
+---
+$ sudo chcon -t httpd_sys_content_t /var/index.html
+
+
+==================================================================================================================================
+
+Q :
+---
+Set the jane user account to expire on March 1, 2030.
+
+
+A :
+---
+$ sudo usermod -e 2030-03-01 jane
+
+
+==================================================================================================================================
+
+Q :
+---
+Create a system account called apachedev
+
+
+A :
+---
+$ sudo useradd --system apachedev
+
+
+==================================================================================================================================
+
+Q :
+---
+Jane's account i.e jane is expired.Unexpire the same and make sure it never expires again.
+
+
+A :
+---
+$ sudo usermod -e "" jane
+
+
+==================================================================================================================================
+
+Q :
+---
+Mark the password for jane as expired to force her to immediately change it the next time she logs in.
+
+
+A :
+---
+$ sudo chage --lastday 0 jane
+
+
+==================================================================================================================================
+
+Q :
+---
+Add the user jane to the group called developers.
+
+
+A :
+---
+$ sudo usermod -a -G developers jane
+
+
+==================================================================================================================================
+
+Q :
+---
+You already created group cricket in the previous question, now rename this group to soccer while preserving the same GID.
+
+
+A :
+---
+$ sudo groupmod -n soccer cricket
+
+
+==================================================================================================================================
+
+Q :
+---
+Update primary group of user sam and set it to rugby
+
+
+A :
+---
+$ sudo usermod -g rugby sam
+
+
+==================================================================================================================================
+
+Q :
+---
+Make sure the user jane gets a warning at least 2 days before the password expires.
+
+
+A :
+---
+$ sudo chage -W 2 jane
+
+
+==================================================================================================================================
+
+Q :
+---
+Print our current user's (bob) environment and save the output in /home/bob/env file.
+
+
+A :
+---
+$ env > /home/bob/env
+...
+USER=bob
+PWD=/home/bob
+HOME=/home/bob
+MAIL=/var/spool/mail/bob
+...
+
+
+==================================================================================================================================
+
+Q :
+---
+Add an environment variable for user bob.
+
+The variable name should be MYVAR and its value should be TRUE
+
+
+A :
+---
+$ vi ~/.bashrc
+export MYVAR=TRUE
+
+$ source ~/.bashrc
+
+
+==================================================================================================================================
+
+Q :
+---
+Make sure that this command gets executed for any user that logs in to the system:
+
+echo Welcome to our server!
+
+
+A :
+---
+$ sudo vi /etc/profile.d/welcome.sh
+echo "Welcome to our server!"
+
+
+==================================================================================================================================
+
+Q :
+---
+Update the value of $PATH variable for user bob to include $HOME/.config/bin location in the path.
+
+
+A :
+---
+$ vi /home/bob/.bashrc
+PATH="$HOME/.local/bin:$HOME/bin:$HOME/.config/bin:$PATH"
+
+$ source ~/.bashrc
+
+
+==================================================================================================================================
+
+Q :
+---
+How do we allow the user called trinity to execute any sudo command ?
+
+
+A :
+---
+$ sudo gpasswd -a trinity wheel
+
+
+==================================================================================================================================
+
+Q :
+---
+Modify the security limits file and make sure that the user called trinity can run no more than 30 processes in her session.
+This should be both a hard limit and a soft limit, written in a single line.
+
+
+A :
+---
+$ sudo vi /etc/security/limits.conf
+trinity - nproc 30
+
+
+==================================================================================================================================
+
+Q :
+---
+Modify the sudoers file in such a way to allow the user called trinity to run any sudo command without needing to provide her password.
+
+
+A :
+---
+$  sudo visudo /etc/sudoers
+trinity    ALL=(ALL)   NOPASSWD: ALL
+
+
+==================================================================================================================================
+
+Q :
+---
+Modify the sudoers file again. Remove your previous entry for the user called trinity if it still exists.
+Now add a new entry that allows trinity to only run the /usr/bin/mount command with sudo.
+
+
+A :
+---
+$ sudo visudo /etc/sudoers
+trinity ALL=(ALL) /usr/bin/mount
+
+
+==================================================================================================================================
+
+Q :
+---
+Make changes in security limits file for user stephen so that he can create maximum filesize upto 4 MB. This should be a hard limit.
+
+
+A :
+---
+$ sudo vi /etc/security/limits.conf
+stephen hard fsize 4096
+
+
+==================================================================================================================================
+
+Q :
+---
+Define a policy, so that user trinity be able to run sudo commands as the user sam.
+
+
+A :
+---
+$ sudo visudo /etc/sudoers
+trinity   ALL=(sam)   ALL
+
+
+==================================================================================================================================
+
+Q :
+---
+The current password for the root account is N3wpass. Change it to S3cure123.
+
+
+A :
+---
+$ sudo passwd root
+Changing password for user root.
+New password: 
+Retype new password: 
+passwd: all authentication tokens updated successfully.
+
+
+==================================================================================================================================
+
+Q :
+---
+Restrict the root access to SSH service via PAM
+
+You can use the pam_listfile.so module which offers great flexibility in limiting the privileges of specific accounts. 
+Please make sure you don't restrict the root SSH access from the SSH configuration.
+
+
+A :
+---
+$ sudo vi /etc/pam.d/sshd
+auth    required       pam_listfile.so onerr=succeed  item=user  sense=deny  file=/etc/ssh/deniedusers
+
+
+$ sudo vi /etc/ssh/deniedusers
+root
+
+
+==================================================================================================================================
+
+Q (!!!):
+--------
+Find out what process is listening for incoming connections on port 22, and identify its PID.
+
+
+A :
+---
+$ ss -tnlp | grep :22
+LISTEN 0      128          0.0.0.0:22         0.0.0.0:*          
+LISTEN 0      128             [::]:22            [::]:* 
+
+
+$ sudo ss -tlnp | grep :22
+LISTEN 0      128          0.0.0.0:22         0.0.0.0:*    users:(("sshd",pid=936,fd=3))                           
+LISTEN 0      128             [::]:22            [::]:*    users:(("sshd",pid=936,fd=4))
+
+
+==================================================================================================================================
+
+Q :
+---
+Our system uses dynamic network configuration. Leave it as it is, dynamically configured, but add an extra IP to eth1 interface on this system: 10.0.0.50/24.
+
+If needed, use the proper command to reapply network settings after you make your modifications.
+
+
+A :
+---
+$ sudo ip a add 10.0.0.50/24 dev eth1
+$ sudo nmcli device reapply eth1
+
+
+==================================================================================================================================
+
+Q :
+---
+Allow all traffic that is coming from any IP in this network range: 10.11.12.0 to 10.11.12.255 (i.e 10.11.12.0/24), 
+add the required rule in the trusted zone and the rule must be permanent.
+
+
+A :
+---
+$ sudo firewall-cmd --add-source=10.11.12.0/24 --zone=trusted --permanent
+
+
+==================================================================================================================================
+
+Q :
+---
+Temporarily route all traffic that must reach the 192.168.0.* network through the device that has the IP 172.28.128.100
+
+
+A :
+---
+$ sudo ip route add 192.168.0.0/24 via 172.28.128.100
+
+
+==================================================================================================================================
+
+Q (!!!):
+--------
+Now, permanently route all traffic that must reach the 192.168.0.* network through the device that has the IP 172.28.128.100
+
+Also tell the NetworkManager to immediately apply the network settings we just changed.
+
+
+A :
+---
+$ sudo nmcli connection modify eth1 +ipv4.routes "192.168.0.0/24 172.28.128.100"
+$ sudo nmcli device reapply eth1
+
+
+==================================================================================================================================
+
+Q :
+---
+Configure the system to automatically synchronize its time through the chrony daemon. 
+Make sure the daemon is enabled so that it automatically starts every time the system boots.
+
+
+A :
+---
+$ sudo yum install chrony -y
+$ sudo systemctl start chronyd
+
+# check if system is configured to automatically synchronise its time through chrony
+$ sudo timedatectl show
+Timezone=Asia/Kolkata
+LocalRTC=no
+CanNTP=yes
+NTP=yes
+NTPSynchronized=yes
+TimeUSec=Sun 2023-11-26 23:13:57 IST
+RTCTimeUSec=Sun 2023-11-26 23:13:56 IST
+
+
+==================================================================================================================================
+
+Q :
+---
+Using timedatectl configure RTC (real-time clock) to maintain the RTC in local time.
+RTC is a battery-powered computer clock that keeps track of the time even when the system is turned off.
+
+
+A :
+---
+$ sudo timedatectl set-local-rtc 1
+
+
+==================================================================================================================================
+
+Q :
+---
+Modify /var/named/example.com.zone and make mysql.example.com an alias for database.example.com by adding the proper CNAME entry. 
+Otherwise said, mysql.example.com should point to database.example.com. Restart the named.service after you've added the new entry.
+
+
+A :
+---
+$ sudo vi  /var/named/example.com.zone
+mysql.example.com.      CNAME   database.example.com.
+
+$ sudo systemctl restart named.service
+
+
+==================================================================================================================================
+
+Q :
+---
+By default the bind server also fetches DNS data from other DNS servers on the Internet, when it does not have it available in its own cache.
+ But somehow our bind server is not able to query the kodekloud.com domain data.
+
+Make the required configuration changes so that bind server can also fetch the DNS data from other DNS servers on the Internet.
+
+
+A :
+---
+$ sudo vi /etc/named.conf
+recursion yes;
+
+$ sudo systemctl restart named.service
+
+
+==================================================================================================================================
+
+Q (!!!):
+--------
+Using dig utility retrieve all record types (including MX, TXT etc) associated with our example.com domain and save the output in /home/bob/records file.
+
+
+A :
+---
+$ dig example.com
+...
+;; QUESTION SECTION:
+;example.com.                   IN      A
+
+;; ANSWER SECTION:
+example.com.            21600   IN      A       93.184.216.34
+
+...
+
+
+# Notice the ANY option here which will retrieve all records, including MX, TXT etc.
+$ dig @localhost -q example.com ANY > /home/bob/records
+...
+;; QUESTION SECTION:
+;example.com.                   IN      ANY
+
+;; ANSWER SECTION:
+example.com.            3600    IN      TXT     "We can write anything in here!"
+example.com.            3600    IN      MX      10 mail.example.com.
+example.com.            3600    IN      MX      20 mail2.example.com.
+example.com.            3600    IN      SOA     example.com. administrator.example.com. 0 86400 3600 604800 10800
+example.com.            3600    IN      NS      ns1.example.com.
+example.com.            3600    IN      NS      ns2.example.com.
+example.com.            3600    IN      A       203.0.113.15
+
+;; ADDITIONAL SECTION:
+mail.example.com.       3600    IN      A       203.0.113.80
+mail2.example.com.      3600    IN      A       203.0.113.81
+ns1.example.com.        3600    IN      A       10.11.12.9
+ns2.example.com.        3600    IN      A       10.11.12.10
+...
+
+
+==================================================================================================================================
+
+Q :
+---
+Change Dovecot's configuration and disable SSL/TLS encryption.
+
+Make sure to restart dovecot's service after making the required changes.
+
+
+A :
+---
+$ sudo vi /etc/dovecot/conf.d/10-ssl.conf
+ssl = no
+
+$ sudo systemctl restart dovecot
+
+
+==================================================================================================================================
+
+Q :
+---
+You can find out the IP address of eth0 interface on this system using ip a command.
+
+Change Dovecot's configuration so that it listens for incoming connections only on the IP address you found.
+
+
+A :
+---
+$ ip a
+192.29.103.11/24
+
+$ sudo vi /etc/dovecot/dovecot.conf
+# A comma separated list of IPs or hosts where to listen in for connections.
+# "*" listens in all IPv4 interfaces, "::" listens in all IPv6 interfaces.
+# If you want to specify non-default ports or anything more complex,
+# edit conf.d/master.conf.
+listen = 192.29.103.11
+
+$ sudo systemctl restart dovecot
+
+
+==================================================================================================================================
+
+Q :
+---
+Can you figure out in what Dovecot config file we can find quota related settings ? 
+Edit that config file and make sure that the maximum accepted mail size is set to 200M.
+
+
+A :
+---
+$ sudo vi /etc/dovecot/conf.d/90-quota.conf
+plugin {
+  #quota_rule = *:storage=1G
+  #quota_rule2 = Trash:storage=+100M
+
+  # LDA/LMTP allows saving the last mail to bring user from under quota to
+  # over quota, if the quota doesn't grow too high. Default is to allow as
+  # long as quota will stay under 10% above the limit. Also allowed e.g. 10M.
+  #quota_grace = 10%%
+
+  # Quota plugin can also limit the maximum accepted mail size.
+  quota_max_mail_size = 200M
+}
+
+
+==================================================================================================================================
+
+Q :
+---
+Edit the configuration of the Squid proxy daemon. 
+Add a src type acl and name it vpn. The IP you should use in this acl is 203.0.110.5. 
+Now add a new rule that tells the proxy server to allow access to the acl named vpn.
+
+
+A :
+---
+$ sudo vi /etc/squid/squid.conf
+acl vpn src 203.0.110.5
+http_access allow vpn
+
+
+==================================================================================================================================
+
+Q (!!!):
+--------
+Edit the configuration of the Squid proxy daemon , add an acl and http access rule to block facebook.com.
+
+
+A :
+---
+$ sudo vi /etc/squid/squid.conf
+acl facebook dstdomain .facebook.com
+http_access deny facebook
+
+
+==================================================================================================================================
+
+Q :
+---
+We have the following Directory block in the main configuration file of httpd:
+
+       <Directory "/var/www/html/admin/">
+       </Directory>
+
+Modify it to allow access to this directory from 127.0.0.1 IP address only.
+
+
+A :
+---
+$ sudo vi /etc/httpd/conf/httpd.conf
+<Directory "/var/www/html/admin/">
+  Require ip 127.0.0.1
+</Directory>
+
+
+==================================================================================================================================
+
+Q :
+---
+Edit the main config file of the httpd daemon. Find this block: <Directory "/var/www/html">. 
+Enable the use of .htaccess files in this directory. All types of overrides should be allowed in these files.
+
+
+A :
+---
+$ sudo vi /etc/httpd/conf/httpd.conf
+<Directory "/var/www/html">
+    #
+    # AllowOverride controls what directives may be placed in .htaccess files.
+    # It can be "All", "None", or any combination of the keywords:
+    #   Options FileInfo AuthConfig Limit
+    #
+    AllowOverride All
+</Directory>
+
+
+$ sudo systemctl restart httpd
+
+
+==================================================================================================================================
+
+Q :
+---
+Modify the /var/www/html/admin/ Directory block in httpd main configuration file so that it looks like as below:
+
+<Directory "/var/www/html/admin/">
+    AuthType Basic
+    AuthBasicProvider file
+    AuthName "Secret admin page"
+    AuthUserFile /etc/httpd/passwords
+    Require valid-user
+</Directory>
+
+
+It enables password protection to this area of our website.
+
+Create the password file i.e /etc/httpd/passwords and add the user called john with password john123 in the same.
+
+
+A :
+---
+$ sudo vi /etc/httpd/conf/httpd.conf
+
+<Directory "/var/www/html/admin/">
+    AuthType Basic
+    AuthBasicProvider file
+    AuthName "Secret admin page"
+    AuthUserFile /etc/httpd/passwords
+    Require valid-user
+</Directory>
+
+
+$ sudo htpasswd -c /etc/httpd/passwords john
+$ sudo systemctl restart httpd
+
+
+==================================================================================================================================
+
+Q :
+---
+Edit the mariadb-server.cnf config file to enable the remote access to your MariaDB server.
+
+Make sure to restart the mariadb service after making the required changes.
+
+
+A :
+---
+$ sudo vi /etc/my.cnf.d/mariadb-server.cnf
+#
+# Allow server to accept connections on all interfaces.
+#
+bind-address=0.0.0.0
+
+$ sudo systemctl restart mariadb
+
+
+==================================================================================================================================
+
+Q (!!!):
+--------
+Through any method you want, change the password for the MariaDB root user to Secu43@123
+
+
+A :
+---
+$ sudo mysql_secure_installation
+
+# Then test connection
+$ mysql -u root -p
+
+
+==================================================================================================================================
+
+Q (!!!):
+--------
+We have virsh utility installed that let us interact with virtual machines and qemu-kvm installed that let us create and run them.
+
+Check if any virtual machine is present on this system (stopped or running), if yes then save its name in /home/bob/vm file.
+
+
+A :
+---
+$ virsh list --all
+
+ Id   Name   State
+--------------------
+
+
+$ sudo virsh list --all
+ Id   Name   State
+-----------------------
+ -    VM1    shut off
+
+
+==================================================================================================================================
+
+Q :
+---
+Find out the swapfile used on this system and save its exact path in /home/bob/swap file.
+
+
+A :
+---
+$ swapon --show
+NAME      TYPE SIZE USED PRIO
+/swapfile file   2G 8.3M   -2
+
+
+$ vi /home/bob/swap
+/swapfile
+
+
+==================================================================================================================================
+
+Q :
+---
+Create an xfs filesystem with the label "DataDisk" on /dev/vdb.
+
+
+A :
+---
+$ sudo mkfs.xfs -L "DataDisk" /dev/vdb
+
+meta-data=/dev/vdb               isize=512    agcount=4, agsize=65536 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1
+data     =                       bsize=4096   blocks=262144, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=2560, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+
+
+==================================================================================================================================
+
+Q :
+---
+Configure the system to automatically mount /dev/vdc when it boots up. 
+This partition has an ext4 filesystem on it. 
+It should mount the filesystem to the /test directory. 
+This directory does not exist, make sure you create it first.
+
+Also make sure this filesystem should be checked on boot.
+
+
+A :
+---
+$ sudo mkdir /test
+$ sudo vi /etc/fstab
+/dev/vdc /test ext4 defaults 0 2
+
+
+==================================================================================================================================
+
+Q :
+---
+Configure the system to automatically use /dev/vdb as swap when it boots up.
+
+
+A :
+---
+$ sudo vi /etc/fstab
+/swapfile none swap defaults 0 0
+/dev/vdc /test ext4 defaults 0 2
+/dev/vdb none swap defaults 0 0
+
+
+==================================================================================================================================
+
+Q :
+---
+Change the label for /dev/vdb filesystem to SwapFS
+
+
+A :
+---
+$ sudo xfs_admin -L "SwapFS" /dev/vdb
+
+
+==================================================================================================================================
+
+Q :
+---
+Let's export /etc directory using NFS for 127.0.0.1 IP address. 
+Also, the ro option should be applied, making this share read-only. 
+Clients will only be able to read, but not write to this network shared directory.
+
+
+A :
+---
+$ sudo vi /etc/exports
+/etc 127.0.0.1(ro)
+
+$ sudo systemctl reload nfs-server
+
+
+==================================================================================================================================
+
+Q :
+---
+Tell autofs to auto-mount a directory called /shares. 
+If this directory does not exist, autofs should automatically create it. 
+The /shares directory should be defined in a file called /etc/auto.shares.
+
+Further, autofs should automatically mount a network share 127.0.0.1:/etc in /shares/mynetworkshare/ 
+and should show us the contents of 127.0.0.1:/etc in /shares/mynetworkshare/ directory.
+
+
+A :
+---
+$ sudo vi /etc/auto.master
+/shares /etc/auto.shares
+
+
+$ sudo vi /etc/auto.shares
+mynetworkshare -fstype=auto 127.0.0.1:/etc
+
+
+$ sudo systemctl reload autofs
+$ ls /shares/mynetworkshare
+
+
+==================================================================================================================================
+
+Q :
+---
+

@@ -249,6 +249,20 @@ $   find –perm –u=rw,g=rw,o=r
 $   find -perm /664      # find files with any of these permissions
 $   find –perm /u=rw,g=rw,o=r 
 ```
+```sh
+$ sudo find /var/log/ -perm -g=w ! -perm o=rw -exec ls {} \;
+
+/var/log/lastlog
+/var/log/wtmp
+/var/log/btmp
+
+
+$ sudo find /var/log/ -perm -g=w ! -perm o=rw -exec ls -l {} \;
+
+-rw-rw-r-- 1 root utmp 292292 Nov 24 09:34 /var/log/lastlog
+-rw-rw-r-- 1 root utmp 768 Nov 24 08:43 /var/log/wtmp
+-rw-rw---- 1 root utmp 0 Feb  8  2023 /var/log/btmp
+```
 
 <br/>
 
@@ -556,11 +570,6 @@ UID_MAX_TOTO_TEST        6000
 GID_MAX                 60000
 
 
-$   egrep -r '60{3}' /home/cento/toto.log
-UID_MAX_TOTO_TEST        6000
-GID_MAX                 60000
-
-
 # Finding all strings matching EXACTLY 6, terminating by three zeros  -> 60{3}$
 $   egrep -r '60{3}$' /home/cento/toto.log
 UID_MAX_TOTO_TEST        6000
@@ -584,10 +593,10 @@ $   egrep -r 'enabled|disable?' /etc/
 empty, it behaves as disabled.
 ```
 ```sh
-# Matching any one lowercase from a to z  ->  [a-z]
-$   egrep -r 'enabled|disable?' /etc/
-/etc/dleyna-server-service.conf:# If netf is enabled but the list is 
-empty, it behaves as disabled.
+# Words having /dev/, followed by any characters having a or b or ... to z
+$ egrep -r '/dev/[a-z]*' /etc/
+/etc/smartmontools/smartd.conf:#/dev/twl0 -d 3ware,1 -a -s L/../../2/03
+/etc/smartmontools/smartd.conf:#/dev/hdc,0 -a -s L/../../2/01
 
 # Words having cat or cut
 $   egrep -r 'c[au]t' /etc/
@@ -709,6 +718,21 @@ $   zip –r archive.zip Pictures/
 $   unzip archive.zip
 Archive: archive.zip
 replace file1? [y]es, [n]o, [A]ll, [N]one, [r]ename: 
+```
+
+<br/>
+
+If we zip / unzip **<span style="color:#FFA500">non-tar</span>** file
+
+```sh
+$ gzip games.txt              $ gunzip games.txt.gz         gzip --decompress games.txt.gz
+games.txt.gz                  games.txt
+
+$ bzip2 games.txt             $ bunzip games.txt.bz2        bzip2 --decompress games.txt.bz2
+games.txt.bz2                 games.txt
+
+$ xz games.txt                $ unxz games.txt.xz           xz --decompress games.txt.xz
+games.txt.xz                  games.txt
 ```
 
 &nbsp;
@@ -1574,7 +1598,7 @@ $   atrm 1
 
 When running scheduled jobs with `cron` or `anacron` :
  
-* you can see logs in `/var/log/cron` (in CentOs by default). In other OS you may need to specify a path to a log output.
+* you can see logs in <mark>`/var/log/cron`</mark> (in CentOs by default). In other OS you may need to specify a path to a log output.
 * or you can use `journalctl -e`
 ```sh
 $   journalctl -e
@@ -2969,6 +2993,253 @@ Sep 11 01:39:43 localhost.localdomain sshd[1041]: Server listening on 0.0.0.0 po
 Sep 11 01:39:43 localhost.localdomain sshd[1041]: Server listening on :: port 22.
 Sep 11 01:39:43 localhost.localdomain systemd[1]: Started OpenSSH server daemon.
 Sep 11 01:40:01 localhost.localdomain sshd[1650]: Accepted password for cento from 192.168.25.2 port 51630 ssh2
+```
+
+&nbsp;
+
+###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Configure bridge and bonding devices</ins>
+
+- **Network bonding** combines multiple LAN or Ethernet interfaces into a single logical
+interface known as a **network bond** : The goal of network bonding is to provide **`fault tolerance`** and **`network redundancy`**.
+
+- **Network Bridging** involves the creation of a logical interface known as a
+**bridge** between two interfaces. This allows traffic to pass through them and is especially helpful in **sharing an internet connection** between your systems and others.
+
+<br/>
+
+#### 🔖 <ins>Bond</ins>
+
+- To check if module is loaded :
+
+```sh
+$   lsmod | grep bond
+
+bonding               152979  0
+```
+
+- To load the module (if not loaded)
+
+```sh
+$   sudo modprobe bonding
+```
+
+<br/>
+
+####  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; To configure a temporary Network Bonding Interface
+
+- We have 2 networks cards.
+
+```sh
+$   dnf install net-tools -y
+$   ifconfig
+
+ens33: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.1.173  netmask 255.255.255.0  broadcast 192.168.1.255
+        inet6 fe80::20c:29ff:fe6a:d2b2  prefixlen 64  scopeid 0x20<link>
+        ether 00:0c:29:6a:d2:b2  txqueuelen 1000  (Ethernet)
+        RX packets 109151  bytes 162982305 (155.4 MiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 53252  bytes 3608732 (3.4 MiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+ens36: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.1.174  netmask 255.255.255.0  broadcast 192.168.1.255
+        inet6 fe80::20c:29ff:fe6a:d2bc  prefixlen 64  scopeid 0x20<link>
+        ether 00:0c:29:6a:d2:bc  txqueuelen 1000  (Ethernet)
+        RX packets 7  bytes 1128 (1.1 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 57  bytes 9401 (9.1 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+```
+
+<br/>
+
+- Let's create a network bond of type 802.3ad
+
+<br/>
+
+> mode=4 (802.3ad): This is also referred to as the **Dynamic Link Aggregation** mode. It
+creates aggregation groups with the same speed. Works on **network switches** that
+support the IEEE 802.3ad dynamic link standard.
+
+<br/>
+
+```sh
+$   ip link add bond1 type bond mode 802.3ad
+$   ip a
+
+7: bond1: <BROADCAST,MULTICAST,MASTER> mtu 1500 qdisc noop state DOWN group default qlen 1000
+    link/ether 8a:60:ec:65:71:3a brd ff:ff:ff:ff:ff:ff
+```
+
+- Activate the bond
+
+```sh
+$   ifconfig bond1 up
+# See MASTER,UP
+$   ip link
+
+7: bond1: <NO-CARRIER,BROADCAST,MULTICAST,MASTER,UP> mtu 1500 qdisc noqueue state DOWN mode DEFAULT group default qlen 1000
+    link/ether 8a:60:ec:65:71:3a brd ff:ff:ff:ff:ff:ff
+```
+
+<br/>
+
+####  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; To PERMANENTLY configure a Network Bonding Interface
+
+- We will edit files at <mark>**`/etc/sysconfig/network-scripts/`**</mark>
+- We will use `mode=5` (Load balancing), instead of `mode=1` (active-backup). For unknown reasons, we can not ping to/from outside.
+
+<br/>
+
+Let's create our bond NIC
+
+```sh
+$   vi /etc/sysconfig/network-scripts/ifcfg-bond0
+
+DEVICE=bond0
+NAME=bond0
+TYPE=Bond
+BONDING_MASTER=yes
+IPADDR=192.168.1.179
+PREFIX=24
+GATEWAY=192.168.1.1
+DNS1=192.168.1.100
+ONBOOT=yes
+BOOTPROTO=none
+BONDING_OPTS="mode=5 miimon=100"
+```
+
+<br/>
+
+Let's edit our 2 NICs to be configured as **`SLAVE`**
+
+```sh
+$   vi /etc/sysconfig/network-scripts/ifcfg-ens33
+
+TYPE=Ethernet
+PROXY_METHOD=none
+BROWSER_ONLY=no
+BOOTPROTO=none
+DEFROUTE=yes
+IPV4_FAILURE_FATAL=no
+IPV6INIT=no
+IPV6_AUTOCONF="yes"
+IPV6_DEFROUTE="yes"
+IPV6_FAILURE_FATAL="no"
+IPV6_ADDR_GEN_MODE="stable-privacy"
+NAME=ens33
+UUID=07c6e0eb-ea82-4736-9508-83d07e146330
+DEVICE=ens33
+ONBOOT=yes
+IPADDR=192.168.1.173
+PREFIX=24
+GATEWAY=192.168.1.1
+DNS1=192.168.1.100
+# Lines to ADD
+MASTER=bond0
+SLAVE=yes
+```
+```sh
+$   vi /etc/sysconfig/network-scripts/ifcfg-ens36
+
+WADDR=00:0C:29:6A:D2:BC
+TYPE=Ethernet
+PROXY_METHOD=none
+BROWSER_ONLY=no
+BOOTPROTO=none
+IPADDR=192.168.1.174
+PREFIX=24
+GATEWAY=192.168.1.1
+DNS1=192.168.1.100
+DEFROUTE=yes
+IPV4_FAILURE_FATAL=no
+IPV6INIT=no
+NAME=ens36
+UUID=4e4220ef-efc4-386b-987a-c4b7e4e1a393
+ONBOOT=yes
+AUTOCONNECT_PRIORITY=-999
+# Lines to ADD
+MASTER=bond0
+SLAVE=yes
+```
+
+<br/>
+
+Now, activate the Network interfaces, update the changes and restart service
+
+```sh
+$   ifup ifcfg-ens33
+$   ifup ifcfg-ens36
+
+$   nmcli con reload
+$   systemctl restart network
+```
+
+<br/>
+
+Let's test connectivity (inside and outside)
+
+```sh
+[centos-ca@centos-ca ~]$ ping 192.168.1.179
+
+64 bytes from 192.168.1.179: icmp_seq=1 ttl=64 time=0.772 ms
+64 bytes from 192.168.1.179: icmp_seq=2 ttl=64 time=0.457 ms
+
+
+[root@centos-sftp ~]# ping -c 10 -I bond0 baeldung.com
+
+64 bytes from 172.66.40.248 (172.66.40.248): icmp_seq=1 ttl=58 time=16.0 ms
+64 bytes from 172.66.40.248 (172.66.40.248): icmp_seq=2 ttl=58 time=16.6 ms
+```
+
+<br/>
+
+Let's shutdown `ens33` and test connectivity (inside and outside)
+
+```sh
+$   ifconfig ens33 down
+$   nmcli con reload
+$   cat /proc/net/bonding/bond0
+
+Bonding Mode: transmit load balancing
+Primary Slave: None
+Currently Active Slave: ens36
+MII Status: up
+MII Polling Interval (ms): 100
+Up Delay (ms): 0
+Down Delay (ms): 0
+
+Slave Interface: ens33
+# It is down
+MII Status: down
+Speed: 1000 Mbps
+Duplex: full
+Link Failure Count: 1
+Permanent HW addr: 00:0c:29:6a:d2:b2
+Slave queue ID: 0
+
+Slave Interface: ens36
+MII Status: up
+Speed: 1000 Mbps
+Duplex: full
+Link Failure Count: 0
+Permanent HW addr: 00:0c:29:6a:d2:bc
+Slave queue ID: 0
+```
+```sh
+[root@centos-sftp ~]# ping -c 10 -I bond0 baeldung.com
+
+PING baeldung.com (172.66.40.248) from 192.168.1.179 bond0: 56(84) bytes of data.
+64 bytes from 172.66.40.248 (172.66.40.248): icmp_seq=1 ttl=58 time=18.1 ms
+64 bytes from 172.66.40.248 (172.66.40.248): icmp_seq=2 ttl=58 time=16.4 ms
+
+
+[centos-ca@centos-ca ~]$ ping 192.168.1.179
+
+PING 192.168.1.179 (192.168.1.179) 56(84) bytes of data.
+64 bytes from 192.168.1.179: icmp_seq=1 ttl=64 time=0.714 ms
+64 bytes from 192.168.1.179: icmp_seq=2 ttl=64 time=3.13 ms
 ```
 
 &nbsp;
