@@ -652,7 +652,7 @@ $   egrep –r '/[^a-z]' /etc/
 
 <br/>
 
-### ⚠️ WARNING : a comparison between `grep` and `egrep`
+### ⚠️ <mark>WARNING</mark> : a comparison between `grep` and `egrep`
 
 > How many numbers (1 to 4000) in /home/bob/textfile begin with a number 2, save the count in /home/bob/count file.
 
@@ -712,7 +712,7 @@ $   tar -xf archive.tar.gz –C /tmp/
 
 #### 🔖 <ins>Compressing files</ins>
 
-> ⚠️ **`f`** option should be the last
+> ⚠️ <mark>**`f`** option should be the last</mark>
 
 ```sh
 # j for compressing archive through bzip2      -->      -cjf , NOT -cfj !!!!!!!!!!!!!!!
@@ -922,6 +922,8 @@ $   systemctl isolate rescue.target
 
 ###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Use scripting to automate system maintenance tasks</ins>
 Example :
+
+Each script begins with a **shebang** `#!/bin/bash`
 ```sh
 #!/bin/bash
 
@@ -966,7 +968,7 @@ $   systemctl stop sshd.service
 $   systemctl start sshd.service
 ```
 
-### ⚠️ WARNING :
+### ⚠️ <mark>WARNING</mark> :
 
 ```sh
 # To restart a service
@@ -997,7 +999,7 @@ $   systemctl enable --now sshd.service
 $   systemctl disable --now sshd.service
 ```
 
-### ⚠️ WARNING :
+### ⚠️ <mark>WARNING</mark> :
 To REALLY avoid a service to run (**a service 1 can still re-enable a service 2, even if disabled**), use the `mask` option.
 
 If we need to use the service again, please do not forget to `unmask`
@@ -1391,7 +1393,7 @@ $   journalctl -b -1
 Aug 17 18:45:39 ubuntu kernel: Linux version 5.15.0-78-generic (buildd@lcy02-amd64-008) (gcc (Ubuntu 11.3.0-1ubuntu1~22.04.>
 ```
 
-### ⚠️NOTE
+### ⚠️ <mark>NOTE</mark>
 
 > Contrary to Ubuntu server, on CentOS the journal is only kept in memory (when powering off or rebooting, all logs are lost). 
 >
@@ -2416,7 +2418,7 @@ $   groups john
 john : programmers
 ```
 
-### ⚠️ WARNING (note the difference here) :
+### ⚠️ <mark>WARNING</mark> (note the difference here) :
 
 - `gpasswd` : expects USERNAME then GROUP
 - `usermod` : expects GROUP then USERNAME
@@ -3179,169 +3181,15 @@ PING 192.168.1.179 (192.168.1.179) 56(84) bytes of data.
 64 bytes from 192.168.1.179: icmp_seq=2 ttl=64 time=3.13 ms
 ```
 
+###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Configure packet filtering</ins>
+
 &nbsp;
 
-###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Implement packet filtering</ins>
+###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Port Redirection, and NAT (Network Address Translation)</ins>
 
+&nbsp;
 
-
-We have a tool called **`FirewallD`** for filtering packets. 
-
-This firewall manager puts every network interfaces in what we call **zones**.
-
-<br/>
-
-**<ins>Each zone has its own set of rules :</ins>** 
-
-#### 🔖 <ins>Example 1</ins>
-
-For example we have a server with 1 wireless and 1 wired **NIC** :
-
-- The wireless one is added in a zone called **Drop**, which is very restrictive and blocks all incoming connections.
-- The wired one is on a zone called **Trusted**, where all connections are accepted (we trust all network traffic in our office).
-
-
-
-> <ins>**Public** is the used default zone :</ins>
->
-> - In this zone, every incoming connection is blocked, except what we explicitly choose to allow.
-> - The logic is that the main policy is to deny incoming connections to all ports : **only allowing** incoming connections **to specifically enabled services**
-
-<br/>
-
-```sh
-# We can check what zone is currently default
-$   firewall-cmd --get-default-zone
-public
-
-# To set default zone to public
-$   firewall-cmd --set-default-zone=public
-Warning: ZONE_ALREADY_SET: public
-success
-```
-
-```sh
-# To see the current firewall rules
-$   firewall-cmd --list-all
-
-public (active)
-  target: default
-  icmp-block-inversion: no
-  interfaces: ens33
-  sources:
-  # Incoming connections for these services are allowed
-  # A service here is a friendly name for allowing connections to a certain port
-  services: dhcpv6-client ssh
-  ports: 22/tcp
-  ...
-
-
-# If we want to see what port number corresponds to a service (here ssh)
-$   firewall-cmd --info-service=ssh
-
-ssh
-  ports: 22/tcp
-  protocols:
-  source-ports:
-  modules:
-  destination:
-```
-
-<br>
-
-#### 🔖 <ins>Example 2</ins>
-
-Let's say we installed an HTTP server like Apache or Nginx.
-
-```sh
-# If we want to allow traffic to the HTTP service
-$   firewall-cmd --add-service=http
-success
-
-# If we want to allow TCP connections to port 80
-$   firewall-cmd --add-port=80/tcp
-success
-```
-
-
-```sh
-# To deny traffic to the HTTP service
-$   firewall-cmd --remove-service=http
-$   firewall-cmd --remove-port=80/tcp
-```
-
-<br/>
-
-> We have seen one logic with the **Public** zone, but we can use another logic : Instead of filtering traffic based on incoming ports, we can have **rules on where the traffic is coming from**
-
- <br/>
-
- ```sh
- # Allow incoming traffic from this IP range in trusted zone : 10.11.12.0 to 10.11.12.255
-$   firewall-cmd --add-source=10.11.12.0/24 --zone=trusted
-success
-
-
-# To remove the AP address filter
-$   firewall-cmd --remove-source=10.11.12.0/24 --zone=trusted
-success
- ```
-
-<br/>
-
-### ⚠️ WARNING : 
-
-Based on what we saw, **`firewall-cmd`**, on a <span style="color:#06C258">**physical host with multiple NICs**</span>, allows us to define our set of rules by zone (<span style="color:#FF8A8A">**affiliated to a specific NIC**</span>)
-
- ```sh
- # Creating a new zone (here: 'extranet'). '--permanent' is mandatory
- $   firewall-cmd --permanent --new-zone=extranet
-
-
- # Now our firewall is filtering network traffic through two zones : public and trusted.
-# We can check out what zones are actively filtering traffic with this command
-$   firewall-cmd --get-active-zones
-public
-  interfaces: ens33
-trusted
-  sources: 10.11.12.0/24
-
-
-# To assign an interface to a different zone (here : 'trusted')
-$   firewall-cmd --zone=trusted --change-interface=ens33
- ```
-
-
-<br>
-
-#### 🔖 <ins>Permanent rules</ins>
-
-```sh
-# We allow incoming traffic to port 12345
-$   sudo firewall-cmd --add-port=12345/tcp
-success
-
-# We check
-$   sudo firewall-cmd --list-all
-public (active)
-target: default
-icmp-block-inversion: no
-interfaces: enp0s3
-sources: 
-services: cockpit dhcpv6-client http ssh
-ports: 12345
-
-
-# ONCE we are satisfied, we make the rule permanent
-$   sudo firewall-cmd --runtime-to-permanent
-success
-```
-```sh
-# Another way to make a permanent rule
-#
-# BEWARE : this command makes it permanent BUT not active in the current session
-$   sudo firewall-cmd --add-port=12345/tcp --permanent
-```
+###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Implement reverse proxies and load balancers</ins>
 
 &nbsp;
 
@@ -3983,7 +3831,7 @@ success
 
 <br/>
 
-#### ⚠️ NOTE :
+#### ⚠️ <mark>NOTE</mark> :
 
 > When creating your rules, Squid will look at the 1st rule and so on : it means that you have to design well your rules to apply them **<ins>in a specific order</ins>**
 ```sh
@@ -4064,7 +3912,7 @@ DocumentRoot "/var/www/html"
 
 <br/>
 
-#### ⚠️ NOTE :
+#### ⚠️ <mark>NOTE</mark> :
 
 - For the following example : our HTTP server will host 2 websites, **Blog** & **Store**
 
@@ -4614,7 +4462,7 @@ sdb      8:16   0    8G  0 disk
 └─sdb6   8:22   0  1.9G  0 part [SWAP]
 ```
 
-#### ⚠️ NOTE :
+#### ⚠️ <mark>NOTE</mark> :
 
 > **However there is a problem :** if we reboot the machine, /dev/sdb6 won't be used as swap <span style="color:#FF8A8A"><ins>**anymore**</ins></span>. We will see later how to automatically use a swap every time the OS boots up. 
 
@@ -4829,7 +4677,7 @@ sr0     11:0    1 1024M  0 rom
 
 <br/>
 
-#### ⚠️ NOTE :
+#### ⚠️ <mark>NOTE</mark> :
 
 > **If we want to know the UUID of a partition :** if we connect wrongly hardwares on motherboard, partitions will not match the real disks. 
 >
@@ -5047,7 +4895,7 @@ total 0
 
 <br/>
 
-#### ⚠️ NOTE :
+#### ⚠️ <mark>NOTE</mark> :
 
 > **If we don't want the parent-child scheme :** we just want to point directly to the child directory.
 
@@ -5228,7 +5076,7 @@ Linux 3.10.0-1160.el7.x86_64 (localhost.localdomain)    10/15/2023      _x86_64_
 
 <br/>
 
-### ⚠️ WARNING :
+### ⚠️ <mark>WARNING</mark> :
 
 Here a way for having <b><span style="color:#06C258">I/O statistics in live (per 1 second)</span></b> :
 
@@ -5510,7 +5358,7 @@ realtime =none                   extsz=4096   blocks=0, rtextents=0
 
 <br/>
 
-### ⚠️ WARNING :
+### ⚠️ <mark>WARNING</mark> :
 
 Now we want to resize a LV **with a filesystem on it**. <span style="color:#FF8A8A"><ins>**We should not use**</ins></span> this previous command : The XFS file system we just put on it, would still only use 2 GB.
 
@@ -5621,7 +5469,7 @@ $   mount /dev/mapper/my_secure_disk_e  /mnt
 ```
 
 
-### ⚠️ NOTE
+### ⚠️ <mark>NOTE</mark>
 
 > So **`/dev/mapper/my_secure_disk_e`** is seen as regular unencrypted disk and this makes it easy for applications to write data to it and read data.
 >
@@ -5635,7 +5483,7 @@ $   mount /dev/mapper/my_secure_disk_e  /mnt
 
 <br/>
 
-### ⚠️ WARNING
+### ⚠️ <mark>WARNING</mark>
 
 > **/dev/mapper/my_secure_disk_e** is a sort of FAKE disk. 
 >
@@ -5788,7 +5636,7 @@ $   mdadm --stop /dev/md0
 mdadm: stopped /dev/md0
 ```
 
-### ⚠️ NOTE
+### ⚠️ <mark>NOTE</mark>
 
 When Linux boots up, it will scan what is called the super block of all devices : it will check which devices belong to a raid array. When they do, Linux will reassemble them into an array and they'll be found in **`/dev/md`** 1 to 7.
 
@@ -5800,7 +5648,7 @@ $   mdadm --zero-superblock /dev/sdc /dev/sdd /dev/sde
 
 <br/>
 
-### ⚠️ NOTE
+### ⚠️ <mark>NOTE</mark>
 
 Here is the command of how to add spare disk to an array
 
@@ -5820,7 +5668,7 @@ mdadm: array /dev/md0 started.
 
 <br/>
 
-### ⚠️ NOTE
+### ⚠️ <mark>NOTE</mark>
 
 We mount 2 disks at Level 1 and we want to increase the level of safety
 
