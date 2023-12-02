@@ -1,5 +1,21 @@
 ## Essentials commands
 
+### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Get info about your OS (some examples)</ins>
+
+```sh
+# Find kernel version
+$   uname -r
+
+# Output value of kernel parameter
+$   cat /proc/sys/net/ipv4/ip_forward
+
+# Get current timezone
+$   date +%Z
+$   cat /etc/timezone
+```
+
+&nbsp;
+
 ### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Create and manage hard & soft links</ins>
 
 ```sh
@@ -652,7 +668,9 @@ $   egrep –r '/[^a-z]' /etc/
 
 <br/>
 
-### ⚠️ <mark>NOTE</mark> : a comparison between `grep` and `egrep`
+### ⚠️ <mark>NOTE</mark> 
+
+- a comparison between `grep` and `egrep`
 
 > How many numbers (1 to 4000) in /home/bob/textfile begin with a number 2, save the count in /home/bob/count file.
 
@@ -662,6 +680,16 @@ $   egrep -e '^2' /home/bob/textfile | wc -l
 
 $   grep -c '^2' textfile
 1111
+```
+
+- An advanced expression
+
+> Replace all lines, starting with **`container.web`** , ending with **`24h`** and that have the word
+**`Running`** anywhere in-between with: **`SENSITIVE LINE REMOVED`**
+
+```sh
+# Expression : ^container.web.*Running.*24h$
+$   sed -i 's/^container.web.*Running.*24h$/SENSITIVE LINE REMOVED/g' server.log
 ```
 
 &nbsp;
@@ -2637,6 +2665,14 @@ file locks                      (-x) unlimited
 -bash: ulimit: max user processes: cannot modify limit: Operation not permitted
 ```
 
+<br/>
+
+### ⚠️ <mark>WARNING</mark> :
+
+> You must **logout** of all sessions, the log in again.
+>
+> If you don't do that, changes will never applied and you will <span style="color:#FF8A8A">**lose points when passing the certification**</span>.
+
 &nbsp;
 
 ###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Manage User Privileges</ins>
@@ -2703,6 +2739,7 @@ cento  ALL= /bin/ls, /bin/stat
 
 ```sh
 cento  ALL=       NOPASSWD:ALL
+user2 ALL=(root) NOPASSWD: /bin/bash /root/dangerous.sh 
 ```
 
 &nbsp;
@@ -3118,7 +3155,7 @@ $   ip -c addr
 
 <br/>
 
-#### 🔖 <ins>Bond</ins>
+#### 🔖 <ins>Bond</ins> (just an example of configuration but no demo)
 
 ```sh
 # Let's create a copy from samples 
@@ -3192,42 +3229,6 @@ ECDSA key fingerprint is MD5:22:fd:bb:09:eb:89:60:c0:8f:53:a9:cb:a3:5e:3e:fd.
 Are you sure you want to continue connecting (yes/no)? yes
 Warning: Permanently added '192.168.1.221' (ECDSA) to the list of known hosts.
 ubuntu@192.168.1.221's password: 
-
-```
-
-<br/>
-
-```sh
-# Let's shut down 1 NIC
-$   ip link set dev ens33 down
-$   ip -c addr
-
-2: ens33: <BROADCAST,MULTICAST,SLAVE> mtu 1500 qdisc fq_codel master bond0 state DOWN group default qlen 1000
-    link/ether 5e:bc:e3:74:5d:67 brd ff:ff:ff:ff:ff:ff 
-    altname enp2s1
-3: ens37: <BROADCAST,MULTICAST,SLAVE,UP,LOWER_UP> mtu 1500 qdisc fq_codel master bond0 state UP group default qlen 1000
-    link/ether 00:0c:29:d6:bb:82 brd ff:ff:ff:ff:ff:ff permaddr 00:0c:29:d6:bb:96
-    altname enp2s5
-4: ens38: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
-    link/ether 00:0c:29:d6:bb:8c brd ff:ff:ff:ff:ff:ff
-    altname enp2s6
-    inet 10.10.1.10/24 brd 10.10.1.255 scope global ens38
-       valid_lft forever preferred_lft forever
-    inet6 fe80::20c:29ff:fed6:bb8c/64 scope link 
-       valid_lft forever preferred_lft forever
-5: bond0: <BROADCAST,MULTICAST,MASTER,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
-    link/ether 5e:bc:e3:74:5d:67 brd ff:ff:ff:ff:ff:ff
-    inet 192.168.1.221/24 brd 192.168.1.255 scope global bond0
-       valid_lft forever preferred_lft forever
-    inet6 fe80::5cbc:e3ff:fe74:5d67/64 scope link 
-       valid_lft forever preferred_lft forever
-```
-```sh
-# Let's ping AGAIN from outside
-[centos-ad@centos-ad ~]$ ping 192.168.1.221
-
-PING 192.168.1.221 (192.168.1.221) 56(84) bytes of data.
-64 bytes from 192.168.1.221: icmp_seq=1 ttl=64 time=0.658 ms
 ```
 
 &nbsp;
@@ -3624,6 +3625,16 @@ $   systemctl status systemd-timesyncd.service
 # We can for example specify a NTP server
 $   vi /etc/systemd/timesyncd.conf
 $   systemctl restart systemd-timesyncd.service
+```
+```sh
+$   apropos -s 1,5,8 timesync
+$   man timesyncd.conf
+$   vi /etc/systemd/timesyncd.conf
+
+NTP=0.pool.ntp.org 1.pool.ntp.org
+FallbackNTP=ntp.ubuntu.com 0.debian.pool.ntp.org
+PollIntervalMaxSec=1000
+ConnectionRetrySec=20
 ```
 
 &nbsp;
@@ -4714,6 +4725,149 @@ sdb      8:16   0    8G  0 disk
 └─sdb6   8:22   0  1.9G  0 part
 sr0     11:0    1 1024M  0 rom
 ```
+
+<br> 
+
+#### ⚠️ <mark>NOTE</mark> :
+
+> We have /dev/vdb disk on this system. Perform the following actions on it.
+>
+> - Create a partition **`/dev/vdb1`** of **400MB** in size and format it as XFS file system. 
+>
+> - Create a partition **`/dev/vdb2`** of **100MB** in size, format it as ext4 file system and mount it in /mnt/ . 
+   We want to keep some sensitive data on ext4 filesystem. 
+>
+> - Create a partition **`/dev/vdb3`** of **450MB** in size and format it with the xfs filesystem. 
+   To make this easier to spot in the future, among the other filesystems, set the filesystem label to **ExamFS** when you format it.
+
+<br/>
+
+```sh
+$  lsblk
+
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vda    253:0    0   11G  0 disk 
+└─vda1 253:1    0   10G  0 part /
+vdb    253:16   0    1G  0 disk 
+vdc    253:32   0    1G  0 disk 
+vdd    253:48   0    1G  0 disk 
+vde    253:64   0    1G  0 disk 
+└─vde1 253:65   0 1023M  0 part 
+```
+```sh
+$  fdisk /dev/vdb
+
+Command (m for help): n
+Partition type
+   p   primary (0 primary, 0 extended, 4 free)
+   e   extended (container for logical partitions)
+Select (default p): 
+Partition number (1-4, default 1): 
+First sector (2048-2097151, default 2048): 
+Last sector, +sectors or +size{K,M,G,T,P} (2048-2097151, default 2097151): 400M
+Value out of range.
+Last sector, +sectors or +size{K,M,G,T,P} (2048-2097151, default 2097151): +400M
+
+Created a new partition 1 of type 'Linux' and of size 400 MiB.
+
+
+Command (m for help): n
+Partition type
+   p   primary (1 primary, 0 extended, 3 free)
+   e   extended (container for logical partitions)
+Select (default p): 
+
+Using default response p.
+Partition number (2-4, default 2): 
+First sector (821248-2097151, default 821248): 
+Last sector, +sectors or +size{K,M,G,T,P} (821248-2097151, default 2097151): +100M
+
+Created a new partition 2 of type 'Linux' and of size 100 MiB.
+
+
+Command (m for help): n
+Partition type
+   p   primary (2 primary, 0 extended, 2 free)
+   e   extended (container for logical partitions)
+Select (default p): 
+
+Using default response p.
+Partition number (3,4, default 3): 
+First sector (1026048-2097151, default 1026048): 
+Last sector, +sectors or +size{K,M,G,T,P} (1026048-2097151, default 2097151): +450M
+
+Created a new partition 3 of type 'Linux' and of size 450 MiB.
+
+Command (m for help): w
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Syncing disks.
+```
+
+<br/>
+
+```sh
+$  lsblk
+
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vda    253:0    0   11G  0 disk 
+└─vda1 253:1    0   10G  0 part /
+vdb    253:16   0    1G  0 disk 
+├─vdb1 253:17   0  400M  0 part 
+├─vdb2 253:18   0  100M  0 part 
+└─vdb3 253:19   0  450M  0 part 
+vdc    253:32   0    1G  0 disk 
+vdd    253:48   0    1G  0 disk 
+vde    253:64   0    1G  0 disk 
+└─vde1 253:65   0 1023M  0 part 
+```
+
+<br/>
+
+```sh
+# Format the 3 partitions
+$  mkfs.xfs /dev/vdb1
+
+meta-data=/dev/vdb1              isize=512    agcount=4, agsize=25600 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1
+data     =                       bsize=4096   blocks=102400, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=1368, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+
+
+$  mkfs.ext4 /dev/vdb2
+
+mke2fs 1.45.6 (20-Mar-2020)
+Creating filesystem with 102400 1k blocks and 25688 inodes
+Filesystem UUID: 959786fa-1d0f-49c2-a230-abead2d1868b
+Superblock backups stored on blocks: 
+        8193, 24577, 40961, 57345, 73729
+
+Allocating group tables: done                            
+Writing inode tables: done                            
+Creating journal (4096 blocks): done
+Writing superblocks and filesystem accounting information: done 
+
+
+$  mkfs.xfs -L "ExamFS" /dev/vdb3
+
+meta-data=/dev/vdb3              isize=512    agcount=4, agsize=28800 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1
+data     =                       bsize=4096   blocks=115200, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=1368, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+```
+
 &nbsp;
 
 ###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Configure and manage swap space</ins>
@@ -5122,6 +5276,8 @@ This method is used specifically **for remote file systems** : it is *<ins>for a
 
 #### 🔖 <ins>Network File Sharing</ins>
 
+#####  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Solution 1
+
 When we want to mount a file system or a directory stored on a different server, the most often used solution is the **network file sharing**.
 
 ```sh
@@ -5139,9 +5295,26 @@ Next we need to tell the NFS server what directories it should share to the netw
 $   vi /etc/exports
 # remotedir directory should be accessible to computers having the IP address 127.0.0.1. ro for read-only
 /remotedir 127.0.0.1(ro)
+```
+```sh
+# To apply changes
+$   sudo exportfs -ra
 
-
+# OR
 $   systemctl reload autofs.service
+```
+
+<br/>
+
+#####  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Solution 2
+
+We can also use the **`sshf`** utility.
+
+```sh
+# Use SSHFS to mount directory /data-export from server app-srv1 to /app-srv1/data-export . 
+# The mount should be read-write and option allow_other should be enabled.
+$   sudo mkdir -p /app-srv1/data-export
+$   sudo sshfs -o allow_other,rw app-srv1:/data-export /app-srv1/data-export
 ```
 
 <br/>
@@ -6172,3 +6345,30 @@ Disk quotas for user cento (uid 1000):
 $   touch /mybackups/cento/TOTOfile2
 touch: cannot touch ‘/mybackups/cento/TOTOfile2’: Disk quota exceeded
 ```
+
+&nbsp;
+
+###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Build and install from source</ins>
+
+> Install the text based terminal browser links2 from source on server app-srv1 . The source is provided at **/tools/links-2.14.tar.bz2** on
+that server.
+Configure the installation process so that:
+>
+> 1. The target location of the installed binary will be /usr/bin/links
+> 2. Support for ipv6 will be disabled
+
+```sh
+$   cd /tools
+$   tar xjf links-2.14.tar.bz2
+$   cd links-2.14
+```
+
+<br/>
+
+### ⚠️ <mark>NOTE</mark>
+
+The usual process of installing from source is :
+
+1. **`./configure`** (args...)
+2. **`make`**
+3. **`make install`**
