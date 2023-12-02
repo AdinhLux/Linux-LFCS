@@ -650,6 +650,20 @@ $   egrep –r 'http[^s]' /etc/
 $   egrep –r '/[^a-z]' /etc/
 ```
 
+<br/>
+
+### ⚠️ WARNING : a comparison between `grep` and `egrep`
+
+> How many numbers (1 to 4000) in /home/bob/textfile begin with a number 2, save the count in /home/bob/count file.
+
+```sh
+$   egrep -w '^2' /home/bob/textfile | wc -l
+2
+
+$   grep -c '^2' textfile
+1111
+```
+
 &nbsp;
 
 ###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Archive, backup, compress, unpack, and uncompress files</ins>
@@ -745,7 +759,7 @@ games.txt.xz                  games.txt
 
 &nbsp;
 
-###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Backup files to a Remote System</ins>
+###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Backup files to a Remote System</ins> (with `rsync` utility)
 
 ```sh
 # rsync SOURCE_REPO REMOTE_REPO 
@@ -903,91 +917,6 @@ $   systemctl isolate emergency.target
 # We will be dropped into a root shell. We can type commands as a system administrator : DB backups (while db not online), fix system settings and so on. 
 $   systemctl isolate rescue.target
 ```
-
-&nbsp;
-
-###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 📽️ <ins>Install, configure and troubleshoot bootloaders</ins>
-
-#### 🔖 <ins>What if OS is not booting at all ?</ins>
-1. You download an iso file and you boot on it
-2. Depending of the Linux distribution, you need to select `Troubleshooting` to load the **rescue image.**
-3. You select the option to mount this image on `/mnt/sysroot`
-4. In the tutorial, you type in the shell the command to make `/mnt/sysroot`, the root of your active system :
-    ```sh
-    $   chroot /mnt/sysroot
-    ```
-5. We will generate a BIOS configuration file :
-    ```sh
-    # For BIOS
-    $   grub2-mkconfig -o /boot/grub2/grub.cfg
-
-    # For EFI (on CentOS). The -o option had directed to write the file to a specific location.
-    $   grub2-mkconfig -o /boot/efi/EFI/centos/grub.cfg
-    ```
-6. 
-    - <ins>**BIOS**</ins> : 
-    
-    <br/>
-    
-    When the computer boots through BIOS mode, it looks for the bootloader at the very beginning of the disk : **we need to place the GRUB file in the 1st disk's sectors**. 
-
-    First we need to know which disk to install the GRUB. We will display all block devices.
-    ```sh
-    # sda1 for PHYSICAL disk / vda1 for VIRTUAL disk
-    $   lsblk
-
-    NAME          MAJ:MIN RM SIZE  RO TYPE MOUNTPOINT
-    sda             8:0    0 20G    0 disk
-    ├─sda1          8:1    0  1G    0 part /boot         # Partition where we find GRUB, configuration files
-    ├─sda2          8:2    0  2G    0 part [SWAP]
-    └─sda3          8:3    0 17G    0 part /             # Our file system
-    ```
-
-    GRUB file should be installed on the first sector of disk `sda`.
-    ```sh
-    # /dev is a special device file pointing to the 1st virtual disk (in the example, the 1st physical disk in on virtual machine)
-    $   grub2-install /dev/sda
-    ```
-
-    <br/>
-
-    - <ins>**EFI**</ins> : 
-    
-    <br/>
-
-    Don't look for the bootloader on 1st sectors of disk. Let's look for the bootloader in a file **on a special boot partition**. We can use this command to automatically place the bootloader files in their proper location.
-    ```sh
-    # dnf is the package manaer for CentOS. For another Linux distribution the command could differ
-    $   dnf reinstall grub2-efi grub2-efi-modules shim
-    ```
-
-    <br/>
-
-7. We can exit to change root environment and exit again to reboot the machine.
-    ```sh
-    $   exit
-    $   exit
-    ```
-
-8. Once rebooted, without Live CD, we can arrive at a console terminal. If we want to make some configuration changes to the settings for Grub bootloader, we can edit a particular file :
-    ```sh
-    $   vi /etc/default/grub
-
-    # If you change this file, run 'update-grub' afterwards to update
-    # /boot/grub/grub.cfg.
-    # For full documentation of the options in this file, see:
-    #   info -f grub -n 'Simple configuration'
-
-    GRUB_DEFAULT=0
-    GRUB_TIMEOUT_STYLE=hidden
-    GRUB_TIMEOUT=5                  # OS GRUB is displayed for 5 seconds
-    GRUB_DISTRIBUTOR=`lsb_release -i -s 2> /dev/null || echo Debian`
-    GRUB_CMDLINE_LINUX_DEFAULT=""   
-    GRUB_CMDLINE_LINUX=""           # We can specify commands for changing kernel behaviour, disable things. 
-
-    # Regenerate the file used to be read by our Bootloader, with our new settings
-    $   grub2-mkconfig -o /boot/grub2/grub.cfg
-    ```
 
 &nbsp;
 
