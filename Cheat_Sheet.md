@@ -239,6 +239,9 @@ $   find -name "f*"
 
 # Finding content having the 4 leading digit. We don't care about permissions -> 000
 $   find . -perm /4000
+
+# Finding file created before 01-01-2020
+$   find . -newermt "01/01/2020" -type f
 ```
 ```sh
 # Permissions: 664 = u+rw,g+rw,o+r
@@ -249,6 +252,11 @@ $   find –perm –u=rw,g=rw,o=r
 $   find -perm /664      # find files with any of these permissions
 $   find –perm /u=rw,g=rw,o=r 
 ```
+
+<br/>
+
+#### 🔖 <ins>Example with permissions</ins>
+
 ```sh
 $ sudo find /var/log/ -perm -g=w ! -perm o=rw -exec ls {} \;
 
