@@ -652,13 +652,13 @@ $   egrep –r '/[^a-z]' /etc/
 
 <br/>
 
-### ⚠️ <mark>WARNING</mark> : a comparison between `grep` and `egrep`
+### ⚠️ <mark>NOTE</mark> : a comparison between `grep` and `egrep`
 
 > How many numbers (1 to 4000) in /home/bob/textfile begin with a number 2, save the count in /home/bob/count file.
 
 ```sh
-$   egrep -w '^2' /home/bob/textfile | wc -l
-2
+$   egrep -e '^2' /home/bob/textfile | wc -l
+1111
 
 $   grep -c '^2' textfile
 1111
@@ -2941,28 +2941,563 @@ Sep 11 01:40:01 localhost.localdomain sshd[1650]: Accepted password for cento fr
 - **Network bonding** combines multiple LAN or Ethernet interfaces into a single logical
 interface known as a **network bond** : The goal of network bonding is to provide **`fault tolerance`** and **`network redundancy`**.
 
-- **Network Bridging** involves the creation of a logical interface known as a
-**bridge** between two interfaces. This allows traffic to pass through them and is especially helpful in **sharing an internet connection** between your systems and others.
+- **Network Bridging** involves the creation of a device that connects two LAN networks and controls the flow of data packets between them.
+
+<br/>
+
+`netplan` is the new networking system that is taking over from editing the <mark>`/etc/networking/`</mark> interfaces file.
+
+```sh
+$   sudo apt-get -y install netplan.io
+```
+
+<br/>
+
+Before, let's take a look at our interfaces
+
+```sh
+# ens37 and ens38 are 2 NICs we've just added
+$   ip -c addr
+
+2: ens33: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 00:0c:29:d6:bb:82 brd ff:ff:ff:ff:ff:ff
+    altname enp2s1
+    inet 192.168.1.111/24 brd 192.168.1.255 scope global ens33
+       valid_lft forever preferred_lft forever
+    inet6 fe80::20c:29ff:fed6:bb82/64 scope link 
+       valid_lft forever preferred_lft forever
+3: ens37:  <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN group default qlen 1000
+    link/ether 00:0c:29:d6:bb:96 brd ff:ff:ff:ff:ff:ff
+    altname enp2s5
+4: ens38: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN group default qlen 1000
+    link/ether 00:0c:29:d6:bb:8c brd ff:ff:ff:ff:ff:ff
+    altname enp2s6
+```
+
+Let's edit our NICs
+
+```sh
+# Set IPv4
+$   sudo ip address add 192.168.1.171/24 dev ens37
+
+# Turn on the NIC
+$   sudo ip link set dev ens37 up
+```
+```sh
+# Set DNS and gateway : make a file in /etc/neplan/
+$   sudo vi /etc/netplan/00-installer-config.yaml
+```
+```yml
+network:
+  ethernets:
+    ens33:
+      addresses:
+      - 192.168.1.111/24
+      nameservers:
+        addresses:
+        - 192.168.1.100
+      routes:
+      - to: default
+        via: 192.168.1.1
+    ens37:
+      addresses:
+      - 192.168.1.171/24
+      nameservers:
+        addresses:
+        - 192.168.1.100
+      routes:
+      - to: 192.168.1.0/24
+        via: 192.168.1.1
+    ens38:
+      addresses:
+      - 10.10.1.10/24
+  version: 2
+```
+```sh
+# Apply changes
+$   sudo netplan try
+```
+
+<br/>
+
+```sh
+$   ip -c addr
+
+2: ens33: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 00:0c:29:d6:bb:82 brd ff:ff:ff:ff:ff:ff
+    altname enp2s1
+    inet 192.168.1.111/24 brd 192.168.1.255 scope global ens33
+       valid_lft forever preferred_lft forever
+    inet6 fe80::20c:29ff:fed6:bb82/64 scope link 
+       valid_lft forever preferred_lft forever
+3: ens37: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 00:0c:29:d6:bb:96 brd ff:ff:ff:ff:ff:ff
+    altname enp2s5
+    inet 192.168.1.171/24 brd 192.168.1.255 scope global ens37
+       valid_lft forever preferred_lft forever
+    inet6 fe80::20c:29ff:fed6:bb96/64 scope link 
+       valid_lft forever preferred_lft forever
+4: ens38: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 00:0c:29:d6:bb:8c brd ff:ff:ff:ff:ff:ff
+    altname enp2s6
+    inet 10.10.1.10/24 brd 10.10.1.255 scope global ens38
+       valid_lft forever preferred_lft forever
+    inet6 fe80::20c:29ff:fed6:bb8c/64 scope link 
+       valid_lft forever preferred_lft forever
+```
+
+<br/>
+
+#### 🔖 <ins>Bridge</ins> (just an example of configuration but no demo)
+
+```sh
+# Let's create a copy from samples 
+$   sudo cp /usr/share/doc/netplan/examples/bridge.yaml /etc/netplan/my-bridge.yaml
+```
+
+<br/>
+
+The schema of our bridge
+
+```txt
+                         ------------
+                         |          |
+192.168.1.0/24---ens33-==|  bridge  |==-ens38---10.10.1.0/24
+		                 |          |
+                         ------------
+```
+
+<br/>
+
+```sh
+# Edit our new file, while selecting ens33 and ens38
+$   vi /etc/netplan/my-bridge.yaml
+```
+
+```yml
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    # Our 2 NICs
+    ens33:
+      dhcp4: no
+    ens38:
+      dhcp4: no
+  bridges:
+    br0:
+      # Asking IP address for bridge br0
+      dhcp4: yes
+      interfaces:
+        - ens33
+        - ens38
+```
+```sh
+# Apply changes
+$   sudo netplan try
+```
+```sh
+$   ip -c addr
+
+2: ens33: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br0 state UP group default qlen 1000
+    link/ether 00:0c:29:d6:bb:82 brd ff:ff:ff:ff:ff:ff
+    altname enp2s1
+3: ens37: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 00:0c:29:d6:bb:96 brd ff:ff:ff:ff:ff:ff
+    altname enp2s5
+    inet6 fe80::20c:29ff:fed6:bb96/64 scope link 
+       valid_lft forever preferred_lft forever
+4: ens38: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br0 state UP group default qlen 1000
+    link/ether 00:0c:29:d6:bb:8c brd ff:ff:ff:ff:ff:ff
+    altname enp2s6
+5: br0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/ether 82:2d:ef:fc:60:b2 brd ff:ff:ff:ff:ff:ff
+    inet6 fe80::802d:efff:fefc:60b2/64 scope link 
+       valid_lft forever preferred_lft forever
+```
 
 <br/>
 
 #### 🔖 <ins>Bond</ins>
 
+```sh
+# Let's create a copy from samples 
+$   sudo cp /usr/share/doc/netplan/examples/bonding.yaml /etc/netplan/my-bond.yaml
+```
+
 <br/>
 
-#### 🔖 <ins>Bridge</ins>
+The schema of our bond
+
+```txt
+                         ----------          ========= ens33
+                         |        |          |
+192.168.1.0/24 ----------|  bond  | ---------|
+		                 |        |          |
+                         ----------          ========= ens37
+```
+
+<br/>
+
+```sh
+# Edit our new file, while selecting ens33 and ens38
+$   vi /etc/netplan/my-bond.yaml
+```
+
+```yml
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    # Our 2 NICs
+    ens33:
+      dhcp4: no
+    ens37:
+      dhcp4: no
+  bonds:
+    bond0:
+      addresses:
+      - 192.168.1.221/24
+      nameservers:
+        addresses:
+        - 192.168.1.100
+      routes:
+      - to: 192.168.1.0/24
+        via: 192.168.1.1
+      interfaces:
+        - ens33
+        - ens37
+      parameters:
+        # In mode 'active-backup' we lose connection
+        mode: balance-tlb
+```
+```sh
+# Apply changes
+$   sudo netplan try
+```
+```sh
+# Let's ping from outside
+[centos-ad@centos-ad ~]$ ping 192.168.1.221
+
+PING 192.168.1.221 (192.168.1.221) 56(84) bytes of data.
+64 bytes from 192.168.1.221: icmp_seq=1 ttl=64 time=0.658 ms
+
+
+# Let's SSH
+[centos-ad@centos-ad ~]$ ssh ubuntu@192.168.1.221
+
+The authenticity of host '192.168.1.221 (192.168.1.221)' can't be established.
+ECDSA key fingerprint is SHA256:3xlqPFPXHIazy0OJz1n0cocGMq2FN169yc/Qb4XDTlU.
+ECDSA key fingerprint is MD5:22:fd:bb:09:eb:89:60:c0:8f:53:a9:cb:a3:5e:3e:fd.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added '192.168.1.221' (ECDSA) to the list of known hosts.
+ubuntu@192.168.1.221's password: 
+
+```
+
+<br/>
+
+```sh
+# Let's shut down 1 NIC
+$   ip link set dev ens33 down
+$   ip -c addr
+
+2: ens33: <BROADCAST,MULTICAST,SLAVE> mtu 1500 qdisc fq_codel master bond0 state DOWN group default qlen 1000
+    link/ether 5e:bc:e3:74:5d:67 brd ff:ff:ff:ff:ff:ff 
+    altname enp2s1
+3: ens37: <BROADCAST,MULTICAST,SLAVE,UP,LOWER_UP> mtu 1500 qdisc fq_codel master bond0 state UP group default qlen 1000
+    link/ether 00:0c:29:d6:bb:82 brd ff:ff:ff:ff:ff:ff permaddr 00:0c:29:d6:bb:96
+    altname enp2s5
+4: ens38: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 00:0c:29:d6:bb:8c brd ff:ff:ff:ff:ff:ff
+    altname enp2s6
+    inet 10.10.1.10/24 brd 10.10.1.255 scope global ens38
+       valid_lft forever preferred_lft forever
+    inet6 fe80::20c:29ff:fed6:bb8c/64 scope link 
+       valid_lft forever preferred_lft forever
+5: bond0: <BROADCAST,MULTICAST,MASTER,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/ether 5e:bc:e3:74:5d:67 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.1.221/24 brd 192.168.1.255 scope global bond0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::5cbc:e3ff:fe74:5d67/64 scope link 
+       valid_lft forever preferred_lft forever
+```
+```sh
+# Let's ping AGAIN from outside
+[centos-ad@centos-ad ~]$ ping 192.168.1.221
+
+PING 192.168.1.221 (192.168.1.221) 56(84) bytes of data.
+64 bytes from 192.168.1.221: icmp_seq=1 ttl=64 time=0.658 ms
+```
 
 &nbsp;
 
-###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Configure packet filtering</ins>
+###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Configure packet filtering</ins> (with `iptables` utility)
+
+Before processing, we will need a context from the fake exam : we test connection to some portswhen some of them return a response.
+
+```txt
+➜ curl data-002:5000
+app on port 5000
+
+➜ curl data-002:6000
+curl: (7) Failed to connect to data-002 port 6000 after 4 ms: Connection refused
+
+➜ curl data-002:6001
+app on port 6001
+
+➜ curl data-002:6002
+app on port 6002
+```
+
+- Check for existing iptables
+
+```sh
+$   iptables -L
+
+# It is empty
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination         
+
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination         
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination 
+
+
+# For NAT
+$   iptables -L -t nat
+```
+```sh
+$ ip -c link
+
+2: ens33: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
+    link/ether 00:0c:29:d6:bb:82 brd ff:ff:ff:ff:ff:ff
+    altname enp2s1
+```
+
+<br/>
+
+- Closing port 5000
+
+```sh
+# USE sudo
+# --------
+#
+# -A      : for appending
+# -p      : protocol
+# --dport : destination port
+# -j      : jump (what to do if packet matches)
+$   sudo iptables -A INPUT -i eth0 -p tcp --dport 5000 -j DROP
+
+
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination         
+DROP       tcp  --  anywhere             anywhere             tcp dpt:5000
+```
+```sh
+➜ root@data-002:~$ curl localhost:5000 # still works on localhost
+app on port 5000
+
+➜ root@data-002:~$ exit
+➜ curl data-001:5000 # blocked from remote
+curl: (7) Failed to connect to data-001 port 5000 after 0 ms: Connection refused
+```
+
+<br/>
+
+- Port 6002 should only be accessible from IP 192.168.1.100
+
+```sh
+# The idea there is that we first allow that IP and then deny all other traffic on that port.
+$   iptables -A INPUT -i eth0 -p tcp --dport 6002 -s 192.168.10.80 -j ACCEPT
+$   iptables -A INPUT -i eth0 -p tcp --dport 6002 -j DROP
+```
+```sh
+➜ curl data-002:6002
+^C # timeout
+
+➜ ssh data-001
+
+➜ root@data-001:~$ curl data-002:6002
+app on port 6002 # success
+```
+
+<br/>
+
+- Blocking all outgoing traffic to IP 192.168.10.70
+
+```sh
+➜ root@data-002:~$ nc app-srv1 22
+SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.1
+^C # success
+```
+```sh
+$   iptables -A OUTPUT -d 192.168.10.70 -p tcp -j DROP
+```
+```sh
+➜ root@data-002:~$ nc app-srv1 22
+^C # timeout. Now it is impossible to send requests to 192.168.10.70
+
+➜ root@data-002:~$ nc data-001 22
+SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.1
+^C # success
+```
 
 &nbsp;
 
-###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Port Redirection, and NAT (Network Address Translation)</ins>
+###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Port Redirection, and NAT </ins> (with `iptables` utility)
+
+- Perform some NAT for connections on port 6000 and redirect all traffic on port 6000 to local port 6001
+
+```sh
+# -t nat     : it SHOULD be Specified. The target is only valid in the nat table, in the PREROUTING and OUTPUT 
+$   iptables -A PREROUTING -i eth0 -t nat -p tcp --dport 6000 -j REDIRECT --to-port 6001
+
+
+Chain PREROUTING (policy ACCEPT)
+target prot opt source destination
+REDIRECT tcp -- anywhere anywhere tcp dpt:x11 redir ports 6001 # new rule
+```
+```sh
+➜ root@data-002:~$ curl localhost:6000 # fail
+curl: (7) Failed to connect to localhost port 6000 after 0 ms: Connection refused
+
+➜ root@data-002:~$ exit
+➜ curl data-002:6000 # fail
+app on port 6001
+```
 
 &nbsp;
 
-###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Implement reverse proxies and load balancers</ins>
+###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Implement reverse proxies and load balancers</ins> (with `nginx` utility)
+
+#### 🔖 <ins>Reverse Proxy</ins>
+
+To create a reverse proxy
+
+```sh
+$   sudo apt install nginx
+$   sudo vi /etc/nginx/sites-available/proxy.conf
+
+server {
+  # Listening for incoming connections on port 80
+  listen 80;
+  # Only for requests that match the location (/) description :
+  #
+  # example.com/
+  # example.com/admin
+  # example.com/images/dog.jpg
+  location/{
+    proxy_pass http://1.1.1.1;
+    # To load additional parameters from a config file
+    include proxy_params;
+  }
+}
+```
+```sh
+$   sudo vi /etc/nginx/proxy_params
+# To see what users actually visit on the website
+```
+
+<br/>
+
+We must pay attention to 2 specific folders :
+
+- <mark>**`/etc/nginx/sites-available/`**</mark> :
+  - All config files are defined there
+- <mark>**`/etc/nginx/sites-enabled/`**</mark> :
+  - The best practice is to create a **soft link** from `/sites-available/` to `/sites-enabled/` when we want to enable a website configuration
+
+```sh
+# To enable
+$   sudo ln -s /etc/nginx/sites-available/proxy.conf /etc/nginx/sites-enabled/proxy.conf
+
+# No forget to "disable" the default file
+$   sudo rm /etc/nginx/sites-enabled/default
+
+
+# To check config files for errors 
+$   sudo nginx-t
+```  
+
+<br/>
+
+To reapply the changes, simply reload
+
+```sh
+$   sudo systemctl reload nginx.service
+```
+
+<br/>
+
+#### 🔖 <ins>Load Balancer</ins>
+
+```sh
+$   sudo vi /etc/nginx/sites-available/lb.conf
+```
+```sh
+# Round robin config
+upstream mywebservers{
+  # Pick the server withe the least active connections from this list
+  least_conn;
+  # Process more requests than weaker servers, use weight. Default value is 1
+  server 1.2.3.4 weight=3;
+  server 5.6.7.8;
+}
+
+server {
+  listen 80;
+  location/{
+    proxy_pass http://mywebservers;
+  }
+}
+```
+```sh
+upstream mywebservers{
+  least_conn;
+  # To do maintenance work on this server
+  server 1.2.3.4 weight=3 down;
+  server 5.6.7.8;
+  # To run a backup server if one of the main list goes down. Server with 'S'
+  Server 10.20.30.40 backup;
+}
+
+server {
+  listen 80;
+  location/{
+    proxy_pass http://mywebservers;
+  }
+}
+```
+```sh
+upstream mywebservers{
+  least_conn;
+  # If web servers are not listening for incoming connections on the standard port 80
+  server 1.2.3.4:8081;
+  server 5.6.7.8;
+  Server 10.20.30.40 backup;
+}
+
+server {
+  listen 80;
+  location/{
+    proxy_pass http://mywebservers;
+  }
+}
+```
+```sh
+# To enable
+$   sudo ln -s /etc/nginx/sites-available/lb.conf /etc/nginx/sites-enabled/lb.conf
+
+
+# To check config files for errors 
+$   sudo nginx-t
+``` 
+```sh
+$   sudo systemctl reload nginx.service
+```
 
 &nbsp;
 
