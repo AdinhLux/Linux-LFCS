@@ -1,5 +1,21 @@
 ## Essentials commands
 
+### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Get info about your OS (some examples)</ins>
+
+```sh
+# Find kernel version
+$   uname -r
+
+# Output value of kernel parameter
+$   cat /proc/sys/net/ipv4/ip_forward
+
+# Get current timezone
+$   date +%Z
+$   cat /etc/timezone
+```
+
+&nbsp;
+
 ### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Create and manage hard & soft links</ins>
 
 ```sh
@@ -239,6 +255,9 @@ $   find -name "f*"
 
 # Finding content having the 4 leading digit. We don't care about permissions -> 000
 $   find . -perm /4000
+
+# Finding file created before 01-01-2020
+$   find . -newermt "01/01/2020" -type f
 ```
 ```sh
 # Permissions: 664 = u+rw,g+rw,o+r
@@ -249,6 +268,11 @@ $   find –perm –u=rw,g=rw,o=r
 $   find -perm /664      # find files with any of these permissions
 $   find –perm /u=rw,g=rw,o=r 
 ```
+
+<br/>
+
+#### 🔖 <ins>Example with permissions</ins>
+
 ```sh
 $ sudo find /var/log/ -perm -g=w ! -perm o=rw -exec ls {} \;
 
@@ -642,6 +666,32 @@ $   egrep –r 'http[^s]' /etc/
 $   egrep –r '/[^a-z]' /etc/
 ```
 
+<br/>
+
+### ⚠️ <mark>NOTE</mark> 
+
+- a comparison between `grep` and `egrep`
+
+> How many numbers (1 to 4000) in /home/bob/textfile begin with a number 2, save the count in /home/bob/count file.
+
+```sh
+$   egrep -e '^2' /home/bob/textfile | wc -l
+1111
+
+$   grep -c '^2' textfile
+1111
+```
+
+- An advanced expression
+
+> Replace all lines, starting with **`container.web`** , ending with **`24h`** and that have the word
+**`Running`** anywhere in-between with: **`SENSITIVE LINE REMOVED`**
+
+```sh
+# Expression : ^container.web.*Running.*24h$
+$   sed -i 's/^container.web.*Running.*24h$/SENSITIVE LINE REMOVED/g' server.log
+```
+
 &nbsp;
 
 ###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Archive, backup, compress, unpack, and uncompress files</ins>
@@ -690,7 +740,7 @@ $   tar -xf archive.tar.gz –C /tmp/
 
 #### 🔖 <ins>Compressing files</ins>
 
-> ⚠️ **`f`** option should be the last
+> ⚠️ <mark>**`f`** option should be the last</mark>
 
 ```sh
 # j for compressing archive through bzip2      -->      -cjf , NOT -cfj !!!!!!!!!!!!!!!
@@ -737,7 +787,7 @@ games.txt.xz                  games.txt
 
 &nbsp;
 
-###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Backup files to a Remote System</ins>
+###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Backup files to a Remote System</ins> (with `rsync` utility)
 
 ```sh
 # rsync SOURCE_REPO REMOTE_REPO 
@@ -898,93 +948,10 @@ $   systemctl isolate rescue.target
 
 &nbsp;
 
-###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 📽️ <ins>Install, configure and troubleshoot bootloaders</ins>
-
-#### 🔖 <ins>What if OS is not booting at all ?</ins>
-1. You download an iso file and you boot on it
-2. Depending of the Linux distribution, you need to select `Troubleshooting` to load the **rescue image.**
-3. You select the option to mount this image on `/mnt/sysroot`
-4. In the tutorial, you type in the shell the command to make `/mnt/sysroot`, the root of your active system :
-    ```sh
-    $   chroot /mnt/sysroot
-    ```
-5. We will generate a BIOS configuration file :
-    ```sh
-    # For BIOS
-    $   grub2-mkconfig -o /boot/grub2/grub.cfg
-
-    # For EFI (on CentOS). The -o option had directed to write the file to a specific location.
-    $   grub2-mkconfig -o /boot/efi/EFI/centos/grub.cfg
-    ```
-6. 
-    - <ins>**BIOS**</ins> : 
-    
-    <br/>
-    
-    When the computer boots through BIOS mode, it looks for the bootloader at the very beginning of the disk : **we need to place the GRUB file in the 1st disk's sectors**. 
-
-    First we need to know which disk to install the GRUB. We will display all block devices.
-    ```sh
-    # sda1 for PHYSICAL disk / vda1 for VIRTUAL disk
-    $   lsblk
-
-    NAME          MAJ:MIN RM SIZE  RO TYPE MOUNTPOINT
-    sda             8:0    0 20G    0 disk
-    ├─sda1          8:1    0  1G    0 part /boot         # Partition where we find GRUB, configuration files
-    ├─sda2          8:2    0  2G    0 part [SWAP]
-    └─sda3          8:3    0 17G    0 part /             # Our file system
-    ```
-
-    GRUB file should be installed on the first sector of disk `sda`.
-    ```sh
-    # /dev is a special device file pointing to the 1st virtual disk (in the example, the 1st physical disk in on virtual machine)
-    $   grub2-install /dev/sda
-    ```
-
-    <br/>
-
-    - <ins>**EFI**</ins> : 
-    
-    <br/>
-
-    Don't look for the bootloader on 1st sectors of disk. Let's look for the bootloader in a file **on a special boot partition**. We can use this command to automatically place the bootloader files in their proper location.
-    ```sh
-    # dnf is the package manaer for CentOS. For another Linux distribution the command could differ
-    $   dnf reinstall grub2-efi grub2-efi-modules shim
-    ```
-
-    <br/>
-
-7. We can exit to change root environment and exit again to reboot the machine.
-    ```sh
-    $   exit
-    $   exit
-    ```
-
-8. Once rebooted, without Live CD, we can arrive at a console terminal. If we want to make some configuration changes to the settings for Grub bootloader, we can edit a particular file :
-    ```sh
-    $   vi /etc/default/grub
-
-    # If you change this file, run 'update-grub' afterwards to update
-    # /boot/grub/grub.cfg.
-    # For full documentation of the options in this file, see:
-    #   info -f grub -n 'Simple configuration'
-
-    GRUB_DEFAULT=0
-    GRUB_TIMEOUT_STYLE=hidden
-    GRUB_TIMEOUT=5                  # OS GRUB is displayed for 5 seconds
-    GRUB_DISTRIBUTOR=`lsb_release -i -s 2> /dev/null || echo Debian`
-    GRUB_CMDLINE_LINUX_DEFAULT=""   
-    GRUB_CMDLINE_LINUX=""           # We can specify commands for changing kernel behaviour, disable things. 
-
-    # Regenerate the file used to be read by our Bootloader, with our new settings
-    $   grub2-mkconfig -o /boot/grub2/grub.cfg
-    ```
-
-&nbsp;
-
 ###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Use scripting to automate system maintenance tasks</ins>
 Example :
+
+Each script begins with a **shebang** `#!/bin/bash`
 ```sh
 #!/bin/bash
 
@@ -1029,7 +996,7 @@ $   systemctl stop sshd.service
 $   systemctl start sshd.service
 ```
 
-### ⚠️ WARNING :
+### ⚠️ <mark>WARNING</mark> :
 
 ```sh
 # To restart a service
@@ -1060,7 +1027,7 @@ $   systemctl enable --now sshd.service
 $   systemctl disable --now sshd.service
 ```
 
-### ⚠️ WARNING :
+### ⚠️ <mark>WARNING</mark> :
 To REALLY avoid a service to run (**a service 1 can still re-enable a service 2, even if disabled**), use the `mask` option.
 
 If we need to use the service again, please do not forget to `unmask`
@@ -1454,7 +1421,7 @@ $   journalctl -b -1
 Aug 17 18:45:39 ubuntu kernel: Linux version 5.15.0-78-generic (buildd@lcy02-amd64-008) (gcc (Ubuntu 11.3.0-1ubuntu1~22.04.>
 ```
 
-### ⚠️NOTE
+### ⚠️ <mark>NOTE</mark>
 
 > Contrary to Ubuntu server, on CentOS the journal is only kept in memory (when powering off or rebooting, all logs are lost). 
 >
@@ -2479,7 +2446,7 @@ $   groups john
 john : programmers
 ```
 
-### ⚠️ WARNING (note the difference here) :
+### ⚠️ <mark>WARNING</mark> (note the difference here) :
 
 - `gpasswd` : expects USERNAME then GROUP
 - `usermod` : expects GROUP then USERNAME
@@ -2698,6 +2665,14 @@ file locks                      (-x) unlimited
 -bash: ulimit: max user processes: cannot modify limit: Operation not permitted
 ```
 
+<br/>
+
+### ⚠️ <mark>WARNING</mark> :
+
+> You must **logout** of all sessions, the log in again.
+>
+> If you don't do that, changes will never applied and you will <span style="color:#FF8A8A">**lose points when passing the certification**</span>.
+
 &nbsp;
 
 ###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Manage User Privileges</ins>
@@ -2764,6 +2739,7 @@ cento  ALL= /bin/ls, /bin/stat
 
 ```sh
 cento  ALL=       NOPASSWD:ALL
+user2 ALL=(root) NOPASSWD: /bin/bash /root/dangerous.sh 
 ```
 
 &nbsp;
@@ -2997,413 +2973,531 @@ Sep 11 01:40:01 localhost.localdomain sshd[1650]: Accepted password for cento fr
 
 &nbsp;
 
-###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Configure bridge and bonding devices</ins>
+###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Configure bridge and bonding devices</ins> (with `netplan` utility, <span style="color:#FFA500">for Ubuntu</span>)  
 
 - **Network bonding** combines multiple LAN or Ethernet interfaces into a single logical
 interface known as a **network bond** : The goal of network bonding is to provide **`fault tolerance`** and **`network redundancy`**.
 
-- **Network Bridging** involves the creation of a logical interface known as a
-**bridge** between two interfaces. This allows traffic to pass through them and is especially helpful in **sharing an internet connection** between your systems and others.
+- **Network Bridging** involves the creation of a device that connects two LAN networks and controls the flow of data packets between them.
 
 <br/>
 
-#### 🔖 <ins>Bond</ins>
-
-- To check if module is loaded :
+`netplan` is the new networking system that is taking over from editing the <mark>`/etc/networking/`</mark> interfaces file.
 
 ```sh
-$   lsmod | grep bond
-
-bonding               152979  0
-```
-
-- To load the module (if not loaded)
-
-```sh
-$   sudo modprobe bonding
+$   sudo apt-get -y install netplan.io
 ```
 
 <br/>
 
-####  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; To configure a temporary Network Bonding Interface
-
-- We have 2 networks cards.
+Before, let's take a look at our interfaces
 
 ```sh
-$   dnf install net-tools -y
-$   ifconfig
+# ens37 and ens38 are 2 NICs we've just added
+$   ip -c addr
 
-ens33: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
-        inet 192.168.1.173  netmask 255.255.255.0  broadcast 192.168.1.255
-        inet6 fe80::20c:29ff:fe6a:d2b2  prefixlen 64  scopeid 0x20<link>
-        ether 00:0c:29:6a:d2:b2  txqueuelen 1000  (Ethernet)
-        RX packets 109151  bytes 162982305 (155.4 MiB)
-        RX errors 0  dropped 0  overruns 0  frame 0
-        TX packets 53252  bytes 3608732 (3.4 MiB)
-        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+2: ens33: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 00:0c:29:d6:bb:82 brd ff:ff:ff:ff:ff:ff
+    altname enp2s1
+    inet 192.168.1.111/24 brd 192.168.1.255 scope global ens33
+       valid_lft forever preferred_lft forever
+    inet6 fe80::20c:29ff:fed6:bb82/64 scope link 
+       valid_lft forever preferred_lft forever
+3: ens37:  <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN group default qlen 1000
+    link/ether 00:0c:29:d6:bb:96 brd ff:ff:ff:ff:ff:ff
+    altname enp2s5
+4: ens38: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN group default qlen 1000
+    link/ether 00:0c:29:d6:bb:8c brd ff:ff:ff:ff:ff:ff
+    altname enp2s6
+```
 
-ens36: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
-        inet 192.168.1.174  netmask 255.255.255.0  broadcast 192.168.1.255
-        inet6 fe80::20c:29ff:fe6a:d2bc  prefixlen 64  scopeid 0x20<link>
-        ether 00:0c:29:6a:d2:bc  txqueuelen 1000  (Ethernet)
-        RX packets 7  bytes 1128 (1.1 KiB)
-        RX errors 0  dropped 0  overruns 0  frame 0
-        TX packets 57  bytes 9401 (9.1 KiB)
-        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+Let's edit our NICs
+
+```sh
+# Set IPv4
+$   sudo ip address add 192.168.1.171/24 dev ens37
+
+# Turn on the NIC
+$   sudo ip link set dev ens37 up
+```
+```sh
+# Set DNS and gateway : make a file in /etc/neplan/
+$   sudo vi /etc/netplan/00-installer-config.yaml
+```
+```yml
+network:
+  ethernets:
+    ens33:
+      addresses:
+      - 192.168.1.111/24
+      nameservers:
+        addresses:
+        - 192.168.1.100
+      routes:
+      - to: default
+        via: 192.168.1.1
+    ens37:
+      addresses:
+      - 192.168.1.171/24
+      nameservers:
+        addresses:
+        - 192.168.1.100
+      routes:
+      - to: 192.168.1.0/24
+        via: 192.168.1.1
+    ens38:
+      addresses:
+      - 10.10.1.10/24
+  version: 2
+```
+```sh
+# Apply changes
+$   sudo netplan try
 ```
 
 <br/>
 
-- Let's create a network bond of type 802.3ad
-
-<br/>
-
-> mode=4 (802.3ad): This is also referred to as the **Dynamic Link Aggregation** mode. It
-creates aggregation groups with the same speed. Works on **network switches** that
-support the IEEE 802.3ad dynamic link standard.
-
-<br/>
-
 ```sh
-$   ip link add bond1 type bond mode 802.3ad
-$   ip a
+$   ip -c addr
 
-7: bond1: <BROADCAST,MULTICAST,MASTER> mtu 1500 qdisc noop state DOWN group default qlen 1000
-    link/ether 8a:60:ec:65:71:3a brd ff:ff:ff:ff:ff:ff
-```
-
-- Activate the bond
-
-```sh
-$   ifconfig bond1 up
-# See MASTER,UP
-$   ip link
-
-7: bond1: <NO-CARRIER,BROADCAST,MULTICAST,MASTER,UP> mtu 1500 qdisc noqueue state DOWN mode DEFAULT group default qlen 1000
-    link/ether 8a:60:ec:65:71:3a brd ff:ff:ff:ff:ff:ff
+2: ens33: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 00:0c:29:d6:bb:82 brd ff:ff:ff:ff:ff:ff
+    altname enp2s1
+    inet 192.168.1.111/24 brd 192.168.1.255 scope global ens33
+       valid_lft forever preferred_lft forever
+    inet6 fe80::20c:29ff:fed6:bb82/64 scope link 
+       valid_lft forever preferred_lft forever
+3: ens37: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 00:0c:29:d6:bb:96 brd ff:ff:ff:ff:ff:ff
+    altname enp2s5
+    inet 192.168.1.171/24 brd 192.168.1.255 scope global ens37
+       valid_lft forever preferred_lft forever
+    inet6 fe80::20c:29ff:fed6:bb96/64 scope link 
+       valid_lft forever preferred_lft forever
+4: ens38: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 00:0c:29:d6:bb:8c brd ff:ff:ff:ff:ff:ff
+    altname enp2s6
+    inet 10.10.1.10/24 brd 10.10.1.255 scope global ens38
+       valid_lft forever preferred_lft forever
+    inet6 fe80::20c:29ff:fed6:bb8c/64 scope link 
+       valid_lft forever preferred_lft forever
 ```
 
 <br/>
 
-####  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; To PERMANENTLY configure a Network Bonding Interface
-
-- We will edit files at <mark>**`/etc/sysconfig/network-scripts/`**</mark>
-- We will use `mode=5` (Load balancing), instead of `mode=1` (active-backup). For unknown reasons, we can not ping to/from outside.
-
-<br/>
-
-Let's create our bond NIC
+#### 🔖 <ins>Bridge</ins> (just an example of configuration but no demo)
 
 ```sh
-$   vi /etc/sysconfig/network-scripts/ifcfg-bond0
-
-DEVICE=bond0
-NAME=bond0
-TYPE=Bond
-BONDING_MASTER=yes
-IPADDR=192.168.1.179
-PREFIX=24
-GATEWAY=192.168.1.1
-DNS1=192.168.1.100
-ONBOOT=yes
-BOOTPROTO=none
-BONDING_OPTS="mode=5 miimon=100"
+# Let's create a copy from samples 
+$   sudo cp /usr/share/doc/netplan/examples/bridge.yaml /etc/netplan/my-bridge.yaml
 ```
 
 <br/>
 
-Let's edit our 2 NICs to be configured as **`SLAVE`**
+The schema of our bridge
 
-```sh
-$   vi /etc/sysconfig/network-scripts/ifcfg-ens33
-
-TYPE=Ethernet
-PROXY_METHOD=none
-BROWSER_ONLY=no
-BOOTPROTO=none
-DEFROUTE=yes
-IPV4_FAILURE_FATAL=no
-IPV6INIT=no
-IPV6_AUTOCONF="yes"
-IPV6_DEFROUTE="yes"
-IPV6_FAILURE_FATAL="no"
-IPV6_ADDR_GEN_MODE="stable-privacy"
-NAME=ens33
-UUID=07c6e0eb-ea82-4736-9508-83d07e146330
-DEVICE=ens33
-ONBOOT=yes
-IPADDR=192.168.1.173
-PREFIX=24
-GATEWAY=192.168.1.1
-DNS1=192.168.1.100
-# Lines to ADD
-MASTER=bond0
-SLAVE=yes
-```
-```sh
-$   vi /etc/sysconfig/network-scripts/ifcfg-ens36
-
-WADDR=00:0C:29:6A:D2:BC
-TYPE=Ethernet
-PROXY_METHOD=none
-BROWSER_ONLY=no
-BOOTPROTO=none
-IPADDR=192.168.1.174
-PREFIX=24
-GATEWAY=192.168.1.1
-DNS1=192.168.1.100
-DEFROUTE=yes
-IPV4_FAILURE_FATAL=no
-IPV6INIT=no
-NAME=ens36
-UUID=4e4220ef-efc4-386b-987a-c4b7e4e1a393
-ONBOOT=yes
-AUTOCONNECT_PRIORITY=-999
-# Lines to ADD
-MASTER=bond0
-SLAVE=yes
+```txt
+                         ------------
+                         |          |
+192.168.1.0/24---ens33-==|  bridge  |==-ens38---10.10.1.0/24
+		                 |          |
+                         ------------
 ```
 
 <br/>
 
-Now, activate the Network interfaces, update the changes and restart service
-
 ```sh
-$   ifup ifcfg-ens33
-$   ifup ifcfg-ens36
+# Edit our new file, while selecting ens33 and ens38
+$   vi /etc/netplan/my-bridge.yaml
+```
 
-$   nmcli con reload
-$   systemctl restart network
+```yml
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    # Our 2 NICs
+    ens33:
+      dhcp4: no
+    ens38:
+      dhcp4: no
+  bridges:
+    br0:
+      # Asking IP address for bridge br0
+      dhcp4: yes
+      interfaces:
+        - ens33
+        - ens38
+```
+```sh
+# Apply changes
+$   sudo netplan try
+```
+```sh
+$   ip -c addr
+
+2: ens33: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br0 state UP group default qlen 1000
+    link/ether 00:0c:29:d6:bb:82 brd ff:ff:ff:ff:ff:ff
+    altname enp2s1
+3: ens37: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 00:0c:29:d6:bb:96 brd ff:ff:ff:ff:ff:ff
+    altname enp2s5
+    inet6 fe80::20c:29ff:fed6:bb96/64 scope link 
+       valid_lft forever preferred_lft forever
+4: ens38: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br0 state UP group default qlen 1000
+    link/ether 00:0c:29:d6:bb:8c brd ff:ff:ff:ff:ff:ff
+    altname enp2s6
+5: br0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/ether 82:2d:ef:fc:60:b2 brd ff:ff:ff:ff:ff:ff
+    inet6 fe80::802d:efff:fefc:60b2/64 scope link 
+       valid_lft forever preferred_lft forever
 ```
 
 <br/>
 
-Let's test connectivity (inside and outside)
+#### 🔖 <ins>Bond</ins> (just an example of configuration but no demo)
 
 ```sh
-[centos-ca@centos-ca ~]$ ping 192.168.1.179
-
-64 bytes from 192.168.1.179: icmp_seq=1 ttl=64 time=0.772 ms
-64 bytes from 192.168.1.179: icmp_seq=2 ttl=64 time=0.457 ms
-
-
-[root@centos-sftp ~]# ping -c 10 -I bond0 baeldung.com
-
-64 bytes from 172.66.40.248 (172.66.40.248): icmp_seq=1 ttl=58 time=16.0 ms
-64 bytes from 172.66.40.248 (172.66.40.248): icmp_seq=2 ttl=58 time=16.6 ms
+# Let's create a copy from samples 
+$   sudo cp /usr/share/doc/netplan/examples/bonding.yaml /etc/netplan/my-bond.yaml
 ```
 
 <br/>
 
-Let's shutdown `ens33` and test connectivity (inside and outside)
+The schema of our bond
+
+```txt
+                         ----------          ========= ens33
+                         |        |          |
+192.168.1.0/24 ----------|  bond  | ---------|
+		                 |        |          |
+                         ----------          ========= ens37
+```
+
+<br/>
 
 ```sh
-$   ifconfig ens33 down
-$   nmcli con reload
-$   cat /proc/net/bonding/bond0
+# Edit our new file, while selecting ens33 and ens38
+$   vi /etc/netplan/my-bond.yaml
+```
 
-Bonding Mode: transmit load balancing
-Primary Slave: None
-Currently Active Slave: ens36
-MII Status: up
-MII Polling Interval (ms): 100
-Up Delay (ms): 0
-Down Delay (ms): 0
-
-Slave Interface: ens33
-# It is down
-MII Status: down
-Speed: 1000 Mbps
-Duplex: full
-Link Failure Count: 1
-Permanent HW addr: 00:0c:29:6a:d2:b2
-Slave queue ID: 0
-
-Slave Interface: ens36
-MII Status: up
-Speed: 1000 Mbps
-Duplex: full
-Link Failure Count: 0
-Permanent HW addr: 00:0c:29:6a:d2:bc
-Slave queue ID: 0
+```yml
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    # Our 2 NICs
+    ens33:
+      dhcp4: no
+    ens37:
+      dhcp4: no
+  bonds:
+    bond0:
+      addresses:
+      - 192.168.1.221/24
+      nameservers:
+        addresses:
+        - 192.168.1.100
+      routes:
+      - to: 192.168.1.0/24
+        via: 192.168.1.1
+      interfaces:
+        - ens33
+        - ens37
+      parameters:
+        # In mode 'active-backup' we lose connection
+        mode: balance-tlb
 ```
 ```sh
-[root@centos-sftp ~]# ping -c 10 -I bond0 baeldung.com
+# Apply changes
+$   sudo netplan try
+```
+```sh
+# Let's ping from outside
+[centos-ad@centos-ad ~]$ ping 192.168.1.221
 
-PING baeldung.com (172.66.40.248) from 192.168.1.179 bond0: 56(84) bytes of data.
-64 bytes from 172.66.40.248 (172.66.40.248): icmp_seq=1 ttl=58 time=18.1 ms
-64 bytes from 172.66.40.248 (172.66.40.248): icmp_seq=2 ttl=58 time=16.4 ms
+PING 192.168.1.221 (192.168.1.221) 56(84) bytes of data.
+64 bytes from 192.168.1.221: icmp_seq=1 ttl=64 time=0.658 ms
 
 
-[centos-ca@centos-ca ~]$ ping 192.168.1.179
+# Let's SSH
+[centos-ad@centos-ad ~]$ ssh ubuntu@192.168.1.221
 
-PING 192.168.1.179 (192.168.1.179) 56(84) bytes of data.
-64 bytes from 192.168.1.179: icmp_seq=1 ttl=64 time=0.714 ms
-64 bytes from 192.168.1.179: icmp_seq=2 ttl=64 time=3.13 ms
+The authenticity of host '192.168.1.221 (192.168.1.221)' can't be established.
+ECDSA key fingerprint is SHA256:3xlqPFPXHIazy0OJz1n0cocGMq2FN169yc/Qb4XDTlU.
+ECDSA key fingerprint is MD5:22:fd:bb:09:eb:89:60:c0:8f:53:a9:cb:a3:5e:3e:fd.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added '192.168.1.221' (ECDSA) to the list of known hosts.
+ubuntu@192.168.1.221's password: 
 ```
 
 &nbsp;
 
-###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Implement packet filtering</ins>
+###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Configure packet filtering</ins> (with `iptables` utility)
 
+Before processing, we will need a context from the fake exam : we test connection to some portswhen some of them return a response.
 
+```txt
+➜ curl data-002:5000
+app on port 5000
 
-We have a tool called **`FirewallD`** for filtering packets. 
+➜ curl data-002:6000
+curl: (7) Failed to connect to data-002 port 6000 after 4 ms: Connection refused
 
-This firewall manager puts every network interfaces in what we call **zones**.
+➜ curl data-002:6001
+app on port 6001
 
-<br/>
-
-**<ins>Each zone has its own set of rules :</ins>** 
-
-#### 🔖 <ins>Example 1</ins>
-
-For example we have a server with 1 wireless and 1 wired **NIC** :
-
-- The wireless one is added in a zone called **Drop**, which is very restrictive and blocks all incoming connections.
-- The wired one is on a zone called **Trusted**, where all connections are accepted (we trust all network traffic in our office).
-
-
-
-> <ins>**Public** is the used default zone :</ins>
->
-> - In this zone, every incoming connection is blocked, except what we explicitly choose to allow.
-> - The logic is that the main policy is to deny incoming connections to all ports : **only allowing** incoming connections **to specifically enabled services**
-
-<br/>
-
-```sh
-# We can check what zone is currently default
-$   firewall-cmd --get-default-zone
-public
-
-# To set default zone to public
-$   firewall-cmd --set-default-zone=public
-Warning: ZONE_ALREADY_SET: public
-success
+➜ curl data-002:6002
+app on port 6002
 ```
 
+- Check for existing iptables
+
 ```sh
-# To see the current firewall rules
-$   firewall-cmd --list-all
+$   iptables -L
 
-public (active)
-  target: default
-  icmp-block-inversion: no
-  interfaces: ens33
-  sources:
-  # Incoming connections for these services are allowed
-  # A service here is a friendly name for allowing connections to a certain port
-  services: dhcpv6-client ssh
-  ports: 22/tcp
-  ...
+# It is empty
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination         
+
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination         
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination 
 
 
-# If we want to see what port number corresponds to a service (here ssh)
-$   firewall-cmd --info-service=ssh
-
-ssh
-  ports: 22/tcp
-  protocols:
-  source-ports:
-  modules:
-  destination:
+# For NAT
+$   iptables -L -t nat
 ```
-
-<br>
-
-#### 🔖 <ins>Example 2</ins>
-
-Let's say we installed an HTTP server like Apache or Nginx.
-
 ```sh
-# If we want to allow traffic to the HTTP service
-$   firewall-cmd --add-service=http
-success
+$ ip -c link
 
-# If we want to allow TCP connections to port 80
-$   firewall-cmd --add-port=80/tcp
-success
-```
-
-
-```sh
-# To deny traffic to the HTTP service
-$   firewall-cmd --remove-service=http
-$   firewall-cmd --remove-port=80/tcp
+2: ens33: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
+    link/ether 00:0c:29:d6:bb:82 brd ff:ff:ff:ff:ff:ff
+    altname enp2s1
 ```
 
 <br/>
 
-> We have seen one logic with the **Public** zone, but we can use another logic : Instead of filtering traffic based on incoming ports, we can have **rules on where the traffic is coming from**
-
- <br/>
-
- ```sh
- # Allow incoming traffic from this IP range in trusted zone : 10.11.12.0 to 10.11.12.255
-$   firewall-cmd --add-source=10.11.12.0/24 --zone=trusted
-success
-
-
-# To remove the AP address filter
-$   firewall-cmd --remove-source=10.11.12.0/24 --zone=trusted
-success
- ```
-
-<br/>
-
-### ⚠️ WARNING : 
-
-Based on what we saw, **`firewall-cmd`**, on a <span style="color:#06C258">**physical host with multiple NICs**</span>, allows us to define our set of rules by zone (<span style="color:#FF8A8A">**affiliated to a specific NIC**</span>)
-
- ```sh
- # Creating a new zone (here: 'extranet'). '--permanent' is mandatory
- $   firewall-cmd --permanent --new-zone=extranet
-
-
- # Now our firewall is filtering network traffic through two zones : public and trusted.
-# We can check out what zones are actively filtering traffic with this command
-$   firewall-cmd --get-active-zones
-public
-  interfaces: ens33
-trusted
-  sources: 10.11.12.0/24
-
-
-# To assign an interface to a different zone (here : 'trusted')
-$   firewall-cmd --zone=trusted --change-interface=ens33
- ```
-
-
-<br>
-
-#### 🔖 <ins>Permanent rules</ins>
+- Closing port 5000
 
 ```sh
-# We allow incoming traffic to port 12345
-$   sudo firewall-cmd --add-port=12345/tcp
-success
-
-# We check
-$   sudo firewall-cmd --list-all
-public (active)
-target: default
-icmp-block-inversion: no
-interfaces: enp0s3
-sources: 
-services: cockpit dhcpv6-client http ssh
-ports: 12345
-
-
-# ONCE we are satisfied, we make the rule permanent
-$   sudo firewall-cmd --runtime-to-permanent
-success
-```
-```sh
-# Another way to make a permanent rule
+# USE sudo
+# --------
 #
-# BEWARE : this command makes it permanent BUT not active in the current session
-$   sudo firewall-cmd --add-port=12345/tcp --permanent
+# -A      : for appending
+# -p      : protocol
+# --dport : destination port
+# -j      : jump (what to do if packet matches)
+$   sudo iptables -A INPUT -i eth0 -p tcp --dport 5000 -j DROP
+
+
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination         
+DROP       tcp  --  anywhere             anywhere             tcp dpt:5000
+```
+```sh
+➜ root@data-002:~$ curl localhost:5000 # still works on localhost
+app on port 5000
+
+➜ root@data-002:~$ exit
+➜ curl data-001:5000 # blocked from remote
+curl: (7) Failed to connect to data-001 port 5000 after 0 ms: Connection refused
+```
+
+<br/>
+
+- Port 6002 should only be accessible from IP 192.168.1.100
+
+```sh
+# The idea there is that we first allow that IP and then deny all other traffic on that port.
+$   iptables -A INPUT -i eth0 -p tcp --dport 6002 -s 192.168.10.80 -j ACCEPT
+$   iptables -A INPUT -i eth0 -p tcp --dport 6002 -j DROP
+```
+```sh
+➜ curl data-002:6002
+^C # timeout
+
+➜ ssh data-001
+
+➜ root@data-001:~$ curl data-002:6002
+app on port 6002 # success
+```
+
+<br/>
+
+- Blocking all outgoing traffic to IP 192.168.10.70
+
+```sh
+➜ root@data-002:~$ nc app-srv1 22
+SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.1
+^C # success
+```
+```sh
+$   iptables -A OUTPUT -d 192.168.10.70 -p tcp -j DROP
+```
+```sh
+➜ root@data-002:~$ nc app-srv1 22
+^C # timeout. Now it is impossible to send requests to 192.168.10.70
+
+➜ root@data-002:~$ nc data-001 22
+SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.1
+^C # success
+```
+
+&nbsp;
+
+###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Port Redirection, and NAT </ins> (with `iptables` utility)
+
+- Perform some NAT for connections on port 6000 and redirect all traffic on port 6000 to local port 6001
+
+```sh
+# -t nat     : it SHOULD be Specified. The target is only valid in the nat table, in the PREROUTING and OUTPUT 
+$   iptables -A PREROUTING -i eth0 -t nat -p tcp --dport 6000 -j REDIRECT --to-port 6001
+
+
+Chain PREROUTING (policy ACCEPT)
+target prot opt source destination
+REDIRECT tcp -- anywhere anywhere tcp dpt:x11 redir ports 6001 # new rule
+```
+```sh
+➜ root@data-002:~$ curl localhost:6000 # fail
+curl: (7) Failed to connect to localhost port 6000 after 0 ms: Connection refused
+
+➜ root@data-002:~$ exit
+➜ curl data-002:6000 # fail
+app on port 6001
+```
+
+&nbsp;
+
+###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Implement reverse proxies and load balancers</ins> (with `nginx` utility)
+
+#### 🔖 <ins>Reverse Proxy</ins>
+
+To create a reverse proxy
+
+```sh
+$   sudo apt install nginx
+$   sudo vi /etc/nginx/sites-available/proxy.conf
+
+server {
+  # Listening for incoming connections on port 80
+  listen 80;
+  # Only for requests that match the location (/) description :
+  #
+  # example.com/
+  # example.com/admin
+  # example.com/images/dog.jpg
+  location/{
+    proxy_pass http://1.1.1.1;
+    # To load additional parameters from a config file
+    include proxy_params;
+  }
+}
+```
+```sh
+$   sudo vi /etc/nginx/proxy_params
+# To see what users actually visit on the website
+```
+
+<br/>
+
+We must pay attention to 2 specific folders :
+
+- <mark>**`/etc/nginx/sites-available/`**</mark> :
+  - All config files are defined there
+- <mark>**`/etc/nginx/sites-enabled/`**</mark> :
+  - The best practice is to create a **soft link** from `/sites-available/` to `/sites-enabled/` when we want to enable a website configuration
+
+```sh
+# To enable
+$   sudo ln -s /etc/nginx/sites-available/proxy.conf /etc/nginx/sites-enabled/proxy.conf
+
+# No forget to "disable" the default file
+$   sudo rm /etc/nginx/sites-enabled/default
+
+
+# To check config files for errors 
+$   sudo nginx-t
+```  
+
+<br/>
+
+To reapply the changes, simply reload
+
+```sh
+$   sudo systemctl reload nginx.service
+```
+
+<br/>
+
+#### 🔖 <ins>Load Balancer</ins>
+
+```sh
+$   sudo vi /etc/nginx/sites-available/lb.conf
+```
+```sh
+# Round robin config
+upstream mywebservers{
+  # Pick the server withe the least active connections from this list
+  least_conn;
+  # Process more requests than weaker servers, use weight. Default value is 1
+  server 1.2.3.4 weight=3;
+  server 5.6.7.8;
+}
+
+server {
+  listen 80;
+  location/{
+    proxy_pass http://mywebservers;
+  }
+}
+```
+```sh
+upstream mywebservers{
+  least_conn;
+  # To do maintenance work on this server
+  server 1.2.3.4 weight=3 down;
+  server 5.6.7.8;
+  # To run a backup server if one of the main list goes down. Server with 'S'
+  Server 10.20.30.40 backup;
+}
+
+server {
+  listen 80;
+  location/{
+    proxy_pass http://mywebservers;
+  }
+}
+```
+```sh
+upstream mywebservers{
+  least_conn;
+  # If web servers are not listening for incoming connections on the standard port 80
+  server 1.2.3.4:8081;
+  server 5.6.7.8;
+  Server 10.20.30.40 backup;
+}
+
+server {
+  listen 80;
+  location/{
+    proxy_pass http://mywebservers;
+  }
+}
+```
+```sh
+# To enable
+$   sudo ln -s /etc/nginx/sites-available/lb.conf /etc/nginx/sites-enabled/lb.conf
+
+
+# To check config files for errors 
+$   sudo nginx-t
+``` 
+```sh
+$   sudo systemctl reload nginx.service
 ```
 
 &nbsp;
@@ -3531,6 +3625,16 @@ $   systemctl status systemd-timesyncd.service
 # We can for example specify a NTP server
 $   vi /etc/systemd/timesyncd.conf
 $   systemctl restart systemd-timesyncd.service
+```
+```sh
+$   apropos -s 1,5,8 timesync
+$   man timesyncd.conf
+$   vi /etc/systemd/timesyncd.conf
+
+NTP=0.pool.ntp.org 1.pool.ntp.org
+FallbackNTP=ntp.ubuntu.com 0.debian.pool.ntp.org
+PollIntervalMaxSec=1000
+ConnectionRetrySec=20
 ```
 
 &nbsp;
@@ -4046,7 +4150,7 @@ success
 
 <br/>
 
-#### ⚠️ NOTE :
+#### ⚠️ <mark>NOTE</mark> :
 
 > When creating your rules, Squid will look at the 1st rule and so on : it means that you have to design well your rules to apply them **<ins>in a specific order</ins>**
 ```sh
@@ -4127,7 +4231,7 @@ DocumentRoot "/var/www/html"
 
 <br/>
 
-#### ⚠️ NOTE :
+#### ⚠️ <mark>NOTE</mark> :
 
 - For the following example : our HTTP server will host 2 websites, **Blog** & **Store**
 
@@ -4621,6 +4725,149 @@ sdb      8:16   0    8G  0 disk
 └─sdb6   8:22   0  1.9G  0 part
 sr0     11:0    1 1024M  0 rom
 ```
+
+<br> 
+
+#### ⚠️ <mark>NOTE</mark> :
+
+> We have /dev/vdb disk on this system. Perform the following actions on it.
+>
+> - Create a partition **`/dev/vdb1`** of **400MB** in size and format it as XFS file system. 
+>
+> - Create a partition **`/dev/vdb2`** of **100MB** in size, format it as ext4 file system and mount it in /mnt/ . 
+   We want to keep some sensitive data on ext4 filesystem. 
+>
+> - Create a partition **`/dev/vdb3`** of **450MB** in size and format it with the xfs filesystem. 
+   To make this easier to spot in the future, among the other filesystems, set the filesystem label to **ExamFS** when you format it.
+
+<br/>
+
+```sh
+$  lsblk
+
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vda    253:0    0   11G  0 disk 
+└─vda1 253:1    0   10G  0 part /
+vdb    253:16   0    1G  0 disk 
+vdc    253:32   0    1G  0 disk 
+vdd    253:48   0    1G  0 disk 
+vde    253:64   0    1G  0 disk 
+└─vde1 253:65   0 1023M  0 part 
+```
+```sh
+$  fdisk /dev/vdb
+
+Command (m for help): n
+Partition type
+   p   primary (0 primary, 0 extended, 4 free)
+   e   extended (container for logical partitions)
+Select (default p): 
+Partition number (1-4, default 1): 
+First sector (2048-2097151, default 2048): 
+Last sector, +sectors or +size{K,M,G,T,P} (2048-2097151, default 2097151): 400M
+Value out of range.
+Last sector, +sectors or +size{K,M,G,T,P} (2048-2097151, default 2097151): +400M
+
+Created a new partition 1 of type 'Linux' and of size 400 MiB.
+
+
+Command (m for help): n
+Partition type
+   p   primary (1 primary, 0 extended, 3 free)
+   e   extended (container for logical partitions)
+Select (default p): 
+
+Using default response p.
+Partition number (2-4, default 2): 
+First sector (821248-2097151, default 821248): 
+Last sector, +sectors or +size{K,M,G,T,P} (821248-2097151, default 2097151): +100M
+
+Created a new partition 2 of type 'Linux' and of size 100 MiB.
+
+
+Command (m for help): n
+Partition type
+   p   primary (2 primary, 0 extended, 2 free)
+   e   extended (container for logical partitions)
+Select (default p): 
+
+Using default response p.
+Partition number (3,4, default 3): 
+First sector (1026048-2097151, default 1026048): 
+Last sector, +sectors or +size{K,M,G,T,P} (1026048-2097151, default 2097151): +450M
+
+Created a new partition 3 of type 'Linux' and of size 450 MiB.
+
+Command (m for help): w
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Syncing disks.
+```
+
+<br/>
+
+```sh
+$  lsblk
+
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vda    253:0    0   11G  0 disk 
+└─vda1 253:1    0   10G  0 part /
+vdb    253:16   0    1G  0 disk 
+├─vdb1 253:17   0  400M  0 part 
+├─vdb2 253:18   0  100M  0 part 
+└─vdb3 253:19   0  450M  0 part 
+vdc    253:32   0    1G  0 disk 
+vdd    253:48   0    1G  0 disk 
+vde    253:64   0    1G  0 disk 
+└─vde1 253:65   0 1023M  0 part 
+```
+
+<br/>
+
+```sh
+# Format the 3 partitions
+$  mkfs.xfs /dev/vdb1
+
+meta-data=/dev/vdb1              isize=512    agcount=4, agsize=25600 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1
+data     =                       bsize=4096   blocks=102400, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=1368, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+
+
+$  mkfs.ext4 /dev/vdb2
+
+mke2fs 1.45.6 (20-Mar-2020)
+Creating filesystem with 102400 1k blocks and 25688 inodes
+Filesystem UUID: 959786fa-1d0f-49c2-a230-abead2d1868b
+Superblock backups stored on blocks: 
+        8193, 24577, 40961, 57345, 73729
+
+Allocating group tables: done                            
+Writing inode tables: done                            
+Creating journal (4096 blocks): done
+Writing superblocks and filesystem accounting information: done 
+
+
+$  mkfs.xfs -L "ExamFS" /dev/vdb3
+
+meta-data=/dev/vdb3              isize=512    agcount=4, agsize=28800 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1
+data     =                       bsize=4096   blocks=115200, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=1368, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+```
+
 &nbsp;
 
 ###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Configure and manage swap space</ins>
@@ -4677,7 +4924,7 @@ sdb      8:16   0    8G  0 disk
 └─sdb6   8:22   0  1.9G  0 part [SWAP]
 ```
 
-#### ⚠️ NOTE :
+#### ⚠️ <mark>NOTE</mark> :
 
 > **However there is a problem :** if we reboot the machine, /dev/sdb6 won't be used as swap <span style="color:#FF8A8A"><ins>**anymore**</ins></span>. We will see later how to automatically use a swap every time the OS boots up. 
 
@@ -4892,7 +5139,7 @@ sr0     11:0    1 1024M  0 rom
 
 <br/>
 
-#### ⚠️ NOTE :
+#### ⚠️ <mark>NOTE</mark> :
 
 > **If we want to know the UUID of a partition :** if we connect wrongly hardwares on motherboard, partitions will not match the real disks. 
 >
@@ -5029,6 +5276,8 @@ This method is used specifically **for remote file systems** : it is *<ins>for a
 
 #### 🔖 <ins>Network File Sharing</ins>
 
+#####  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Solution 1
+
 When we want to mount a file system or a directory stored on a different server, the most often used solution is the **network file sharing**.
 
 ```sh
@@ -5046,9 +5295,26 @@ Next we need to tell the NFS server what directories it should share to the netw
 $   vi /etc/exports
 # remotedir directory should be accessible to computers having the IP address 127.0.0.1. ro for read-only
 /remotedir 127.0.0.1(ro)
+```
+```sh
+# To apply changes
+$   sudo exportfs -ra
 
-
+# OR
 $   systemctl reload autofs.service
+```
+
+<br/>
+
+#####  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Solution 2
+
+We can also use the **`sshf`** utility.
+
+```sh
+# Use SSHFS to mount directory /data-export from server app-srv1 to /app-srv1/data-export . 
+# The mount should be read-write and option allow_other should be enabled.
+$   sudo mkdir -p /app-srv1/data-export
+$   sudo sshfs -o allow_other,rw app-srv1:/data-export /app-srv1/data-export
 ```
 
 <br/>
@@ -5110,7 +5376,7 @@ total 0
 
 <br/>
 
-#### ⚠️ NOTE :
+#### ⚠️ <mark>NOTE</mark> :
 
 > **If we don't want the parent-child scheme :** we just want to point directly to the child directory.
 
@@ -5291,7 +5557,7 @@ Linux 3.10.0-1160.el7.x86_64 (localhost.localdomain)    10/15/2023      _x86_64_
 
 <br/>
 
-### ⚠️ WARNING :
+### ⚠️ <mark>WARNING</mark> :
 
 Here a way for having <b><span style="color:#06C258">I/O statistics in live (per 1 second)</span></b> :
 
@@ -5573,7 +5839,7 @@ realtime =none                   extsz=4096   blocks=0, rtextents=0
 
 <br/>
 
-### ⚠️ WARNING :
+### ⚠️ <mark>WARNING</mark> :
 
 Now we want to resize a LV **with a filesystem on it**. <span style="color:#FF8A8A"><ins>**We should not use**</ins></span> this previous command : The XFS file system we just put on it, would still only use 2 GB.
 
@@ -5684,7 +5950,7 @@ $   mount /dev/mapper/my_secure_disk_e  /mnt
 ```
 
 
-### ⚠️ NOTE
+### ⚠️ <mark>NOTE</mark>
 
 > So **`/dev/mapper/my_secure_disk_e`** is seen as regular unencrypted disk and this makes it easy for applications to write data to it and read data.
 >
@@ -5698,7 +5964,7 @@ $   mount /dev/mapper/my_secure_disk_e  /mnt
 
 <br/>
 
-### ⚠️ WARNING
+### ⚠️ <mark>WARNING</mark>
 
 > **/dev/mapper/my_secure_disk_e** is a sort of FAKE disk. 
 >
@@ -5851,7 +6117,7 @@ $   mdadm --stop /dev/md0
 mdadm: stopped /dev/md0
 ```
 
-### ⚠️ NOTE
+### ⚠️ <mark>NOTE</mark>
 
 When Linux boots up, it will scan what is called the super block of all devices : it will check which devices belong to a raid array. When they do, Linux will reassemble them into an array and they'll be found in **`/dev/md`** 1 to 7.
 
@@ -5863,7 +6129,7 @@ $   mdadm --zero-superblock /dev/sdc /dev/sdd /dev/sde
 
 <br/>
 
-### ⚠️ NOTE
+### ⚠️ <mark>NOTE</mark>
 
 Here is the command of how to add spare disk to an array
 
@@ -5883,7 +6149,7 @@ mdadm: array /dev/md0 started.
 
 <br/>
 
-### ⚠️ NOTE
+### ⚠️ <mark>NOTE</mark>
 
 We mount 2 disks at Level 1 and we want to increase the level of safety
 
@@ -6079,3 +6345,30 @@ Disk quotas for user cento (uid 1000):
 $   touch /mybackups/cento/TOTOfile2
 touch: cannot touch ‘/mybackups/cento/TOTOfile2’: Disk quota exceeded
 ```
+
+&nbsp;
+
+###  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Build and install from source</ins>
+
+> Install the text based terminal browser links2 from source on server app-srv1 . The source is provided at **/tools/links-2.14.tar.bz2** on
+that server.
+Configure the installation process so that:
+>
+> 1. The target location of the installed binary will be /usr/bin/links
+> 2. Support for ipv6 will be disabled
+
+```sh
+$   cd /tools
+$   tar xjf links-2.14.tar.bz2
+$   cd links-2.14
+```
+
+<br/>
+
+### ⚠️ <mark>NOTE</mark>
+
+The usual process of installing from source is :
+
+1. **`./configure`** (args...)
+2. **`make`**
+3. **`make install`**
