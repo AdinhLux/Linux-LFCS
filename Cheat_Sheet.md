@@ -16,6 +16,28 @@ $   cat /etc/timezone
 
 &nbsp;
 
+### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Keyboard layout</ins>
+
+```sh
+# Change Keyboard and apply without restarting
+$	sudo dpkg-reconfigure keyboard-configuration
+$	sudo setupcon
+```
+
+&nbsp;
+
+### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Packages</ins>
+
+```sh
+# Search package (docker) on Ubuntu distro
+$	apt search docker
+
+# Search installed package (docker) on Ubuntu local machine
+$	apt list --installed | grep docker
+```
+
+&nbsp;
+
 ### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <ins>Create and manage hard & soft links</ins>
 
 ```sh
